@@ -1,6 +1,5 @@
 {
   "relation": [
-    { "value": "", "displayName": "Select" },
     { "value": "Mère", "displayName": "Mère" },
     { "value": "Père", "displayName": "Père" },
     { "value": "Grand-Mère", "displayName": "Grand-Mère" },
