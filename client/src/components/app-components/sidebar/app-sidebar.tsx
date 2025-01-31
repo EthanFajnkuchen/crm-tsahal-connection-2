@@ -39,7 +39,7 @@ export function AppSidebar() {
                     <SidebarMenuButton asChild>
                       <a
                         href={item.link}
-                        className="flex items-center text-[18px] text-[white] hover:text-purple-400"
+                        className="flex items-center text-[20px] text-[white] hover:text-purple-400"
                       >
                         <item.icon
                           style={{ width: "20px", height: "20px" }}
