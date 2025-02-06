@@ -8,7 +8,7 @@ import {
 } from "lucide-react";
 
 export const SIDEBAR_ITEMS = [
-  { displayName: "Dashboard", link: "/", icon: House },
+  { displayName: "Dashboard", link: "/dashboard", icon: House },
   { displayName: "Data", link: "/data", icon: Database },
   {
     displayName: "Expert Connection",
