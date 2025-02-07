@@ -1,8 +1,6 @@
 import React from "react";
 import useCurrentPageName from "@/hooks/use-current-page-name";
-import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Search } from "lucide-react";
 import { SearchInput } from "../input/search-input";
 const Header: React.FC = () => {
   const pageTitle = useCurrentPageName();
