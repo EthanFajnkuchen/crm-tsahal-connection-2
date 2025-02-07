@@ -19,15 +19,13 @@ jobs:
         with:
           node-version: 18
           cache: 'npm'
-          cache-dependency-path: client/package-lock.json # Ou client/yarn.lock si vous utilisez Yarn
+          cache-dependency-path: client/package-lock.json
 
       - name: Install dependencies
-        run: npm install
-        working-directory: client # Exécuter npm install dans le dossier client
+        run: cd client && npm install # 🔥 Change de dossier avant d'installer
 
       - name: Build the project
-        run: npm run build
-        working-directory: client # Exécuter le build dans le dossier client
+        run: cd client && npm run build # 🔥 Change de dossier avant de builder
 
   enforce-build:
     name: Enforce Successful Build
