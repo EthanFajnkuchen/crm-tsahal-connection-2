@@ -1,4 +1,5 @@
 import "./App.css";
+import DashboardCardsSection from "./components/app-components/dashboard-card-section/dashboard-card-section";
 import Header from "./components/app-components/header/Header";
 import { AppSidebar } from "./components/app-components/sidebar/app-sidebar";
 import { BrowserRouter as Router } from "react-router-dom";
@@ -10,7 +11,7 @@ function App() {
         <AppSidebar />
         <div className="flex flex-col flex-1">
           <Header />
-          <div className="p-4"></div>
+          <DashboardCardsSection />
         </div>
       </div>
     </Router>
