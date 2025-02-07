@@ -18,7 +18,7 @@ export function AppSidebar() {
 
   return (
     <SidebarProvider>
-      {isMobile && <SidebarTrigger />}
+      {isMobile && <SidebarTrigger className="mt-5 ml-2" />}
       <Sidebar collapsible="icon">
         <SidebarContent className="mt-10">
           <img
