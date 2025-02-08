@@ -4,7 +4,7 @@ import LastTenLeadSection from "@/components/app-components/last-ten-leads-secti
 import { AppSidebar } from "@/components/app-components/sidebar/app-sidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { HeaderMobile } from "@/components/app-components/header-mobile/header-mobile";
-import Header from "@/components/app-components/header/header";
+import Header from "@/components/app-components/header-desktop/header-desktop";
 
 import { BrowserRouter as Router } from "react-router-dom";
 

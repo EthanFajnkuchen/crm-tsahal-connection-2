@@ -3,7 +3,7 @@ import useCurrentPageName from "@/hooks/use-current-page-name";
 import { SearchInput } from "@/components/app-components/search-input/search-input";
 import UserProfile from "@/components/app-components/user-profile/user-profile";
 
-const Header: React.FC = () => {
+const HeaderDesktop: React.FC = () => {
   const pageTitle = useCurrentPageName();
 
   return (
@@ -23,4 +23,4 @@ const Header: React.FC = () => {
   );
 };
 
-export default Header;
+export default HeaderDesktop;
