@@ -1,13 +1,11 @@
 import React from "react";
 import { DASHBOARD_CARDS_ITEMS } from "@/i18n/dashboard-card";
-import CardDashboard from "../card-dashboard.tsx/card-dashboard";
+import CardDashboard from "../card-dashboard/card-dashboard";
+import Section from "../section/section";
 
 const DashboardCardsSection: React.FC = () => {
   return (
-    <div className="bg-white m-3 p-4 rounded-2xl">
-      <h1 className="font-[Poppins] font-semibold text-xl mb-4">
-        Statistiques actuelles
-      </h1>
+    <Section title={"Statistiques actuelles"}>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 ">
         {DASHBOARD_CARDS_ITEMS.map((card, index) => (
           <CardDashboard
@@ -19,7 +17,7 @@ const DashboardCardsSection: React.FC = () => {
           />
         ))}
       </div>
-    </div>
+    </Section>
   );
 };
 
