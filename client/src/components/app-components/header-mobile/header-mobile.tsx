@@ -7,7 +7,6 @@ import LogoTsahalConnection from "@/assets/pictures/Logo Tsahal Conection.png";
 import { SIDEBAR_ITEMS } from "@/i18n/sidebar-items";
 import useCurrentPageName from "@/hooks/use-current-page-name";
 import { SearchInput } from "../search-input/search-input";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import UserProfile from "@/components/app-components/user-profile/user-profile";
 
 export function HeaderMobile() {
