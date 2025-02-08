@@ -10,7 +10,7 @@ function App() {
   const isMobile = useIsMobile();
   return (
     <Router>
-      <div className="flex">
+      <div className="md:flex">
         {!isMobile && <AppSidebar />}
         <div className="flex flex-col flex-1">
           <Header />
