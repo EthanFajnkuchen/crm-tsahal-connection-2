@@ -1,10 +1,12 @@
 import "./App.css";
-import DashboardCardsSection from "./components/app-components/dashboard-card-section/dashboard-card-section";
-import Header from "./components/app-components/header/Header";
-import LastTenLeadSection from "./components/app-components/last-ten-leads-section/last-ten-leads-section";
-import { AppSidebar } from "./components/app-components/sidebar/app-sidebar";
+import DashboardCardsSection from "@/components/app-components/dashboard-card-section/dashboard-card-section";
+import LastTenLeadSection from "@/components/app-components/last-ten-leads-section/last-ten-leads-section";
+import { AppSidebar } from "@/components/app-components/sidebar/app-sidebar";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { HeaderMobile } from "@/components/app-components/header-mobile/header-mobile";
+import Header from "@/components/app-components/header-desktop/header-desktop";
+
 import { BrowserRouter as Router } from "react-router-dom";
-import { useIsMobile } from "./hooks/use-mobile";
 
 function App() {
   const isMobile = useIsMobile();
@@ -12,8 +14,9 @@ function App() {
     <Router>
       <div className="md:flex">
         {!isMobile && <AppSidebar />}
+        {isMobile && <HeaderMobile />}
         <div className="flex flex-col flex-1">
-          <Header />
+          {!isMobile && <Header />}
           <DashboardCardsSection />
           <LastTenLeadSection />
         </div>
