@@ -1,7 +1,7 @@
 import React from "react";
 import useCurrentPageName from "@/hooks/use-current-page-name";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { SearchInput } from "../input/search-input";
+import { SearchInput } from "@/components/app-components/search-input/search-input";
+import UserProfile from "@/components/app-components/user-profile/user-profile";
 const Header: React.FC = () => {
   const pageTitle = useCurrentPageName();
 
@@ -16,11 +16,7 @@ const Header: React.FC = () => {
           placeholder="Search"
           className="w-48 lg:w-96"
         />
-        <Avatar>
-          <AvatarFallback className="bg-fuchsia-800 text-white">
-            RM
-          </AvatarFallback>
-        </Avatar>
+        <UserProfile fallback="RM" />
       </div>
     </header>
   );
