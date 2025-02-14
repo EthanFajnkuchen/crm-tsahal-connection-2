@@ -20,14 +20,14 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { Progress } from "@/components/ui/progress"; // Import du composant Progress
+import { Progress } from "@/components/ui/progress";
 
 interface BarChartComponentProps {
   data: Record<string, number>;
   title: string;
   subTitle: string;
   color: string;
-  isLoading?: boolean; // Ajout d'une prop isLoading
+  isLoading?: boolean;
 }
 
 const chartConfig = {

@@ -6,7 +6,7 @@ import StatusBadge from "@/components/app-components/badge-status/badge-status";
 import { useBadgeStyle } from "@/hooks/use-badges-styles";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
-import { Progress } from "@/components/ui/progress"; // Import de la progress bar ShadCN
+import { Progress } from "@/components/ui/progress";
 
 type Lead = {
   id: string;
@@ -68,7 +68,7 @@ export function LastTenLeadTable() {
   );
 
   if (isLoading) {
-    return <Progress value={50} className="w-full" />; // Affiche la progress bar
+    return <Progress value={50} className="w-full" />;
   }
 
   if (error) {
