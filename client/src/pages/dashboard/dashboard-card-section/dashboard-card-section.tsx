@@ -1,7 +1,7 @@
 import React from "react";
 import { DASHBOARD_CARDS_ITEMS } from "@/i18n/dashboard-card";
-import CardDashboard from "../card-dashboard/card-dashboard";
-import Section from "../section/section";
+import CardDashboard from "@/components/app-components/card-dashboard/card-dashboard";
+import Section from "@/components/app-components/section/section";
 
 const DashboardCardsSection: React.FC = () => {
   return (
