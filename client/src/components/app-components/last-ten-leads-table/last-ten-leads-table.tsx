@@ -53,7 +53,11 @@ const columns: ColumnDef<Lead>[] = [
     header: "Status",
     cell: ({ row }) => {
       const status = row.getValue("status") as keyof typeof useBadgeStyle;
-      return <StatusBadge status={status} />;
+      return (
+        <div className="min-w-[200px] md:min-w-[180px]">
+          <StatusBadge status={status} />
+        </div>
+      );
     },
   },
 ];
