@@ -3,7 +3,12 @@ import { AppSidebar } from "@/components/app-components/sidebar/app-sidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { HeaderMobile } from "@/components/app-components/header-mobile/header-mobile";
 import Header from "@/components/app-components/header-desktop/header-desktop";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 import Dashboard from "./pages/dashboard/Dashboard";
 
 function App() {
@@ -17,6 +22,7 @@ function App() {
           {!isMobile && <Header />}
 
           <Routes>
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route path="/dashboard" element={<Dashboard />} />
           </Routes>
         </div>
