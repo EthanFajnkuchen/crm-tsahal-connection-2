@@ -17,7 +17,7 @@ export function HeaderMobile() {
   const location = window.location;
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b !bg-white backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="!sticky !top-0 !z-50 w-full border-b !bg-white backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="flex flex-col px-2 py-2 gap-3">
         <div className="flex items-center justify-between w-full">
           <Sheet open={open} onOpenChange={setOpen}>
