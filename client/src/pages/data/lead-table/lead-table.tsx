@@ -5,7 +5,6 @@ import Section from "@/components/app-components/section/section";
 import { Button } from "@/components/ui/button";
 import { ArrowUpDown } from "lucide-react";
 
-// Define the type for our data
 type Candidate = {
   id: string;
   inscriptionDate: Date;
@@ -13,7 +12,6 @@ type Candidate = {
   status: string;
 };
 
-// Define our columns
 const columns: ColumnDef<Candidate>[] = [
   {
     accessorKey: "inscriptionDate",
@@ -52,7 +50,6 @@ const columns: ColumnDef<Candidate>[] = [
   },
 ];
 
-// Generate a large amount of sample data
 const generateData = (count: number): Candidate[] => {
   const statuses = ["En cours de traitement", "À traiter", "Dossier traité"];
   return Array.from({ length: count }, (_, i) => ({

@@ -27,6 +27,9 @@ const UserProfile: React.FC<UserProfileProps> = ({ fallback }) => {
         </Avatar>
       </PopoverTrigger>
       <PopoverContent className="w-48 p-2">
+        <h2 className="text-sm ml-3 font-semibold">Raphael Madar</h2>
+        <h3 className="text-sm ml-3 mt-1 text-gray-500">Administrateur</h3>
+        <hr className="mt-1 mb-1" />
         <Button
           variant="ghost"
           className="w-full justify-start text-left font-normal focus-visible:ring-0"

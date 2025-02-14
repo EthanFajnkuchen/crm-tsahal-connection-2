@@ -61,7 +61,6 @@ export function DataTable<TData, TValue>({
 
   const generatePageNumbers = () => {
     const pages = [];
-    // Réduire le nombre de pages visibles sur mobile
     const maxVisiblePages = window.innerWidth < 640 ? 3 : 5;
     const halfVisible = Math.floor(maxVisiblePages / 2);
 
