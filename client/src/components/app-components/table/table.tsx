@@ -18,6 +18,16 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
@@ -36,10 +46,44 @@ export function DataTable<TData, TValue>({
     getPaginationRowModel: getPaginationRowModel(),
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
+    initialState: {
+      pagination: {
+        pageSize: 15,
+      },
+    },
     state: {
       sorting,
     },
   });
+
+  const totalPages = table.getPageCount();
+  const currentPage = table.getState().pagination.pageIndex + 1;
+
+  const generatePageNumbers = () => {
+    const pages = [];
+    // Réduire le nombre de pages visibles sur mobile
+    const maxVisiblePages = window.innerWidth < 640 ? 3 : 5;
+    const halfVisible = Math.floor(maxVisiblePages / 2);
+
+    let startPage = Math.max(currentPage - halfVisible, 1);
+    const endPage = Math.min(startPage + maxVisiblePages - 1, totalPages);
+
+    if (endPage - startPage + 1 < maxVisiblePages) {
+      startPage = Math.max(endPage - maxVisiblePages + 1, 1);
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+
+    return {
+      pages,
+      showStartEllipsis: startPage > 1,
+      showEndEllipsis: endPage < totalPages,
+    };
+  };
+
+  const { pages, showStartEllipsis, showEndEllipsis } = generatePageNumbers();
 
   return (
     <div>
@@ -92,6 +136,104 @@ export function DataTable<TData, TValue>({
             )}
           </TableBody>
         </Table>
+      </div>
+      <div className="mt-4 overflow-x-auto">
+        <Pagination>
+          <PaginationContent className="flex flex-wrap justify-center gap-1">
+            <PaginationItem>
+              <PaginationPrevious
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  table.previousPage();
+                }}
+                aria-disabled={!table.getCanPreviousPage()}
+                className={
+                  !table.getCanPreviousPage()
+                    ? "pointer-events-none opacity-50"
+                    : ""
+                }
+              />
+            </PaginationItem>
+
+            {/* Première page - visible uniquement sur desktop */}
+            {showStartEllipsis && (
+              <>
+                <PaginationItem className="hidden sm:inline-flex">
+                  <PaginationLink
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      table.setPageIndex(0);
+                    }}
+                  >
+                    1
+                  </PaginationLink>
+                </PaginationItem>
+                <PaginationItem className="hidden sm:inline-flex">
+                  <PaginationEllipsis />
+                </PaginationItem>
+              </>
+            )}
+
+            {/* Pages du milieu */}
+            {pages.map((pageNumber) => (
+              <PaginationItem key={pageNumber}>
+                <PaginationLink
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    table.setPageIndex(pageNumber - 1);
+                  }}
+                  isActive={currentPage === pageNumber}
+                >
+                  {pageNumber}
+                </PaginationLink>
+              </PaginationItem>
+            ))}
+
+            {/* Dernière page - visible uniquement sur desktop */}
+            {showEndEllipsis && (
+              <>
+                <PaginationItem className="hidden sm:inline-flex">
+                  <PaginationEllipsis />
+                </PaginationItem>
+                <PaginationItem className="hidden sm:inline-flex">
+                  <PaginationLink
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      table.setPageIndex(totalPages - 1);
+                    }}
+                  >
+                    {totalPages}
+                  </PaginationLink>
+                </PaginationItem>
+              </>
+            )}
+
+            <PaginationItem>
+              <PaginationNext
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  table.nextPage();
+                }}
+                aria-disabled={!table.getCanNextPage()}
+                className={
+                  !table.getCanNextPage()
+                    ? "pointer-events-none opacity-50"
+                    : ""
+                }
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      </div>
+
+      {/* Indicateur de page responsive */}
+      <div className="text-sm text-muted-foreground mt-2 text-center">
+        Page {currentPage} sur {totalPages}
       </div>
     </div>
   );

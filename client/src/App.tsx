@@ -10,6 +10,7 @@ import {
   Navigate,
 } from "react-router-dom";
 import Dashboard from "./pages/dashboard/Dashboard";
+import Data from "./pages/data/Data";
 
 function App() {
   const isMobile = useIsMobile();
@@ -24,6 +25,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/data" element={<Data />} />
           </Routes>
         </div>
       </div>

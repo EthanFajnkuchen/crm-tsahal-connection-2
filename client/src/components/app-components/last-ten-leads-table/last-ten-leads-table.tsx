@@ -98,6 +98,41 @@ const data: Lead[] = [
     nom: "Girard",
     status: "Pas de notre ressort",
   },
+  {
+    id: "815a7c2b",
+    dateInscription: new Date("2023-05-20"),
+    prenom: "Isabelle",
+    nom: "Girard",
+    status: "Pas de notre ressort",
+  },
+  {
+    id: "815a7c2b",
+    dateInscription: new Date("2023-05-20"),
+    prenom: "Isabelle",
+    nom: "Girard",
+    status: "Pas de notre ressort",
+  },
+  {
+    id: "815a7c2b",
+    dateInscription: new Date("2023-05-20"),
+    prenom: "Isabelle",
+    nom: "Girard",
+    status: "Pas de notre ressort",
+  },
+  {
+    id: "815a7c2b",
+    dateInscription: new Date("2023-05-20"),
+    prenom: "Isabelle",
+    nom: "Girard",
+    status: "Pas de notre ressort",
+  },
+  {
+    id: "815a7c2b",
+    dateInscription: new Date("2023-05-20"),
+    prenom: "Isabelle",
+    nom: "Girard",
+    status: "Pas de notre ressort",
+  },
 ];
 
 export function LastTenLeadTable() {
