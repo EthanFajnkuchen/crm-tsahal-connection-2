@@ -4,8 +4,10 @@ import { Button } from "@/components/ui/button";
 import { ArrowUpDown } from "lucide-react";
 import StatusBadge from "@/components/app-components/badge-status/badge-status";
 import { useBadgeStyle } from "@/hooks/use-badges-styles";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/store";
+import { Progress } from "@/components/ui/progress"; // Import de la progress bar ShadCN
 
-// This type defines the shape of our data.
 type Lead = {
   id: string;
   dateInscription: Date;
@@ -22,18 +24,16 @@ type Lead = {
 const columns: ColumnDef<Lead>[] = [
   {
     accessorKey: "dateInscription",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="link"
-          className="p-0 m-0 border-none shadow-none text-inherit hover:no-underline"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Date d'inscription
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      );
-    },
+    header: ({ column }) => (
+      <Button
+        variant="link"
+        className="p-0 m-0 border-none shadow-none text-inherit hover:no-underline"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
+        Date d'inscription
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    ),
     cell: ({ row }) => {
       const date = row.getValue("dateInscription") as Date;
       const formatted = date.toLocaleDateString("fr-FR");
@@ -62,83 +62,31 @@ const columns: ColumnDef<Lead>[] = [
   },
 ];
 
-const data: Lead[] = [
-  {
-    id: "728ed52f",
-    dateInscription: new Date("2023-01-15"),
-    prenom: "Marie",
-    nom: "Dubois",
-    status: "À traiter",
-  },
-  {
-    id: "489e1d42",
-    dateInscription: new Date("2023-02-28"),
-    prenom: "Jean",
-    nom: "Martin",
-    status: "En cours de traitement",
-  },
-  {
-    id: "573c1b9a",
-    dateInscription: new Date("2023-03-10"),
-    prenom: "Sophie",
-    nom: "Lefebvre",
-    status: "Dossier traité",
-  },
-  {
-    id: "692f4e3d",
-    dateInscription: new Date("2023-04-05"),
-    prenom: "Pierre",
-    nom: "Moreau",
-    status: "Ne répond pas/Ne sait pas",
-  },
-  {
-    id: "815a7c2b",
-    dateInscription: new Date("2023-05-20"),
-    prenom: "Isabelle",
-    nom: "Girard",
-    status: "Pas de notre ressort",
-  },
-  {
-    id: "815a7c2b",
-    dateInscription: new Date("2023-05-20"),
-    prenom: "Isabelle",
-    nom: "Girard",
-    status: "Pas de notre ressort",
-  },
-  {
-    id: "815a7c2b",
-    dateInscription: new Date("2023-05-20"),
-    prenom: "Isabelle",
-    nom: "Girard",
-    status: "Pas de notre ressort",
-  },
-  {
-    id: "815a7c2b",
-    dateInscription: new Date("2023-05-20"),
-    prenom: "Isabelle",
-    nom: "Girard",
-    status: "Pas de notre ressort",
-  },
-  {
-    id: "815a7c2b",
-    dateInscription: new Date("2023-05-20"),
-    prenom: "Isabelle",
-    nom: "Girard",
-    status: "Pas de notre ressort",
-  },
-  {
-    id: "815a7c2b",
-    dateInscription: new Date("2023-05-20"),
-    prenom: "Isabelle",
-    nom: "Girard",
-    status: "Pas de notre ressort",
-  },
-];
-
 export function LastTenLeadTable() {
+  const { lastTenLeads, isLoading, error } = useSelector(
+    (state: RootState) => state.dashboard
+  );
+
+  if (isLoading) {
+    return <Progress value={50} className="w-full" />; // Affiche la progress bar
+  }
+
+  if (error) {
+    return <div>Erreur : {error}</div>;
+  }
+
+  const transformedData: Lead[] =
+    lastTenLeads?.map((lead, index) => ({
+      id: `${index}-${lead.email}`,
+      dateInscription: new Date(lead.dateInscription),
+      prenom: lead.firstName,
+      nom: lead.lastName,
+      status: lead.statutCandidat as Lead["status"],
+    })) || [];
+
   return (
     <div className="">
-      <DataTable columns={columns} data={data} />
+      <DataTable columns={columns} data={transformedData} />
     </div>
   );
 }
