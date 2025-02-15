@@ -1,4 +1,5 @@
 import { API_ROUTES } from "@/constants/api-routes";
+const M2M_TOKEN = import.meta.env.VITE_API_M2M_TOKEN;
 
 export interface MonthlyData {
   [key: string]: number;
@@ -23,9 +24,21 @@ export const fetchDashboardDataFromApi = async (): Promise<{
 }> => {
   try {
     const [monthlyResponse, yearlyResponse, leadsResponse] = await Promise.all([
-      fetch(`${API_ROUTES.DASHBOARD_CHART_MONTHLY}`),
-      fetch(`${API_ROUTES.DASHBOARD_CHART_YEARLY}`),
-      fetch(`${API_ROUTES.DASHBOARD_LAST_TEN_LEADS}`),
+      fetch(`${API_ROUTES.DASHBOARD_CHART_MONTHLY}`, {
+        headers: {
+          Authorization: `Bearer ${M2M_TOKEN}`,
+        },
+      }),
+      fetch(`${API_ROUTES.DASHBOARD_CHART_YEARLY}`, {
+        headers: {
+          Authorization: `Bearer ${M2M_TOKEN}`,
+        },
+      }),
+      fetch(`${API_ROUTES.DASHBOARD_LAST_TEN_LEADS}`, {
+        headers: {
+          Authorization: `Bearer ${M2M_TOKEN}`,
+        },
+      }),
     ]);
 
     if (!monthlyResponse.ok || !yearlyResponse.ok || !leadsResponse.ok) {

@@ -29,7 +29,6 @@ export class JwtAuthGuard implements CanActivate {
         secret: process.env.JWT_SECRET,
         issuer: 'crm-tsahal-co',
       });
-      console.log(decoded);
       const requiredPermissions =
         this.reflector.get<string[]>('permissions', context.getHandler()) || [];
 

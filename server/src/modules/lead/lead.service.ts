@@ -3,6 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Lead } from './lead.entity';
 import { LeadStatistics } from './type';
+import { FindManyOptions } from 'typeorm';
+import { LeadFilterDto } from './lead.dto';
 
 @Injectable()
 export class LeadService {
@@ -109,7 +111,6 @@ export class LeadService {
       const today = new Date();
       const startDate = new Date(today.getFullYear(), today.getMonth() - 12, 1);
       startDate.setDate(startDate.getDate() + 1);
-      console.log(startDate);
       const leads = await this.leadRepository
         .createQueryBuilder('lead')
         .select("DATE_FORMAT(lead.dateInscription, '%Y-%m')", 'month')
@@ -158,5 +159,46 @@ export class LeadService {
     } catch (error) {
       throw new Error(error.message);
     }
+  }
+
+  async getLeadsWithFilters(filters: LeadFilterDto): Promise<Partial<Lead>[]> {
+    const { included, excluded, fieldsToSend } = filters;
+
+    let query = this.leadRepository.createQueryBuilder('lead');
+
+    if (included) {
+      Object.keys(included).forEach((field) => {
+        query = query.andWhere(`lead.${field} IN (:...values)`, {
+          values: included[field],
+        });
+      });
+    }
+    if (excluded) {
+      for (const field of Object.keys(excluded)) {
+        const values = excluded[field];
+        if (values.length > 0) {
+          const existingValues = await this.leadRepository
+            .createQueryBuilder('lead')
+            .select(`DISTINCT lead.${field}`, 'value')
+            .where(`lead.${field} IN (:...values)`, { values })
+            .getRawMany();
+
+          const validValues = existingValues.map((v) => v.value);
+
+          if (validValues.length > 0) {
+            query = query.andWhere(`lead.${field} NOT IN (:...validValues)`, {
+              validValues,
+            });
+          }
+        }
+      }
+    }
+
+    if (fieldsToSend && fieldsToSend.length > 0) {
+      const selectedFields = fieldsToSend.map((field) => `lead.${field}`);
+      query = query.select(selectedFields);
+    }
+
+    return query.getRawMany();
   }
 }
