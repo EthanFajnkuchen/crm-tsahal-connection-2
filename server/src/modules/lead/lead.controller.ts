@@ -21,4 +21,16 @@ export class LeadController {
   async getStatistics(): Promise<LeadStatistics> {
     return this.leadService.getStatistics();
   }
+
+  @Get('per-month')
+  @Permissions('read:data')
+  async getLeadsPerMonth(): Promise<Record<string, number>> {
+    return this.leadService.getLeadsPerMonth();
+  }
+
+  @Get('per-year')
+  @Permissions('read:data')
+  async getLeadsPerYear(): Promise<Record<string, number>> {
+    return this.leadService.getLeadsPerYear();
+  }
 }

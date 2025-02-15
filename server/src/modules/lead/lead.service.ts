@@ -103,4 +103,60 @@ export class LeadService {
       throw new Error(error.message);
     }
   }
+
+  async getLeadsPerMonth(): Promise<Record<string, number>> {
+    try {
+      const today = new Date();
+      const startDate = new Date(today.getFullYear(), today.getMonth() - 12, 1);
+      startDate.setDate(startDate.getDate() + 1);
+      console.log(startDate);
+      const leads = await this.leadRepository
+        .createQueryBuilder('lead')
+        .select("DATE_FORMAT(lead.dateInscription, '%Y-%m')", 'month')
+        .addSelect('COUNT(lead.ID)', 'lead_count')
+        .where('lead.dateInscription >= :startDate', {
+          startDate: startDate.toISOString().slice(0, 10),
+        })
+        .groupBy('month')
+        .orderBy('month', 'ASC')
+        .getRawMany();
+
+      const monthlyCounts: Record<string, number> = {};
+      for (let i = 12; i >= 0; i--) {
+        const date = new Date(today.getFullYear(), today.getMonth() - i, 1);
+        date.setDate(date.getDate() + 1);
+        const month = date.toISOString().slice(0, 7);
+        monthlyCounts[month] = 0;
+      }
+
+      leads.forEach((lead) => {
+        if (monthlyCounts.hasOwnProperty(lead.month)) {
+          monthlyCounts[lead.month] = parseInt(lead.lead_count, 10);
+        }
+      });
+
+      return monthlyCounts;
+    } catch (error) {
+      throw new Error(`Failed to get leads per month: ${error.message}`);
+    }
+  }
+
+  async getLeadsPerYear(): Promise<Record<string, number>> {
+    try {
+      const result = await this.leadRepository
+        .createQueryBuilder('lead')
+        .select('SUBSTR(lead.dateInscription, 1, 4)', 'year')
+        .addSelect('COUNT(lead.ID)', 'lead_count')
+        .groupBy('year')
+        .orderBy('year', 'ASC')
+        .getRawMany();
+
+      return result.reduce((acc, row) => {
+        acc[row.year] = parseInt(row.lead_count, 10);
+        return acc;
+      }, {});
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  }
 }
