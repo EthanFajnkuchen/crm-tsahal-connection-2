@@ -10,6 +10,7 @@ interface CardDashboardProps {
   className?: string;
   isLoading: boolean;
   error: string | null;
+  onClick: () => void;
 }
 
 const CardDashboard: React.FC<CardDashboardProps> = ({
@@ -19,13 +20,15 @@ const CardDashboard: React.FC<CardDashboardProps> = ({
   className,
   isLoading,
   error,
+  onClick,
 }) => {
   return (
     <Card
       className={cn(
-        "flex items-center justify-between p-6 w-content border-[#F3E7FF]",
+        "flex items-center justify-between p-6 w-content border-[#F3E7FF] hover:cursor-pointer",
         className
       )}
+      onClick={onClick}
     >
       {isLoading || error ? (
         <div className="flex items-center justify-between w-full">

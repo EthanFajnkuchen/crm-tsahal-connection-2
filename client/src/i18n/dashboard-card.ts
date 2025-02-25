@@ -21,6 +21,12 @@ export const DASHBOARD_CARDS_ITEMS = [
     icon: FileUser,
     bgColor: "bg-[#8950FC]",
     textColor: "text-white",
+    filters: {
+      included: {},
+      excluded: {},
+      fieldsToSend: [],
+    },
+    columns: [],
   },
   {
     displayName: "\u00C0 traiter",
@@ -28,6 +34,26 @@ export const DASHBOARD_CARDS_ITEMS = [
     icon: ClipboardList,
     bgColor: "bg-white",
     textColor: "text-black",
+    filters: {
+      included: { statutCandidat: ["À traiter"] },
+      excluded: {},
+      fieldsToSend: [
+        "dateInscription",
+        "firstName",
+        "lastName",
+        "statutResidentIsrael",
+        "programName",
+        "schoolYears",
+      ],
+    },
+    columns: [
+      { accessorKey: "dateInscription", header: "Date d'inscription" },
+      { accessorKey: "firstName", header: "Prénom" },
+      { accessorKey: "lastName", header: "Nom" },
+      { accessorKey: "statutResidentIsrael", header: "Statut Résident Israël" },
+      { accessorKey: "programName", header: "Nom du Programme" },
+      { accessorKey: "schoolYears", header: "Années Scolaires" },
+    ],
   },
   {
     displayName: "En cours",
@@ -35,6 +61,12 @@ export const DASHBOARD_CARDS_ITEMS = [
     icon: TrendingUp,
     bgColor: "bg-white",
     textColor: "text-black",
+    filters: {
+      included: {},
+      excluded: {},
+      fieldsToSend: [],
+    },
+    columns: [],
   },
   {
     displayName: "Michve Alon",
@@ -42,6 +74,12 @@ export const DASHBOARD_CARDS_ITEMS = [
     icon: Shield,
     bgColor: "bg-white",
     textColor: "text-black",
+    filters: {
+      included: {},
+      excluded: {},
+      fieldsToSend: [],
+    },
+    columns: [],
   },
   {
     displayName: "Unit\u00E9",
@@ -49,6 +87,12 @@ export const DASHBOARD_CARDS_ITEMS = [
     icon: UserCheck,
     bgColor: "bg-white",
     textColor: "text-black",
+    filters: {
+      included: {},
+      excluded: {},
+      fieldsToSend: [],
+    },
+    columns: [],
   },
   {
     displayName: "Soldats lib\u00E9r\u00E9s",
@@ -56,6 +100,12 @@ export const DASHBOARD_CARDS_ITEMS = [
     icon: UserMinus,
     bgColor: "bg-white",
     textColor: "text-black",
+    filters: {
+      included: {},
+      excluded: {},
+      fieldsToSend: [],
+    },
+    columns: [],
   },
   {
     displayName: "Sans r\u00E9ponse/pas de notre ressort",
@@ -63,6 +113,12 @@ export const DASHBOARD_CARDS_ITEMS = [
     icon: UserX,
     bgColor: "bg-white",
     textColor: "text-black",
+    filters: {
+      included: {},
+      excluded: {},
+      fieldsToSend: [],
+    },
+    columns: [],
   },
   {
     displayName: "Abandon/Exemption avant le service",
@@ -70,6 +126,12 @@ export const DASHBOARD_CARDS_ITEMS = [
     icon: FileUser,
     bgColor: "bg-white",
     textColor: "text-black",
+    filters: {
+      included: {},
+      excluded: {},
+      fieldsToSend: [],
+    },
+    columns: [],
   },
   {
     displayName: "Abandon pendant le service",
@@ -77,6 +139,12 @@ export const DASHBOARD_CARDS_ITEMS = [
     icon: Shield,
     bgColor: "bg-white",
     textColor: "text-black",
+    filters: {
+      included: {},
+      excluded: {},
+      fieldsToSend: [],
+    },
+    columns: [],
   },
   {
     displayName: "R\u00E9sident en Isra\u00EBl sans cadre",
@@ -84,6 +152,12 @@ export const DASHBOARD_CARDS_ITEMS = [
     icon: MapPin,
     bgColor: "bg-white",
     textColor: "text-black",
+    filters: {
+      included: {},
+      excluded: {},
+      fieldsToSend: [],
+    },
+    columns: [],
   },
   {
     displayName: "R\u00E9sident hors d'Isra\u00EBl sans cadre",
@@ -91,6 +165,12 @@ export const DASHBOARD_CARDS_ITEMS = [
     icon: Globe,
     bgColor: "bg-white",
     textColor: "text-black",
+    filters: {
+      included: {},
+      excluded: {},
+      fieldsToSend: [],
+    },
+    columns: [],
   },
   {
     displayName: "Programme Post-BAC",
@@ -98,6 +178,12 @@ export const DASHBOARD_CARDS_ITEMS = [
     icon: GraduationCap,
     bgColor: "bg-white",
     textColor: "text-black",
+    filters: {
+      included: {},
+      excluded: {},
+      fieldsToSend: [],
+    },
+    columns: [],
   },
   {
     displayName: "En programme pr\u00E9-Arm\u00E9e",
@@ -105,6 +191,12 @@ export const DASHBOARD_CARDS_ITEMS = [
     icon: Clock,
     bgColor: "bg-white",
     textColor: "text-black",
+    filters: {
+      included: {},
+      excluded: {},
+      fieldsToSend: [],
+    },
+    columns: [],
   },
   {
     displayName: "En Youd Aleph",
@@ -112,6 +204,12 @@ export const DASHBOARD_CARDS_ITEMS = [
     icon: School,
     bgColor: "bg-white",
     textColor: "text-black",
+    filters: {
+      included: {},
+      excluded: {},
+      fieldsToSend: [],
+    },
+    columns: [],
   },
   {
     displayName: "Youd Beth",
@@ -119,6 +217,11 @@ export const DASHBOARD_CARDS_ITEMS = [
     icon: School,
     bgColor: "bg-white",
     textColor: "text-black",
+    filters: {
+      included: {},
+      excluded: {},
+      fieldsToSend: [],
+    },
   },
   {
     displayName: "Olim qui \u00E9tudient",
@@ -126,6 +229,11 @@ export const DASHBOARD_CARDS_ITEMS = [
     icon: Book,
     bgColor: "bg-white",
     textColor: "text-black",
+    filters: {
+      included: {},
+      excluded: {},
+      fieldsToSend: [],
+    },
   },
   {
     displayName: "Touristes qui \u00E9tudient",
@@ -133,5 +241,10 @@ export const DASHBOARD_CARDS_ITEMS = [
     icon: Book,
     bgColor: "bg-white",
     textColor: "text-black",
+    filters: {
+      included: {},
+      excluded: {},
+      fieldsToSend: [],
+    },
   },
 ];

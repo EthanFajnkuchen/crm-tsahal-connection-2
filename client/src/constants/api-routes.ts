@@ -4,4 +4,5 @@ export const API_ROUTES = {
   DASHBOARD_LAST_TEN_LEADS: `${BACKEND_BASE_URL}/api/leads?limit=10`,
   DASHBOARD_CHART_MONTHLY: `${BACKEND_BASE_URL}/api/leads/per-month`,
   DASHBOARD_CHART_YEARLY: `${BACKEND_BASE_URL}/api/leads/per-year`,
+  FILTERED_LEADS: `${BACKEND_BASE_URL}/api/leads/filters`,
 };
