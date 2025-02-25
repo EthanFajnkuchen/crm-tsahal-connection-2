@@ -14,6 +14,22 @@ import {
   Book,
 } from "lucide-react";
 
+import { inProgressColumns } from "@/table-columns/in-progress-columns";
+import { toTreatColumns } from "@/table-columns/to-treat-columns";
+import { MichveAlonColumns } from "@/table-columns/michve-alon-columns";
+import { UnityColumns } from "@/table-columns/unity-columns";
+import { ReleasedColumns } from "@/table-columns/released-columns";
+import { NoResponseColumns } from "@/table-columns/no-response.columns";
+import { AbandonBeforeServiceColumns } from "@/table-columns/abandon-before-service-columns";
+import { AbandonDuringServiceColumns } from "@/table-columns/abandon-during-service-columns";
+import { ResidentIsraelNoFrameworkColumns } from "@/table-columns/resident-israel-no-framework-columns";
+import { ProgramAfterBacColumns } from "@/table-columns/program-after-bac-columns";
+import { ProgramPreArmyColumns } from "@/table-columns/program-pre-army-columns";
+import { YoudAlephColumns } from "@/table-columns/youd-aleph-columns";
+import { YoudBethColumns } from "@/table-columns/youd-beth-columns";
+import { StudyingOlimColumns } from "@/table-columns/studying-olim-columns";
+import { StudyingTouristColumns } from "@/table-columns/studying-tourist-columns";
+
 export const DASHBOARD_CARDS_ITEMS = [
   {
     displayName: "Total",
@@ -44,16 +60,10 @@ export const DASHBOARD_CARDS_ITEMS = [
         "statutResidentIsrael",
         "programName",
         "schoolYears",
+        "email",
       ],
     },
-    columns: [
-      { accessorKey: "dateInscription", header: "Date d'inscription" },
-      { accessorKey: "firstName", header: "Prénom" },
-      { accessorKey: "lastName", header: "Nom" },
-      { accessorKey: "statutResidentIsrael", header: "Statut Résident Israël" },
-      { accessorKey: "programName", header: "Nom du Programme" },
-      { accessorKey: "schoolYears", header: "Années Scolaires" },
-    ],
+    columns: toTreatColumns.columns,
   },
   {
     displayName: "En cours",
@@ -62,11 +72,19 @@ export const DASHBOARD_CARDS_ITEMS = [
     bgColor: "bg-white",
     textColor: "text-black",
     filters: {
-      included: {},
+      included: { statutCandidat: ["En cours de traitement"] },
       excluded: {},
-      fieldsToSend: [],
+      fieldsToSend: [
+        "dateInscription",
+        "firstName",
+        "lastName",
+        "giyusDate",
+        "programName",
+        "schoolYears",
+        "email",
+      ],
     },
-    columns: [],
+    columns: inProgressColumns.columns,
   },
   {
     displayName: "Michve Alon",
@@ -75,11 +93,24 @@ export const DASHBOARD_CARDS_ITEMS = [
     bgColor: "bg-white",
     textColor: "text-black",
     filters: {
-      included: {},
+      included: { currentStatus: ["Un soldat - Michve Alon"] },
       excluded: {},
-      fieldsToSend: [],
+      fieldsToSend: [
+        "dateInscription",
+        "firstName",
+        "lastName",
+        "statutCandidat",
+        "mahzorGiyus",
+        "giyusDate",
+        "dateFinService",
+        "typePoste",
+        "nomPoste",
+        "pikoud",
+        "expertConnection",
+        "email",
+      ],
     },
-    columns: [],
+    columns: MichveAlonColumns.columns,
   },
   {
     displayName: "Unit\u00E9",
@@ -88,11 +119,24 @@ export const DASHBOARD_CARDS_ITEMS = [
     bgColor: "bg-white",
     textColor: "text-black",
     filters: {
-      included: {},
+      included: { currentStatus: ["Un soldat - unité"] },
       excluded: {},
-      fieldsToSend: [],
+      fieldsToSend: [
+        "dateInscription",
+        "firstName",
+        "lastName",
+        "statutCandidat",
+        "mahzorGiyus",
+        "giyusDate",
+        "dateFinService",
+        "typePoste",
+        "nomPoste",
+        "pikoud",
+        "expertConnection",
+        "email",
+      ],
     },
-    columns: [],
+    columns: UnityColumns.columns,
   },
   {
     displayName: "Soldats lib\u00E9r\u00E9s",
@@ -101,11 +145,24 @@ export const DASHBOARD_CARDS_ITEMS = [
     bgColor: "bg-white",
     textColor: "text-black",
     filters: {
-      included: {},
+      included: { currentStatus: ["Un soldat libéré"] },
       excluded: {},
-      fieldsToSend: [],
+      fieldsToSend: [
+        "dateInscription",
+        "firstName",
+        "lastName",
+        "statutCandidat",
+        "mahzorGiyus",
+        "giyusDate",
+        "dateFinService",
+        "typePoste",
+        "nomPoste",
+        "pikoud",
+        "expertConnection",
+        "email",
+      ],
     },
-    columns: [],
+    columns: ReleasedColumns.columns,
   },
   {
     displayName: "Sans r\u00E9ponse/pas de notre ressort",
@@ -114,11 +171,24 @@ export const DASHBOARD_CARDS_ITEMS = [
     bgColor: "bg-white",
     textColor: "text-black",
     filters: {
-      included: {},
+      included: {
+        statutCandidat: ["Pas de notre ressort", "Ne répond pas/Ne sait pas"],
+      },
       excluded: {},
-      fieldsToSend: [],
+      fieldsToSend: [
+        "dateInscription",
+        "firstName",
+        "lastName",
+        "statutCandidat",
+        "birthDate",
+        "phoneNumber",
+        "whatsappNumber",
+        "mahzorGiyus",
+        "expertConnection",
+        "email",
+      ],
     },
-    columns: [],
+    columns: NoResponseColumns.columns,
   },
   {
     displayName: "Abandon/Exemption avant le service",
@@ -127,11 +197,30 @@ export const DASHBOARD_CARDS_ITEMS = [
     bgColor: "bg-white",
     textColor: "text-black",
     filters: {
-      included: {},
+      included: {
+        currentStatus: [
+          "Abandon avant le service",
+          "Exemption religieuse",
+          "Exemption (autre)",
+          "Exemption médicale",
+        ],
+      },
       excluded: {},
-      fieldsToSend: [],
+      fieldsToSend: [
+        "dateInscription",
+        "firstName",
+        "lastName",
+        "statutCandidat",
+        "birthDate",
+        "phoneNumber",
+        "whatsappNumber",
+        "mahzorGiyus",
+        "nomPoste",
+        "expertConnection",
+        "email",
+      ],
     },
-    columns: [],
+    columns: AbandonBeforeServiceColumns.columns,
   },
   {
     displayName: "Abandon pendant le service",
@@ -140,11 +229,23 @@ export const DASHBOARD_CARDS_ITEMS = [
     bgColor: "bg-white",
     textColor: "text-black",
     filters: {
-      included: {},
+      included: { currentStatus: ["Abandon pendant le service"] },
       excluded: {},
-      fieldsToSend: [],
+      fieldsToSend: [
+        "dateInscription",
+        "firstName",
+        "lastName",
+        "statutCandidat",
+        "birthDate",
+        "phoneNumber",
+        "whatsappNumber",
+        "mahzorGiyus",
+        "nomPoste",
+        "expertConnection",
+        "email",
+      ],
     },
-    columns: [],
+    columns: AbandonDuringServiceColumns.columns,
   },
   {
     displayName: "R\u00E9sident en Isra\u00EBl sans cadre",
@@ -153,11 +254,23 @@ export const DASHBOARD_CARDS_ITEMS = [
     bgColor: "bg-white",
     textColor: "text-black",
     filters: {
-      included: {},
-      excluded: {},
-      fieldsToSend: [],
+      included: { currentStatus: ["En Israel (sans cadre)"] },
+      statutCandidat: [["Ne répond pas/Ne sait pas", "Pas de notre ressort"]],
+      fieldsToSend: [
+        "dateInscription",
+        "firstName",
+        "lastName",
+        "statutCandidat",
+        "birthDate",
+        "phoneNumber",
+        "whatsappNumber",
+        "mahzorGiyus",
+        "nomPoste",
+        "expertConnection",
+        "email",
+      ],
     },
-    columns: [],
+    columns: ResidentIsraelNoFrameworkColumns.columns,
   },
   {
     displayName: "R\u00E9sident hors d'Isra\u00EBl sans cadre",
@@ -166,11 +279,25 @@ export const DASHBOARD_CARDS_ITEMS = [
     bgColor: "bg-white",
     textColor: "text-black",
     filters: {
-      included: {},
-      excluded: {},
-      fieldsToSend: [],
+      included: { currentStatus: ["hors d'Israel"] },
+      excluded: {
+        statutCandidat: [["Ne répond pas/Ne sait pas", "Pas de notre ressort"]],
+      },
+      fieldsToSend: [
+        "dateInscription",
+        "firstName",
+        "lastName",
+        "statutCandidat",
+        "birthDate",
+        "phoneNumber",
+        "whatsappNumber",
+        "mahzorGiyus",
+        "nomPoste",
+        "expertConnection",
+        "email",
+      ],
     },
-    columns: [],
+    columns: ResidentIsraelNoFrameworkColumns.columns,
   },
   {
     displayName: "Programme Post-BAC",
@@ -179,11 +306,22 @@ export const DASHBOARD_CARDS_ITEMS = [
     bgColor: "bg-white",
     textColor: "text-black",
     filters: {
-      included: {},
+      included: { currentStatus: ["Programme Post-Bac"] },
       excluded: {},
-      fieldsToSend: [],
+      fieldsToSend: [
+        "dateInscription",
+        "statutCandidat",
+        "firstName",
+        "lastName",
+        "programParticipation",
+        "programName",
+        "schoolYears",
+        "mahzorGiyus",
+        "expertConnection",
+        "email",
+      ],
     },
-    columns: [],
+    columns: ProgramAfterBacColumns.columns,
   },
   {
     displayName: "En programme pr\u00E9-Arm\u00E9e",
@@ -192,11 +330,20 @@ export const DASHBOARD_CARDS_ITEMS = [
     bgColor: "bg-white",
     textColor: "text-black",
     filters: {
-      included: {},
+      included: { currentStatus: ["Programme Pré-Armée"] },
       excluded: {},
-      fieldsToSend: [],
+      fieldsToSend: [
+        "dateInscription",
+        "firstName",
+        "lastName",
+        "armyDeferralProgram",
+        "programNameHebrewArmyDeferral",
+        "mahzorGiyus",
+        "expertConnection",
+        "email",
+      ],
     },
-    columns: [],
+    columns: ProgramPreArmyColumns.columns,
   },
   {
     displayName: "En Youd Aleph",
@@ -205,11 +352,22 @@ export const DASHBOARD_CARDS_ITEMS = [
     bgColor: "bg-white",
     textColor: "text-black",
     filters: {
-      included: {},
+      included: { currentStatus: ["Youd Alef"] },
       excluded: {},
-      fieldsToSend: [],
+      fieldsToSend: [
+        "dateInscription",
+        "firstName",
+        "lastName",
+        "statutCandidat",
+        "israeliBacSchool",
+        "otherSchoolName",
+        "frenchBacSchoolIsrael",
+        "mahzorGiyus",
+        "expertConnection",
+        "email",
+      ],
     },
-    columns: [],
+    columns: YoudAlephColumns.columns,
   },
   {
     displayName: "Youd Beth",
@@ -218,10 +376,22 @@ export const DASHBOARD_CARDS_ITEMS = [
     bgColor: "bg-white",
     textColor: "text-black",
     filters: {
-      included: {},
+      included: { currentStatus: ["Youd Beth"] },
       excluded: {},
-      fieldsToSend: [],
+      fieldsToSend: [
+        "dateInscription",
+        "firstName",
+        "lastName",
+        "statutCandidat",
+        "israeliBacSchool",
+        "otherSchoolName",
+        "frenchBacSchoolIsrael",
+        "mahzorGiyus",
+        "expertConnection",
+        "email",
+      ],
     },
+    columns: YoudBethColumns.columns,
   },
   {
     displayName: "Olim qui \u00E9tudient",
@@ -230,10 +400,21 @@ export const DASHBOARD_CARDS_ITEMS = [
     bgColor: "bg-white",
     textColor: "text-black",
     filters: {
-      included: {},
+      included: { currentStatus: ["Toar Rishon/Handsai (Israélien)"] },
       excluded: {},
-      fieldsToSend: [],
+      fieldsToSend: [
+        "dateInscription",
+        "firstName",
+        "lastName",
+        "statutCandidat",
+        "universityNameHebrew",
+        "diplomaNameHebrew",
+        "mahzorGiyus",
+        "expertConnection",
+        "email",
+      ],
     },
+    columns: StudyingOlimColumns.columns,
   },
   {
     displayName: "Touristes qui \u00E9tudient",
@@ -242,9 +423,20 @@ export const DASHBOARD_CARDS_ITEMS = [
     bgColor: "bg-white",
     textColor: "text-black",
     filters: {
-      included: {},
+      included: { currentStatus: ["Toar Rishon/Handsai (Touriste)"] },
       excluded: {},
-      fieldsToSend: [],
+      fieldsToSend: [
+        "dateInscription",
+        "firstName",
+        "lastName",
+        "statutCandidat",
+        "universityNameHebrew",
+        "diplomaNameHebrew",
+        "mahzorGiyus",
+        "expertConnection",
+        "email",
+      ],
     },
+    columns: StudyingTouristColumns.columns,
   },
 ];
