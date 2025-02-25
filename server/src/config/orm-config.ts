@@ -17,6 +17,5 @@ export const typeOrmConfig: TypeOrmModuleOptions = {
     waitForConnections: true,
     queueLimit: 0,
     connectTimeout: 10000,
-    acquireTimeout: 20000,
   },
 };

@@ -20,7 +20,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { Progress } from "@/components/ui/progress";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface BarChartComponentProps {
   data: Record<string, number>;
@@ -28,6 +28,7 @@ interface BarChartComponentProps {
   subTitle: string;
   color: string;
   isLoading?: boolean;
+  error?: string | null;
 }
 
 const chartConfig = {
@@ -43,11 +44,14 @@ const BarChartComponent: React.FC<BarChartComponentProps> = ({
   subTitle,
   color,
   isLoading = false,
+  error,
 }) => {
   const transformedData = Object.entries(data).map(([date, value]) => ({
     date,
     value,
   }));
+
+  console.log(error);
 
   return (
     <Card className="w-full h-full">
@@ -58,8 +62,8 @@ const BarChartComponent: React.FC<BarChartComponentProps> = ({
         </CardDescription>
       </CardHeader>
       <CardContent>
-        {isLoading ? (
-          <Progress value={50} className="w-full" />
+        {isLoading || error ? (
+          <Skeleton className="h-10 mb-2" />
         ) : (
           <ChartContainer
             config={chartConfig}

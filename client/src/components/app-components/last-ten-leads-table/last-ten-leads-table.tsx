@@ -1,12 +1,14 @@
+import { useEffect } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "@/store/store";
+import { fetchLastTenLeadsThunk } from "@/store/thunks/dashboard/last-ten-leads.thunk";
+
 import { DataTable } from "@/components/app-components/table/table";
 import { Button } from "@/components/ui/button";
 import { ArrowUpDown } from "lucide-react";
 import StatusBadge from "@/components/app-components/badge-status/badge-status";
 import { useBadgeStyle } from "@/hooks/use-badges-styles";
-import { useSelector } from "react-redux";
-import { RootState } from "@/store/store";
-import { Progress } from "@/components/ui/progress";
 
 type Lead = {
   id: string;
@@ -63,17 +65,17 @@ const columns: ColumnDef<Lead>[] = [
 ];
 
 export function LastTenLeadTable() {
-  const { lastTenLeads, isLoading, error } = useSelector(
-    (state: RootState) => state.dashboard
-  );
+  const dispatch = useDispatch<AppDispatch>();
 
-  if (isLoading) {
-    return <Progress value={50} className="w-full" />;
-  }
+  const {
+    data: lastTenLeads,
+    isLoading,
+    error,
+  } = useSelector((state: RootState) => state.lastTenLeads);
 
-  if (error) {
-    return <div>Erreur : {error}</div>;
-  }
+  useEffect(() => {
+    dispatch(fetchLastTenLeadsThunk());
+  }, [dispatch]);
 
   const transformedData: Lead[] =
     lastTenLeads?.map((lead, index) => ({
@@ -86,7 +88,12 @@ export function LastTenLeadTable() {
 
   return (
     <div className="">
-      <DataTable columns={columns} data={transformedData} />
+      <DataTable
+        columns={columns}
+        data={transformedData}
+        isLoading={isLoading}
+        error={error}
+      />
     </div>
   );
 }
