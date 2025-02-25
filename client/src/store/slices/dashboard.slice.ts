@@ -5,6 +5,7 @@ interface DashboardState {
   monthlyData: DashboardData["monthlyData"] | null;
   yearlyData: DashboardData["yearlyData"] | null;
   lastTenLeads: DashboardData["lastTenLeads"] | null;
+  cardLeads: DashboardData["cardLeads"] | null;
   status: "idle" | "loading" | "succeeded" | "failed";
   isLoading: boolean;
   error: string | null;
@@ -14,6 +15,7 @@ const initialState: DashboardState = {
   monthlyData: null,
   yearlyData: null,
   lastTenLeads: null,
+  cardLeads: null,
   status: "idle",
   isLoading: false,
   error: null,
@@ -35,6 +37,7 @@ const dashboardSlice = createSlice({
         state.monthlyData = action.payload.monthlyData;
         state.yearlyData = action.payload.yearlyData;
         state.lastTenLeads = action.payload.lastTenLeads;
+        state.cardLeads = action.payload.cardLeads;
       })
       .addCase(fetchDashboardData.rejected, (state, action) => {
         state.isLoading = false;

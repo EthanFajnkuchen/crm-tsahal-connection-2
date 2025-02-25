@@ -1,21 +1,30 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
-import { fetchDashboardData } from "@/store/thunks/dashboard.thunk";
+import { fetchMonthlyDataThunk } from "@/store/thunks/dashboard/monthly-data.thunk";
+import { fetchYearlyDataThunk } from "@/store/thunks/dashboard/yearly-data.thunk";
 
 import BarChartComponent from "@/components/app-components/chart/chart";
 
 const ChartSection: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const { monthlyData, yearlyData, isLoading, error } = useSelector(
-    (state: RootState) => state.dashboard
-  );
+
+  const {
+    data: monthlyData,
+    isLoading: isLoadingMonthly,
+    error: errorMonthly,
+  } = useSelector((state: RootState) => state.monthlyData);
+
+  const {
+    data: yearlyData,
+    isLoading: isLoadingYearly,
+    error: errorYearly,
+  } = useSelector((state: RootState) => state.yearlyData);
 
   useEffect(() => {
-    dispatch(fetchDashboardData());
+    dispatch(fetchMonthlyDataThunk());
+    dispatch(fetchYearlyDataThunk());
   }, [dispatch]);
-
-  if (error) return <div>Erreur : {error}</div>;
 
   return (
     <div className="container mx-auto p-4">
@@ -26,7 +35,8 @@ const ChartSection: React.FC = () => {
             title="Inscriptions par mois"
             subTitle="Février 2024 - Février 2025"
             color="#e682ff"
-            isLoading={isLoading}
+            isLoading={isLoadingMonthly}
+            error={errorMonthly}
           />
         </div>
         <div className="w-full">
@@ -35,7 +45,8 @@ const ChartSection: React.FC = () => {
             title="Inscriptions par an"
             subTitle="2015 - 2025"
             color="#2463EB"
-            isLoading={isLoading}
+            isLoading={isLoadingYearly}
+            error={errorYearly}
           />
         </div>
       </div>

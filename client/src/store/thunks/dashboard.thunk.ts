@@ -10,6 +10,7 @@ export interface DashboardData {
   monthlyData: MonthlyData;
   yearlyData: YearlyData;
   lastTenLeads: Lead[];
+  cardLeads: Record<string, number>;
 }
 
 export const fetchDashboardData = createAsyncThunk<DashboardData>(
