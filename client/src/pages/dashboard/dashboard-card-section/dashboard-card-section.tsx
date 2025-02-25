@@ -20,7 +20,6 @@ import { DataTable } from "@/components/app-components/table/table";
 const DashboardCardsSection: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [selectedCardTitle, setSelectedCardTitle] = useState("");
   const [selectedCard, setSelectedCard] = useState<
     (typeof DASHBOARD_CARDS_ITEMS)[0] | null
   >(null);
@@ -49,7 +48,6 @@ const DashboardCardsSection: React.FC = () => {
     );
     if (selectedCard && selectedCard.filters) {
       setSelectedCard(selectedCard);
-      setSelectedCardTitle(selectedCard.displayName);
       const validFilters: LeadFilterDto = {
         included: Object.fromEntries(
           Object.entries(selectedCard.filters.included ?? {}).filter(
