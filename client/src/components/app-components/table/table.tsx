@@ -115,7 +115,7 @@ export function DataTable<TData, TValue>({
             {isLoading || error ? (
               [...Array(10)].map((_, index) => (
                 <TableRow key={index}>
-                  {columns.map((column, columnIndex) => (
+                  {columns.map((_column, columnIndex) => (
                     <TableCell key={columnIndex}>
                       <Skeleton className="h-4 w-full" />
                     </TableCell>
