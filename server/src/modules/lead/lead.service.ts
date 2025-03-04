@@ -237,6 +237,8 @@ export class LeadService {
           );
         }
       });
+      
+      query = query.orderBy('lead.dateInscription', 'DESC');
 
       const leads = await query.getMany();
 
