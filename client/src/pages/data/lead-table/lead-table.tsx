@@ -6,8 +6,10 @@ import { Button } from "@/components/ui/button";
 import { ArrowUpDown } from "lucide-react";
 import { useSelector, useDispatch } from "react-redux";
 import { useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { RootState, AppDispatch } from "@/store/store";
 import { fetchAllLeadsThunk } from "@/store/thunks/data/all-leads.thunk";
+import { searchLeadsThunk } from "@/store/thunks/data/search-leads.thunk";
 
 type Lead = {
   id: string;
@@ -56,13 +58,20 @@ const columns: ColumnDef<Lead>[] = [
 
 export function LeadTable() {
   const dispatch = useDispatch<AppDispatch>();
-  const { data, isLoading, error } = useSelector(
-    (state: RootState) => state.allLeads
+  const [searchParams] = useSearchParams();
+  const searchQuery = searchParams.get("search");
+
+  const { data, isLoading, error } = useSelector((state: RootState) =>
+    searchQuery ? state.searchLeads : state.allLeads
   );
 
   useEffect(() => {
-    dispatch(fetchAllLeadsThunk());
-  }, [dispatch]);
+    if (searchQuery) {
+      dispatch(searchLeadsThunk(searchQuery));
+    } else {
+      dispatch(fetchAllLeadsThunk());
+    }
+  }, [dispatch, searchQuery]);
 
   const formattedData: Lead[] =
     data?.map((lead) => ({
