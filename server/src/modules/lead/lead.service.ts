@@ -207,4 +207,48 @@ export class LeadService {
 
     return query.getRawMany();
   }
+
+  async searchLeads(searchInput: string): Promise<Partial<Lead>[]> {
+    try {
+      if (!searchInput) {
+        throw new Error('Search input is required');
+      }
+
+      const searchWords = searchInput.toLowerCase().split(/\s+/);
+
+      let query = this.leadRepository.createQueryBuilder('lead');
+
+      searchWords.forEach((word, index) => {
+        const searchQuery = `%${word}%`;
+
+        if (index === 0) {
+          query = query.where(
+            `(LOWER(lead.firstName) LIKE :searchQuery${index} 
+          OR LOWER(lead.lastName) LIKE :searchQuery${index} 
+          OR LOWER(CONCAT(lead.firstName, ' ', lead.lastName)) LIKE :searchQuery${index})`,
+            { [`searchQuery${index}`]: searchQuery },
+          );
+        } else {
+          query = query.andWhere(
+            `(LOWER(lead.firstName) LIKE :searchQuery${index} 
+          OR LOWER(lead.lastName) LIKE :searchQuery${index} 
+          OR LOWER(CONCAT(lead.firstName, ' ', lead.lastName)) LIKE :searchQuery${index})`,
+            { [`searchQuery${index}`]: searchQuery },
+          );
+        }
+      });
+
+      const leads = await query.getMany();
+
+      return leads.map((lead) => ({
+        ID: lead.ID,
+        firstName: lead.firstName,
+        lastName: lead.lastName,
+        dateInscription: lead.dateInscription,
+        statutCandidat: lead.statutCandidat,
+      }));
+    } catch (error) {
+      throw new Error(`Search failed: ${error.message}`);
+    }
+  }
 }

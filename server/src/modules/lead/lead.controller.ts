@@ -41,4 +41,12 @@ export class LeadController {
   async getLeadsByFilter(@Body() filters: LeadFilterDto) {
     return this.leadService.getLeadsWithFilters(filters);
   }
+
+  @Get('search')
+  @Permissions('read:data')
+  async searchLeads(
+    @Query('input') searchInput: string,
+  ): Promise<Partial<Lead>[]> {
+    return this.leadService.searchLeads(searchInput);
+  }
 }
