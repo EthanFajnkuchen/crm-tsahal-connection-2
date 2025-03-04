@@ -13,9 +13,15 @@ export class LeadService {
     private readonly leadRepository: Repository<Lead>,
   ) {}
 
-  async getLeads(limit?: number): Promise<Lead[]> {
+  async getLeads(limit?: number): Promise<Partial<Lead>[]> {
     const queryBuilder = this.leadRepository
       .createQueryBuilder('lead')
+      .select([
+        'lead.dateInscription',
+        'lead.firstName',
+        'lead.lastName',
+        'lead.statutCandidat',
+      ])
       .orderBy('lead.dateInscription', 'DESC');
 
     if (limit) {

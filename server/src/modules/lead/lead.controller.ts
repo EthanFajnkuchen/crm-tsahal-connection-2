@@ -12,7 +12,7 @@ export class LeadController {
 
   @Get()
   @Permissions('read:data')
-  async getLeads(@Query('limit') limit?: string): Promise<Lead[]> {
+  async getLeads(@Query('limit') limit?: string): Promise<Partial<Lead>[]> {
     const parsedLimit = parseLimitParam(limit);
     return this.leadService.getLeads(parsedLimit);
   }
