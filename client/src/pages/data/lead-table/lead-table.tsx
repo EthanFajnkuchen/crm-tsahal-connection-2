@@ -4,15 +4,19 @@ import type { ColumnDef } from "@tanstack/react-table";
 import Section from "@/components/app-components/section/section";
 import { Button } from "@/components/ui/button";
 import { ArrowUpDown } from "lucide-react";
+import { useSelector, useDispatch } from "react-redux";
+import { useEffect } from "react";
+import { RootState, AppDispatch } from "@/store/store";
+import { fetchAllLeadsThunk } from "@/store/thunks/data/all-leads.thunk";
 
-type Candidate = {
+type Lead = {
   id: string;
-  inscriptionDate: Date;
+  inscriptionDate: string;
   fullName: string;
   status: string;
 };
 
-const columns: ColumnDef<Candidate>[] = [
+const columns: ColumnDef<Lead>[] = [
   {
     accessorKey: "inscriptionDate",
     header: ({ column }) => {
@@ -28,8 +32,8 @@ const columns: ColumnDef<Candidate>[] = [
       );
     },
     cell: ({ row }) => {
-      const date = row.getValue("inscriptionDate") as Date;
-      return date.toLocaleDateString("fr-FR");
+      const date = row.getValue("inscriptionDate") as string;
+      return new Date(date).toLocaleDateString("fr-FR");
     },
   },
   {
@@ -50,25 +54,32 @@ const columns: ColumnDef<Candidate>[] = [
   },
 ];
 
-const generateData = (count: number): Candidate[] => {
-  const statuses = ["En cours de traitement", "À traiter", "Dossier traité"];
-  return Array.from({ length: count }, (_, i) => ({
-    id: (i + 1).toString(),
-    inscriptionDate: new Date(
-      2023,
-      Math.floor(Math.random() * 12),
-      Math.floor(Math.random() * 28) + 1
-    ),
-    fullName: `Candidate ${i + 1}`,
-    status: statuses[Math.floor(Math.random() * statuses.length)],
-  }));
-};
-
-const data: Candidate[] = generateData(1000);
 export function LeadTable() {
+  const dispatch = useDispatch<AppDispatch>();
+  const { data, isLoading, error } = useSelector(
+    (state: RootState) => state.allLeads
+  );
+
+  useEffect(() => {
+    dispatch(fetchAllLeadsThunk());
+  }, [dispatch]);
+
+  const formattedData: Lead[] =
+    data?.map((lead) => ({
+      id: lead.id,
+      inscriptionDate: lead.dateInscription,
+      fullName: `${lead.firstName} ${lead.lastName}`,
+      status: lead.statutCandidat,
+    })) || [];
+
   return (
     <Section title={"Liste des leads"}>
-      <DataTable columns={columns} data={data} />
+      <DataTable
+        columns={columns}
+        data={formattedData}
+        isLoading={isLoading}
+        error={error}
+      />
     </Section>
   );
 }
