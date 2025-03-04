@@ -12,7 +12,7 @@ export class LeadController {
 
   @Get()
   @Permissions('read:data')
-  async getLeads(@Query('limit') limit?: string): Promise<Lead[]> {
+  async getLeads(@Query('limit') limit?: string): Promise<Partial<Lead>[]> {
     const parsedLimit = parseLimitParam(limit);
     return this.leadService.getLeads(parsedLimit);
   }
@@ -40,5 +40,13 @@ export class LeadController {
   @Permissions('read:data')
   async getLeadsByFilter(@Body() filters: LeadFilterDto) {
     return this.leadService.getLeadsWithFilters(filters);
+  }
+
+  @Get('search')
+  @Permissions('read:data')
+  async searchLeads(
+    @Query('input') searchInput: string,
+  ): Promise<Partial<Lead>[]> {
+    return this.leadService.searchLeads(searchInput);
   }
 }

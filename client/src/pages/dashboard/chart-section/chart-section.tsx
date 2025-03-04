@@ -34,7 +34,7 @@ const ChartSection: React.FC = () => {
             data={monthlyData || {}}
             title="Inscriptions par mois"
             subTitle="Février 2024 - Février 2025"
-            color="#e682ff"
+            color="#b65eee"
             isLoading={isLoadingMonthly}
             error={errorMonthly}
           />

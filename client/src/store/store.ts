@@ -4,6 +4,8 @@ import yearlyDataReducer from "./slices/dashboard/yearly-data.slice";
 import lastTenLeadsReducer from "./slices/dashboard/last-ten-leads.slice";
 import cardLeadsReducer from "./slices/dashboard/card-leads.slice";
 import filteredLeadsReducer from "./slices/dashboard/filtered-card-leads.slice";
+import leadsReducer from "./slices/data/all-leads.slice";
+import searchLeadsReducer from "./slices/data/search-leads.slice";
 
 export const store = configureStore({
   reducer: {
@@ -12,6 +14,8 @@ export const store = configureStore({
     lastTenLeads: lastTenLeadsReducer,
     cardLeads: cardLeadsReducer,
     filteredLeads: filteredLeadsReducer,
+    allLeads: leadsReducer,
+    searchLeads: searchLeadsReducer,
   },
 });
 
