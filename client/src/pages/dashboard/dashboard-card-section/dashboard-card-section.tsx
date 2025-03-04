@@ -85,7 +85,11 @@ const DashboardCardsSection: React.FC = () => {
             isLoading={isLoading}
             className={`${card.bgColor} ${card.textColor}`}
             error={error}
-            onClick={() => handleCardClick(card.apiKey)}
+            onClick={
+              card.displayName === "Total"
+                ? () => {}
+                : () => handleCardClick(card.apiKey)
+            }
           />
         ))}
       </div>
