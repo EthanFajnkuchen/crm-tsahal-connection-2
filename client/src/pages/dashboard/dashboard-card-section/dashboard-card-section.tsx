@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
 import { fetchCardLeadsThunk } from "@/store/thunks/dashboard/card-leads.thunk";
@@ -16,13 +16,13 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 import { DataTable } from "@/components/app-components/table/table";
+import {
+  openPopup,
+  closePopup,
+} from "@/store/slices/dashboard/card-leads.slice";
 
 const DashboardCardsSection: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [selectedCard, setSelectedCard] = useState<
-    (typeof DASHBOARD_CARDS_ITEMS)[0] | null
-  >(null);
 
   useEffect(() => {
     dispatch(fetchCardLeadsThunk());
@@ -32,7 +32,13 @@ const DashboardCardsSection: React.FC = () => {
     data: cardLeads,
     isLoading,
     error,
+    isPopupOpen,
+    selectedCardApiKey,
   } = useSelector((state: RootState) => state.cardLeads);
+
+  const selectedCard = selectedCardApiKey
+    ? DASHBOARD_CARDS_ITEMS.find((card) => card.apiKey === selectedCardApiKey)
+    : null;
 
   const {
     data: filteredLeads,
@@ -42,12 +48,12 @@ const DashboardCardsSection: React.FC = () => {
 
   console.log(filteredLeads, isLoadingFiltered, errorFiltered);
 
-  const handleCardClick = async (apiKey: string) => {
+  const fetchFilteredData = async (apiKey: string) => {
     const selectedCard = DASHBOARD_CARDS_ITEMS.find(
       (card) => card.apiKey === apiKey
     );
+
     if (selectedCard && selectedCard.filters) {
-      setSelectedCard(selectedCard);
       const validFilters: LeadFilterDto = {
         included: Object.fromEntries(
           Object.entries(selectedCard.filters.included ?? {}).filter(
@@ -67,11 +73,20 @@ const DashboardCardsSection: React.FC = () => {
       };
 
       await dispatch(fetchFilteredLeadsThunk(validFilters));
-      setIsDialogOpen(true);
-
-      console.log("Données envoyées à l'API :", validFilters);
     }
   };
+
+  const handleCardClick = async (apiKey: string) => {
+    await fetchFilteredData(apiKey);
+    dispatch(openPopup(apiKey));
+  };
+
+  // 🔥 Nouveau useEffect pour déclencher la requête API si la pop-up s'ouvre via le localStorage
+  useEffect(() => {
+    if (isPopupOpen && selectedCardApiKey) {
+      fetchFilteredData(selectedCardApiKey);
+    }
+  }, [isPopupOpen, selectedCardApiKey, dispatch]);
 
   return (
     <Section title={"Statistiques actuelles"}>
@@ -93,13 +108,15 @@ const DashboardCardsSection: React.FC = () => {
           />
         ))}
       </div>
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      <Dialog
+        open={isPopupOpen}
+        onOpenChange={(open) => !open && dispatch(closePopup())}
+      >
         <DialogContent className="max-w-7xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{selectedCard?.displayName || "Détails"}</DialogTitle>
             <DialogClose />
           </DialogHeader>
-
           <div className="overflow-auto max-h-[70vh]">
             <DataTable
               columns={selectedCard?.columns || []}
