@@ -62,4 +62,9 @@ export class LeadController {
     const stats = await this.leadService.getProductStats(isCurrent);
     return stats;
   }
+
+  @Get('expert-co-stats-by-year')
+  async getStatsByYear() {
+    return this.leadService.getStatsExpertCoByYear();
+  }
 }
