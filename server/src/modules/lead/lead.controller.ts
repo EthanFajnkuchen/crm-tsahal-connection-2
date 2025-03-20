@@ -49,4 +49,10 @@ export class LeadController {
   ): Promise<Partial<Lead>[]> {
     return this.leadService.searchLeads(searchInput);
   }
+
+  @Get('expert-co-statistics')
+  @Permissions('read:data')
+  async getExpertCoStats() {
+    return this.leadService.getExpertCoStats();
+  }
 }
