@@ -41,7 +41,7 @@ const CardDashboard: React.FC<CardDashboardProps> = ({
       ) : (
         <>
           <div className="flex flex-col space-y-2">
-            <CardTitle className="text-sm ">{title}</CardTitle>
+            <CardTitle className="text-sm">{title}</CardTitle>
             <span className="text-3xl font-bold">{number}</span>
           </div>
           <Icon className="w-10 h-10" />

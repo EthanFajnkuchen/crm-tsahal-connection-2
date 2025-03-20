@@ -1,13 +1,12 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
-import { fetchCardLeadsThunk } from "@/store/thunks/dashboard/card-leads.thunk";
-import { fetchFilteredLeadsThunk } from "@/store/thunks/dashboard/filtered-card-leads.thunk";
-
-import { DASHBOARD_CARDS_ITEMS } from "@/i18n/dashboard-card";
+import { fetchExpertCoStatsThunk } from "@/store/thunks/expert-connection/expert-co-stats.thunk";
+import { fetchExpertCoFilteredLeadsThunk } from "@/store/thunks/expert-connection/filtered-expert-co-card-leads.thunk";
+import { EXPERT_CO_CARD_ITEMS } from "@/i18n/expert-co-card";
 import CardDashboard from "@/components/app-components/card-dashboard/card-dashboard";
 import Section from "@/components/app-components/section/section";
-import { LeadFilterDto } from "@/store/adapters/dashboard/filtered-card-leads.adapter";
+import { ExpertCoLeadFilterDto } from "@/store/adapters/expert-connection/filtered-expert-co-card-leads.adapter";
 import {
   Dialog,
   DialogContent,
@@ -19,42 +18,42 @@ import { DataTable } from "@/components/app-components/table/table";
 import {
   openPopup,
   closePopup,
-} from "@/store/slices/dashboard/card-leads.slice";
+} from "@/store/slices/expert-connection/expert-co-stats.slice";
 
-const DashboardCardsSection: React.FC = () => {
+const ExpertCoCardsSection: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
 
   useEffect(() => {
-    dispatch(fetchCardLeadsThunk());
+    dispatch(fetchExpertCoStatsThunk());
   }, [dispatch]);
 
   const {
-    data: cardLeads,
+    data: expertCoStats,
     isLoading,
     error,
     isPopupOpen,
     selectedCardApiKey,
-  } = useSelector((state: RootState) => state.cardLeads);
+  } = useSelector((state: RootState) => state.expertCoStats);
 
   const selectedCard = selectedCardApiKey
-    ? DASHBOARD_CARDS_ITEMS.find((card) => card.apiKey === selectedCardApiKey)
+    ? EXPERT_CO_CARD_ITEMS.find((card) => card.apiKey === selectedCardApiKey)
     : null;
 
   const {
     data: filteredLeads,
     isLoading: isLoadingFiltered,
     error: errorFiltered,
-  } = useSelector((state: RootState) => state.filteredLeads);
+  } = useSelector((state: RootState) => state.expertCoFilteredLeads);
 
   console.log(filteredLeads, isLoadingFiltered, errorFiltered);
 
   const fetchFilteredData = async (apiKey: string) => {
-    const selectedCard = DASHBOARD_CARDS_ITEMS.find(
+    const selectedCard = EXPERT_CO_CARD_ITEMS.find(
       (card) => card.apiKey === apiKey
     );
 
     if (selectedCard && selectedCard.filters) {
-      const validFilters: LeadFilterDto = {
+      const validFilters: ExpertCoLeadFilterDto = {
         included: Object.fromEntries(
           Object.entries(selectedCard.filters.included ?? {}).filter(
             ([_, value]) =>
@@ -72,7 +71,7 @@ const DashboardCardsSection: React.FC = () => {
         fieldsToSend: selectedCard.filters.fieldsToSend ?? [],
       };
 
-      await dispatch(fetchFilteredLeadsThunk(validFilters));
+      await dispatch(fetchExpertCoFilteredLeadsThunk(validFilters));
     }
   };
 
@@ -87,23 +86,25 @@ const DashboardCardsSection: React.FC = () => {
     }
   }, [isPopupOpen, selectedCardApiKey, dispatch]);
 
+  const getStatValue = (apiKey: string) => {
+    if (apiKey === "expertCoTotal") return expertCoStats?.expertCoTotal ?? 0;
+    if (apiKey === "expertCoActuel") return expertCoStats?.expertCoActuel ?? 0;
+    return 0;
+  };
+
   return (
-    <Section title={"Statistiques actuelles"}>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 ">
-        {DASHBOARD_CARDS_ITEMS.map((card, index) => (
+    <Section title={"Statistiques Expert Co"}>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 ">
+        {EXPERT_CO_CARD_ITEMS.map((card, index) => (
           <CardDashboard
             key={index}
             title={card.displayName}
-            number={cardLeads ? cardLeads[card.apiKey] : 0}
+            number={getStatValue(card.apiKey)}
             icon={card.icon}
             isLoading={isLoading}
-            className={`${card.bgColor} ${card.textColor}`}
+            className={`${card.bgColor} ${card.textColor} `}
             error={error}
-            onClick={
-              card.displayName === "Total"
-                ? () => {}
-                : () => handleCardClick(card.apiKey)
-            }
+            onClick={() => handleCardClick(card.apiKey)}
           />
         ))}
       </div>
@@ -119,7 +120,15 @@ const DashboardCardsSection: React.FC = () => {
           <div className="overflow-auto max-h-[70vh]">
             <DataTable
               columns={selectedCard?.columns || []}
-              data={filteredLeads || []}
+              data={
+                selectedCardApiKey === "expertCoActuel"
+                  ? filteredLeads?.filter(
+                      (lead) =>
+                        !lead.giyusDate ||
+                        lead.giyusDate > new Date().toISOString().split("T")[0]
+                    ) || []
+                  : filteredLeads || []
+              }
               isLoading={isLoadingFiltered}
               error={null}
             />
@@ -130,4 +139,4 @@ const DashboardCardsSection: React.FC = () => {
   );
 };
 
-export default DashboardCardsSection;
+export default ExpertCoCardsSection;

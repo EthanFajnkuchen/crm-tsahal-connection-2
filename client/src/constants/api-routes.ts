@@ -6,4 +6,5 @@ export const API_ROUTES = {
   DASHBOARD_CHART_YEARLY: `${BACKEND_BASE_URL}/api/leads/per-year`,
   FILTERED_LEADS: `${BACKEND_BASE_URL}/api/leads/filters`,
   DATA_TABLE_LEADS: `${BACKEND_BASE_URL}/api/leads/`,
+  EXPERT_CO_STATS: `${BACKEND_BASE_URL}/api/leads/expert-co-statistics`,
 };
