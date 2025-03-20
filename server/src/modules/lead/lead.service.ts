@@ -285,4 +285,40 @@ export class LeadService {
       );
     }
   }
+
+  async getProductStats(current: boolean): Promise<Record<string, number>> {
+    const products = [
+      'Suivi Massa',
+      'Suivi Classique',
+      'Suivi Expert',
+      'Entretien individuel',
+      'Simulation Tsav Rishon/Yom Hamea',
+      'Evaluation physique & mentale',
+      'Orientation individuelle sur les postes',
+    ];
+
+    const today = new Date().toISOString().split('T')[0]; // Format YYYY-MM-DD
+    const stats: Record<string, number> = {};
+
+    for (const product of products) {
+      const query = this.leadRepository.createQueryBuilder('lead').where(
+        `(lead.produitEC1 = :product OR lead.produitEC2 = :product OR 
+                      lead.produitEC3 = :product OR lead.produitEC4 = :product OR 
+                      lead.produitEC5 = :product)`,
+        { product },
+      );
+
+      if (current) {
+        query.andWhere(
+          `(lead.giyusDate IS NULL OR lead.giyusDate = '' OR lead.giyusDate > :today)`,
+          { today },
+        );
+      }
+
+      stats[product.replace(/\s+/g, '') + (current ? 'Current' : 'Total')] =
+        await query.getCount();
+    }
+
+    return stats;
+  }
 }
