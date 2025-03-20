@@ -1,8 +1,9 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { fetchCardLeadsThunk } from "../../thunks/dashboard/card-leads.thunk";
+import { fetchExpertCoStatsThunk } from "../../thunks/expert-connection/expert-co-stats.thunk";
+import { ExpertCoStats } from "../../adapters/expert-connection/expert-co-stats.adapter";
 
-interface CardLeadsState {
-  data: Record<string, number> | null;
+interface ExpertCoStatsState {
+  data: ExpertCoStats | null;
   status: "idle" | "loading" | "succeeded" | "failed";
   isPopupOpen: boolean;
   selectedCardApiKey: string | null;
@@ -12,7 +13,7 @@ interface CardLeadsState {
 
 const loadPopupState = () => {
   try {
-    const savedState = localStorage.getItem("popupState");
+    const savedState = localStorage.getItem("expertCoPopupState");
     return savedState
       ? JSON.parse(savedState)
       : { isPopupOpen: false, selectedCardApiKey: null };
@@ -21,9 +22,9 @@ const loadPopupState = () => {
   }
 };
 
-const savePopupState = (state: CardLeadsState) => {
+const savePopupState = (state: ExpertCoStatsState) => {
   localStorage.setItem(
-    "popupState",
+    "expertCoPopupState",
     JSON.stringify({
       isPopupOpen: state.isPopupOpen,
       selectedCardApiKey: state.selectedCardApiKey,
@@ -31,7 +32,7 @@ const savePopupState = (state: CardLeadsState) => {
   );
 };
 
-const initialState: CardLeadsState = {
+const initialState: ExpertCoStatsState = {
   data: null,
   status: "idle",
   isLoading: false,
@@ -39,8 +40,8 @@ const initialState: CardLeadsState = {
   ...loadPopupState(),
 };
 
-const cardLeadsSlice = createSlice({
-  name: "cardLeads",
+const expertCoStatsSlice = createSlice({
+  name: "expertCoStats",
   initialState,
   reducers: {
     openPopup: (state, action: PayloadAction<string>) => {
@@ -56,22 +57,24 @@ const cardLeadsSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(fetchCardLeadsThunk.pending, (state) => {
+      .addCase(fetchExpertCoStatsThunk.pending, (state) => {
         state.isLoading = true;
         state.status = "loading";
       })
-      .addCase(fetchCardLeadsThunk.fulfilled, (state, action) => {
+      .addCase(fetchExpertCoStatsThunk.fulfilled, (state, action) => {
         state.isLoading = false;
         state.status = "succeeded";
         state.data = action.payload;
       })
-      .addCase(fetchCardLeadsThunk.rejected, (state, action) => {
+      .addCase(fetchExpertCoStatsThunk.rejected, (state, action) => {
         state.isLoading = false;
         state.status = "failed";
-        state.error = action.error.message ?? "Failed to fetch card leads";
+        state.error =
+          action.error.message ??
+          "Failed to fetch expert connection statistics";
       });
   },
 });
 
-export const { openPopup, closePopup } = cardLeadsSlice.actions;
-export default cardLeadsSlice.reducer;
+export const { openPopup, closePopup } = expertCoStatsSlice.actions;
+export default expertCoStatsSlice.reducer;

@@ -8,6 +8,7 @@ import {
 import Dashboard from "./pages/dashboard/Dashboard";
 import Data from "./pages/data/Data";
 import AppLayout from "./AppLayout";
+import ExpertConnection from "./pages/expert-connection/ExpertConnection";
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
         <Route path="*" element={<AppLayout />}>
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="data" element={<Data />} />
+          <Route path="expert-connection" element={<ExpertConnection />} />
         </Route>
       </Routes>
     </Router>
