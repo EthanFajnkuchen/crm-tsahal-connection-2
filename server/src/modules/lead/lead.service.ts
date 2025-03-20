@@ -1,11 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, MoreThan, Brackets } from 'typeorm';
 import { Lead } from './lead.entity';
 import { LeadStatistics } from './type';
-import { FindManyOptions } from 'typeorm';
 import { LeadFilterDto } from './lead.dto';
-
 @Injectable()
 export class LeadService {
   constructor(
@@ -237,7 +235,7 @@ export class LeadService {
           );
         }
       });
-      
+
       query = query.orderBy('lead.dateInscription', 'DESC');
 
       const leads = await query.getMany();
@@ -251,6 +249,40 @@ export class LeadService {
       }));
     } catch (error) {
       throw new Error(`Search failed: ${error.message}`);
+    }
+  }
+
+  async getExpertCoStats(): Promise<{
+    expertCoTotal: number;
+    expertCoActuel: number;
+  }> {
+    try {
+      const expertCoTotal = await this.leadRepository.count({
+        where: { expertConnection: 'Oui' },
+      });
+
+      const today = new Date().toISOString().split('T')[0]; // Format YYYY-MM-DD
+
+      const expertCoActuel = await this.leadRepository
+        .createQueryBuilder('lead')
+        .where('lead.expertConnection = :expertCo', { expertCo: 'Oui' })
+        .andWhere(
+          new Brackets((qb) => {
+            qb.where('lead.giyusDate IS NULL')
+              .orWhere('lead.giyusDate = ""')
+              .orWhere('lead.giyusDate > :today', { today });
+          }),
+        )
+        .getCount();
+
+      return {
+        expertCoTotal,
+        expertCoActuel,
+      };
+    } catch (error) {
+      throw new Error(
+        `Failed to get expert connection stats: ${error.message}`,
+      );
     }
   }
 }
