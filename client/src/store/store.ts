@@ -8,6 +8,8 @@ import leadsReducer from "./slices/data/all-leads.slice";
 import searchLeadsReducer from "./slices/data/search-leads.slice";
 import expertCoStatsReducer from "./slices/expert-connection/expert-co-stats.slice";
 import expertCoFilteredLeadsReducer from "./slices/expert-connection/filtered-expert-co-card-leads.slice";
+import expertCoChartsTotalReducer from "./slices/expert-connection/charts-total.slice";
+import expertCoChartsCurrentReducer from "./slices/expert-connection/charts-current.slice";
 
 export const store = configureStore({
   reducer: {
@@ -20,6 +22,8 @@ export const store = configureStore({
     searchLeads: searchLeadsReducer,
     expertCoStats: expertCoStatsReducer,
     expertCoFilteredLeads: expertCoFilteredLeadsReducer,
+    expertCoChartsTotal: expertCoChartsTotalReducer,
+    expertCoChartsCurrent: expertCoChartsCurrentReducer,
   },
 });
 

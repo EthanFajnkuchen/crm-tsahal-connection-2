@@ -55,4 +55,11 @@ export class LeadController {
   async getExpertCoStats() {
     return this.leadService.getExpertCoStats();
   }
+
+  @Get('expert-co-charts')
+  async getStats(@Query('current') current: string) {
+    const isCurrent = current === 'true';
+    const stats = await this.leadService.getProductStats(isCurrent);
+    return stats;
+  }
 }

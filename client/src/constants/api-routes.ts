@@ -7,4 +7,5 @@ export const API_ROUTES = {
   FILTERED_LEADS: `${BACKEND_BASE_URL}/api/leads/filters`,
   DATA_TABLE_LEADS: `${BACKEND_BASE_URL}/api/leads/`,
   EXPERT_CO_STATS: `${BACKEND_BASE_URL}/api/leads/expert-co-statistics`,
+  EXPERT_CO_CHARTS: `${BACKEND_BASE_URL}/api/leads/expert-co-charts`,
 };
