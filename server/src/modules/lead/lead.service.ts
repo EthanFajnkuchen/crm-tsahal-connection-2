@@ -321,4 +321,82 @@ export class LeadService {
 
     return stats;
   }
+
+  async getStatsExpertCoByYear(): Promise<
+    Record<string, Record<string, { massa: number; other: number }>>
+  > {
+    try {
+      const dateFields = [
+        'dateProduitEC1',
+        'dateProduitEC2',
+        'dateProduitEC3',
+        'dateProduitEC4',
+        'dateProduitEC5',
+      ];
+
+      const result: Record<
+        string,
+        Record<string, { massa: number; other: number }>
+      > = {};
+
+      for (const field of dateFields) {
+        const query = this.leadRepository
+          .createQueryBuilder('lead')
+          .select([
+            `EXTRACT(YEAR FROM lead.${field}) AS year`,
+            `EXTRACT(MONTH FROM lead.${field}) AS month`,
+            `SUM(CASE WHEN lead.produitEC1 = 'Suivi Massa' THEN 1 ELSE 0 END) AS massa`,
+            `SUM(CASE WHEN lead.produitEC1 != 'Suivi Massa' THEN 1 ELSE 0 END) AS other`,
+          ])
+          .where(`lead.${field} IS NOT NULL`)
+          .groupBy('year, month');
+
+        const counts = await query.getRawMany();
+
+        counts.forEach(({ year, month, massa, other }) => {
+          if (!year || !month) return;
+
+          const yearStr = year.toString();
+          const monthStr = month.toString().padStart(2, '0');
+
+          if (!result[yearStr]) {
+            result[yearStr] = Object.fromEntries(
+              Array.from({ length: 12 }, (_, i) => [
+                (i + 1).toString().padStart(2, '0'),
+                { massa: 0, other: 0 },
+              ]),
+            );
+          }
+
+          result[yearStr][monthStr].massa += Number(massa);
+          result[yearStr][monthStr].other += Number(other);
+        });
+      }
+
+      const sortedResult = Object.keys(result)
+        .sort()
+        .reduce(
+          (acc, year) => {
+            acc[year] = Object.keys(result[year])
+              .sort((a, b) => Number(a) - Number(b))
+              .reduce(
+                (monthAcc, month) => {
+                  monthAcc[month] = result[year][month];
+                  return monthAcc;
+                },
+                {} as Record<string, { massa: number; other: number }>,
+              );
+            return acc;
+          },
+          {} as Record<
+            string,
+            Record<string, { massa: number; other: number }>
+          >,
+        );
+
+      return sortedResult;
+    } catch (error) {
+      throw new Error(`Error retrieving stats: ${error.message}`);
+    }
+  }
 }

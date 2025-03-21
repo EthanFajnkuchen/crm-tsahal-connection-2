@@ -25,29 +25,23 @@ const ExpertCoChartSection: React.FC = () => {
     error: errorCurrent,
   } = useSelector((state: RootState) => state.expertCoChartsCurrent);
 
-  const allDataLoaded = totalStats && currentStats;
-
   return (
     <Section title={"Statistiques des Produits Expert Co"}>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {allDataLoaded && (
-          <>
-            <DonutChartComponent
-              title="Produits - Total"
-              data={totalStats}
-              isLoading={isLoadingTotal}
-              error={errorTotal}
-              totalLabel="Total"
-            />
-            <DonutChartComponent
-              title="Produits - Actuels"
-              data={currentStats}
-              isLoading={isLoadingCurrent}
-              error={errorCurrent}
-              totalLabel="Actuels"
-            />
-          </>
-        )}
+        <DonutChartComponent
+          title="Produits - Total"
+          data={totalStats || {}}
+          isLoading={isLoadingTotal}
+          error={errorTotal}
+          totalLabel="Total"
+        />
+        <DonutChartComponent
+          title="Produits - Actuels"
+          data={currentStats || {}}
+          isLoading={isLoadingCurrent}
+          error={errorCurrent}
+          totalLabel="Actuels"
+        />
       </div>
     </Section>
   );

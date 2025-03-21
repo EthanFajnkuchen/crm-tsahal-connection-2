@@ -8,4 +8,5 @@ export const API_ROUTES = {
   DATA_TABLE_LEADS: `${BACKEND_BASE_URL}/api/leads/`,
   EXPERT_CO_STATS: `${BACKEND_BASE_URL}/api/leads/expert-co-statistics`,
   EXPERT_CO_CHARTS: `${BACKEND_BASE_URL}/api/leads/expert-co-charts`,
+  EXPERT_CO_STATS_BY_YEAR: `${BACKEND_BASE_URL}/api/leads/expert-co-stats-by-year`,
 };
