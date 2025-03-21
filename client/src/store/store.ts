@@ -10,6 +10,7 @@ import expertCoStatsReducer from "./slices/expert-connection/expert-co-stats.sli
 import expertCoFilteredLeadsReducer from "./slices/expert-connection/filtered-expert-co-card-leads.slice";
 import expertCoChartsTotalReducer from "./slices/expert-connection/charts-total.slice";
 import expertCoChartsCurrentReducer from "./slices/expert-connection/charts-current.slice";
+import expertCoStatsByYearReducer from "./slices/expert-connection/stats-by-year.slice";
 
 export const store = configureStore({
   reducer: {
@@ -24,6 +25,7 @@ export const store = configureStore({
     expertCoFilteredLeads: expertCoFilteredLeadsReducer,
     expertCoChartsTotal: expertCoChartsTotalReducer,
     expertCoChartsCurrent: expertCoChartsCurrentReducer,
+    exportCoStatsByYear: expertCoStatsByYearReducer,
   },
 });
 

@@ -360,7 +360,6 @@ export class LeadService {
           const monthStr = month.toString().padStart(2, '0');
 
           if (!result[yearStr]) {
-            // Initialiser l'année avec tous les mois de 01 à 12
             result[yearStr] = Object.fromEntries(
               Array.from({ length: 12 }, (_, i) => [
                 (i + 1).toString().padStart(2, '0'),
@@ -374,13 +373,12 @@ export class LeadService {
         });
       }
 
-      // Tri des années et des mois
       const sortedResult = Object.keys(result)
         .sort()
         .reduce(
           (acc, year) => {
             acc[year] = Object.keys(result[year])
-              .sort((a, b) => Number(a) - Number(b)) // Tri des mois dans l'ordre 01 → 12
+              .sort((a, b) => Number(a) - Number(b))
               .reduce(
                 (monthAcc, month) => {
                   monthAcc[month] = result[year][month];

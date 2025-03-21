@@ -21,13 +21,13 @@ interface DonutChartProps {
 }
 
 const COLORS = [
-  "#4F46E5",
+  "#fe56e5",
   "#6366F1",
-  "#7C3AED",
-  "#EC4899",
+  "#45ed90",
+  "#af3ce0",
   "#14B8A6",
   "#F59E0B",
-  "#10B981",
+  "#b91010",
   "#EF4444",
 ];
 
