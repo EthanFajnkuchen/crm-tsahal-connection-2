@@ -1,9 +1,15 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  StreamableFile,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, MoreThan, Brackets, Not, IsNull } from 'typeorm';
 import { Lead } from './lead.entity';
 import { LeadStatistics } from './type';
 import { LeadFilterDto } from './lead.dto';
+import { PassThrough } from 'stream';
+import { Workbook } from 'exceljs';
 @Injectable()
 export class LeadService {
   constructor(
@@ -450,7 +456,6 @@ export class LeadService {
         });
       }
 
-      // Trier par année décroissante
       const sortedResults = Object.keys(results)
         .sort(
           (a, b) => parseInt(b.split(' ').pop()) - parseInt(a.split(' ').pop()),
@@ -465,6 +470,147 @@ export class LeadService {
       throw new Error(
         `Failed to retrieve Mahzor Giyus counts: ${error.message}`,
       );
+    }
+  }
+
+  async downloadLeads(): Promise<StreamableFile> {
+    try {
+      const leads = await this.leadRepository.find();
+
+      const workbook = new Workbook();
+      const worksheet = workbook.addWorksheet('Data Soldats');
+
+      const columns = [
+        { header: 'ID', key: 'ID' },
+        { header: "Date d'inscription", key: 'dateInscription' },
+        { header: 'Statut du Candidat', key: 'statutCandidat' },
+        { header: 'Mahzor Giyus', key: 'mahzorGiyus' },
+        { header: 'Type Giyus', key: 'typeGiyus' },
+        { header: 'Pikoud', key: 'pikoud' },
+        { header: 'Date de shirhour', key: 'dateFinService' },
+        { header: 'Type de Poste', key: 'typePoste' },
+        { header: 'Nom du Poste', key: 'nomPoste' },
+        { header: 'Expert Connection', key: 'expertConnection' },
+        { header: 'Produit EC1', key: 'produitEC1' },
+        { header: 'Produit EC2', key: 'produitEC2' },
+        { header: 'Produit EC3', key: 'produitEC3' },
+        { header: 'Produit EC4', key: 'produitEC4' },
+        { header: 'Produit EC5', key: 'produitEC5' },
+        { header: 'Date Produit EC1', key: 'dateProduitEC1' },
+        { header: 'Date Produit EC2', key: 'dateProduitEC2' },
+        { header: 'Date Produit EC3', key: 'dateProduitEC3' },
+        { header: 'Date Produit EC4', key: 'dateProduitEC4' },
+        { header: 'Date Produit EC5', key: 'dateProduitEC5' },
+        { header: 'Prénom', key: 'firstName' },
+        { header: 'Nom', key: 'lastName' },
+        { header: 'Date de naissance', key: 'birthDate' },
+        { header: 'Genre', key: 'gender' },
+        { header: 'Email', key: 'email' },
+        { header: 'Numero de téléphone', key: 'phoneNumber' },
+        { header: 'Possède un numero Whatsapp ?', key: 'isWhatsAppSame' },
+        { header: 'Numéro Whatsapp', key: 'whatsappNumber' },
+        { header: 'Ville', key: 'city' },
+        { header: 'Enfant Unique ?', key: 'isOnlyChild' },
+        { header: "Contact d'urgence - Prénom", key: 'contactUrgenceLastName' },
+        { header: "Contact d'urgence - Nom", key: 'contactUrgenceFirstName' },
+        {
+          header: "Contact d'urgence - Numero",
+          key: 'contactUrgencePhoneNumber',
+        },
+        { header: "Contact d'urgence - Email", key: 'contactUrgenceMail' },
+        { header: "Contact d'urgence - Lien", key: 'contactUrgenceRelation' },
+        { header: 'Statut loi du retour', key: 'StatutLoiRetour' },
+        { header: 'Date de conversion', key: 'conversionDate' },
+        { header: 'Agence de conversion', key: 'conversionAgency' },
+        { header: 'Statut de résident', key: 'statutResidentIsrael' },
+        { header: "Année d'Alyah", key: 'anneeAlyah' },
+        { header: 'Nombre de nationalitées', key: 'numberOfNationalities' },
+        { header: 'Nationalité 1', key: 'nationality1' },
+        { header: 'Passeport Nationalité 1', key: 'passportNumber1' },
+        { header: 'Nationalité 2', key: 'nationality2' },
+        { header: 'Passeport Nationalité 2', key: 'passportNumber2' },
+        { header: 'Nationalité 3', key: 'nationality3' },
+        { header: 'Passeport Nationalité 3', key: 'passportNumber3' },
+        { header: 'Possède un ID israelien ?', key: 'hasIsraeliID' },
+        { header: 'Teoudat Zeout', key: 'israeliIDNumber' },
+        { header: 'Possède le BAC', key: 'bacObtention' },
+        { header: 'Pays du BAC', key: 'bacCountry' },
+        { header: 'Type de BAC', key: 'bacType' },
+        { header: 'Ecole du BAC en Israel', key: 'israeliBacSchool' },
+        {
+          header: 'Ecole francaise du BAC en Israel',
+          key: 'frenchBacSchoolIsrael',
+        },
+        { header: "Nom de l'école (Autre)", key: 'otherSchoolName' },
+        { header: 'Cursus en école juive ?', key: 'jewishSchool' },
+        { header: 'Ecole du BAC en France', key: 'frenchBacSchoolFrance' },
+        { header: 'Possède un diplome academique', key: 'academicDiploma' },
+        { header: 'Pays du Diplome', key: 'higherEducationCountry' },
+        {
+          header: "Nom de l'université en hébreu",
+          key: 'universityNameHebrew',
+        },
+        { header: 'No, du diplome en hébreu', key: 'diplomaNameHebrew' },
+        {
+          header: "Nom de  l'université en francais",
+          key: 'universityNameFrench',
+        },
+        { header: 'Nom du diplone en francais', key: 'diplomaNameFrench' },
+        { header: "Age d'arrivée en Israel", key: 'arrivalAge' },
+        {
+          header: 'Participation a un programme pré-armée',
+          key: 'programParticipation',
+        },
+        { header: 'Nom du programme pré-armée', key: 'programName' },
+        { header: 'Année scolaire', key: 'schoolYears' },
+        {
+          header: 'Participation a un programme de Dhyat Giyus',
+          key: 'armyDeferralProgram',
+        },
+        {
+          header: 'Nom du programme de Dhyat Giyus',
+          key: 'programNameHebrewArmyDeferral',
+        },
+        { header: 'Je suis actuellement', key: 'currentStatus' },
+        { header: 'Soldat Seul', key: 'soldierAloneStatus' },
+        { header: 'Type de service', key: 'serviceType' },
+        { header: 'Parcours Mahal', key: 'mahalPath' },
+        { header: "Parcours d'études", key: 'studyPath' },
+        { header: 'Tsav Rishon', key: 'tsavRishonStatus' },
+        { header: 'Centre de recrutement', key: 'recruitmentCenter' },
+        { header: 'Date du Tsav Rishon', key: 'tsavRishonDate' },
+        {
+          header: 'Notes du Tsav Rishon reçu ?',
+          key: 'tsavRishonGradesReceived',
+        },
+        { header: 'Dapar', key: 'daparNote' },
+        { header: 'Profile', key: 'medicalProfile' },
+        { header: 'Simoul Ivrit', key: 'hebrewScore' },
+        { header: 'Yom Hamea', key: 'yomHameaStatus' },
+        { header: 'Date du Yom Hameah', key: 'yomHameaDate' },
+        { header: 'Yom Sayerot', key: 'yomSayerotStatus' },
+        { header: 'Date du Yom Sayerot', key: 'yomSayerotDate' },
+        { header: 'Giyus', key: 'armyEntryDateStatus' },
+        { header: 'Date de giyus', key: 'giyusDate' },
+        { header: 'Programme Michve-Alon', key: 'michveAlonTraining' },
+      ];
+
+      worksheet.columns = columns;
+
+      for (const lead of leads) {
+        worksheet.addRow(lead);
+      }
+
+      const stream = new PassThrough();
+      await workbook.xlsx.write(stream);
+      stream.end();
+
+      return new StreamableFile(stream, {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        disposition: 'attachment; filename="leads.xlsx"',
+      });
+    } catch (error) {
+      throw new InternalServerErrorException(error.message);
     }
   }
 }

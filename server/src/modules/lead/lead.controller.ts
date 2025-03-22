@@ -72,4 +72,9 @@ export class LeadController {
   async getMahzorGiyusCounts() {
     return this.leadService.getMahzorGiyusCounts();
   }
+
+  @Get('download')
+  async downloadLeads() {
+    return this.leadService.downloadLeads();
+  }
 }
