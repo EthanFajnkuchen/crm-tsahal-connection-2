@@ -67,4 +67,9 @@ export class LeadController {
   async getStatsByYear() {
     return this.leadService.getStatsExpertCoByYear();
   }
+
+  @Get('mahzor-giyus-counts')
+  async getMahzorGiyusCounts() {
+    return this.leadService.getMahzorGiyusCounts();
+  }
 }

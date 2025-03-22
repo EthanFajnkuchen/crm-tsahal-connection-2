@@ -5,11 +5,11 @@ import StackedBarChartExample from "./charts-by-year-section/charts-by-year-sect
 
 const ExpertConnection: React.FC = () => {
   return (
-    <>
+    <div className="min-h-[90vh]">
       <ExpertCoCardsSection />
       <ExpertCoChartSection />
       <StackedBarChartExample />
-    </>
+    </div>
   );
 };
 

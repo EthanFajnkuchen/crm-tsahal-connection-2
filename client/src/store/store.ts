@@ -11,6 +11,7 @@ import expertCoFilteredLeadsReducer from "./slices/expert-connection/filtered-ex
 import expertCoChartsTotalReducer from "./slices/expert-connection/charts-total.slice";
 import expertCoChartsCurrentReducer from "./slices/expert-connection/charts-current.slice";
 import expertCoStatsByYearReducer from "./slices/expert-connection/stats-by-year.slice";
+import MahzorGiyusReducer from "./slices/mahzor-giyus/mahzor-giyus.slice";
 
 export const store = configureStore({
   reducer: {
@@ -26,6 +27,7 @@ export const store = configureStore({
     expertCoChartsTotal: expertCoChartsTotalReducer,
     expertCoChartsCurrent: expertCoChartsCurrentReducer,
     exportCoStatsByYear: expertCoStatsByYearReducer,
+    mahzorGiyus: MahzorGiyusReducer,
   },
 });
 

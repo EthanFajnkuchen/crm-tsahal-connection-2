@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, MoreThan, Brackets } from 'typeorm';
+import { Repository, MoreThan, Brackets, Not, IsNull } from 'typeorm';
 import { Lead } from './lead.entity';
 import { LeadStatistics } from './type';
 import { LeadFilterDto } from './lead.dto';
@@ -397,6 +397,74 @@ export class LeadService {
       return sortedResult;
     } catch (error) {
       throw new Error(`Error retrieving stats: ${error.message}`);
+    }
+  }
+
+  async getMahzorGiyusCounts(): Promise<any> {
+    try {
+      const leads = await this.leadRepository.find({
+        where: {
+          mahzorGiyus: Not(IsNull()),
+          typeGiyus: Not(IsNull()),
+        },
+      });
+
+      const results: Record<string, any> = {};
+
+      for (const lead of leads) {
+        const mahzorParts = lead.mahzorGiyus.split(' ');
+        if (mahzorParts.length < 2) continue;
+
+        const year = mahzorParts[1];
+        const period = lead.mahzorGiyus;
+        const typeGiyus = lead.typeGiyus;
+
+        let key: string;
+        if (typeGiyus === 'Olim/Hesder') {
+          key = `${period} - Olim / Mahal Hesder`;
+        } else if (typeGiyus === 'Mahal Nahal / Mahal Haredi') {
+          key = `${period} - Mahal Nahal / Mahal Haredi`;
+        } else {
+          continue;
+        }
+
+        const yearKey = `Mahzor Giyus ${year}`;
+        if (!results[yearKey]) {
+          results[yearKey] = {};
+        }
+        if (!results[yearKey][key]) {
+          results[yearKey][key] = { count: 0, leads: [] };
+        }
+
+        results[yearKey][key].count += 1;
+        results[yearKey][key].leads.push({
+          firstName: lead.firstName,
+          lastName: lead.lastName,
+          expertConnection: lead.expertConnection,
+          gender: lead.gender,
+          statutCandidat: lead.statutCandidat,
+          giyusDate: lead.giyusDate,
+          dateFinService: lead.dateFinService,
+          nomPoste: lead.nomPoste,
+          email: lead.email,
+        });
+      }
+
+      // Trier par année décroissante
+      const sortedResults = Object.keys(results)
+        .sort(
+          (a, b) => parseInt(b.split(' ').pop()) - parseInt(a.split(' ').pop()),
+        )
+        .reduce((acc, key) => {
+          acc[key] = results[key];
+          return acc;
+        }, {});
+
+      return sortedResults;
+    } catch (error) {
+      throw new Error(
+        `Failed to retrieve Mahzor Giyus counts: ${error.message}`,
+      );
     }
   }
 }
