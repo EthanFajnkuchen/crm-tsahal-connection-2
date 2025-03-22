@@ -20,10 +20,10 @@ import { DataTable } from "@/components/app-components/table/table";
 import MahzorGiyusSkeletonSection from "@/components/app-components/mahzor-giyus-skeleton/mahzor-giyus-skeleton";
 
 const REQUIRED_MONTHS = ["Mars", "Aout", "Novembre"];
-const MONTH_COLORS: Record<string, string> = {
-  Mars: "bg-[#3838eb]",
-  Aout: "bg-[#b333e2]",
-  Novembre: "bg-[#31ad6d]",
+const MONTH_COLORS: Record<string, { bg: string; text: string }> = {
+  Mars: { bg: "bg-[#3838eb]", text: "text-[#3838eb]" },
+  Aout: { bg: "bg-[#b333e2]", text: "text-[#b333e2]" },
+  Novembre: { bg: "bg-[#31ad6d]", text: "text-[#31ad6d]" },
 };
 
 const MahzorGiyus: React.FC = () => {
@@ -81,7 +81,8 @@ const MahzorGiyus: React.FC = () => {
                       <MahzorGiyusCard
                         count={periodData.count}
                         period={key}
-                        colorClass={colorClass}
+                        colorClass={colorClass.bg}
+                        textColor={colorClass.text}
                       />
                     </div>
                   );
@@ -98,7 +99,8 @@ const MahzorGiyus: React.FC = () => {
                       <MahzorGiyusCard
                         count={periodData.count}
                         period={key}
-                        colorClass={colorClass}
+                        colorClass={colorClass.bg}
+                        textColor={colorClass.text}
                       />
                     </div>
                   );
