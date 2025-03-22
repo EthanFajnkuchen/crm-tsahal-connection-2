@@ -16,16 +16,29 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogCancel,
-  AlertDialogAction,
 } from "@/components/ui/alert-dialog";
+import { useAuth0 } from "@auth0/auth0-react";
 
 type UserProfileProps = {
   fallback: string;
 };
 
 const UserProfile: React.FC<UserProfileProps> = ({ fallback }) => {
-  const handleLogout = () => {
-    console.log("Logging out...");
+  const { user, logout } = useAuth0();
+
+  const getInitials = (name?: string) => {
+    if (!name) return "?";
+    const parts = name.trim().split(" ");
+    if (parts.length === 1) return parts[0][0]?.toUpperCase();
+    return (parts[0][0] + parts[1][0]).toUpperCase();
+  };
+
+  const handleConfirmLogout = () => {
+    logout({
+      logoutParams: {
+        returnTo: window.location.origin,
+      },
+    });
   };
 
   return (
@@ -33,20 +46,19 @@ const UserProfile: React.FC<UserProfileProps> = ({ fallback }) => {
       <PopoverTrigger asChild>
         <Avatar className="cursor-pointer">
           <AvatarFallback className="bg-fuchsia-800 text-white">
-            {fallback}
+            {getInitials(user?.name)}
           </AvatarFallback>
         </Avatar>
       </PopoverTrigger>
       <PopoverContent className="w-48 p-2">
-        <h2 className="text-sm ml-3 font-semibold">Raphael Madar</h2>
-        <h3 className="text-sm ml-3 mt-1 text-gray-500">Administrateur</h3>
+        <h2 className="text-sm ml-3 font-semibold">{user?.name}</h2>
+        <h3 className="text-sm ml-3 mt-1 text-gray-500">{user?.roleType[0]}</h3>
         <hr className="mt-1 mb-1" />
         <AlertDialog>
-          <AlertDialogTrigger className="focus-visible:ring-0 focus:outline-none">
+          <AlertDialogTrigger asChild>
             <Button
               variant="ghost"
               className="w-full justify-start text-left font-normal focus-visible:ring-0 hover:bg-transparent"
-              onClick={handleLogout}
             >
               <LogOut className="mr-2 h-4 w-4" />
               <span>Logout</span>
@@ -64,7 +76,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ fallback }) => {
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Annuler</AlertDialogCancel>
-              <AlertDialogAction>Continuer</AlertDialogAction>
+              <Button onClick={handleConfirmLogout}>Continuer</Button>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
