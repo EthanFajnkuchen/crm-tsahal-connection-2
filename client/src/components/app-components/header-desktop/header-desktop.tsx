@@ -17,7 +17,7 @@ const HeaderDesktop: React.FC = () => {
           placeholder="Search"
           className="w-48 lg:w-96"
         />
-        <UserProfile fallback="RM" />
+        <UserProfile />
       </div>
     </header>
   );

@@ -82,7 +82,7 @@ export function HeaderMobile() {
               </div>
             </SheetContent>
           </Sheet>
-          <UserProfile fallback="RM" />
+          <UserProfile />
         </div>
         <div className="w-full">
           <SearchInput type="text" placeholder="Search" className="w-full" />
