@@ -19,11 +19,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useAuth0 } from "@auth0/auth0-react";
 
-type UserProfileProps = {
-  fallback: string;
-};
-
-const UserProfile: React.FC<UserProfileProps> = ({ fallback }) => {
+const UserProfile: React.FC = () => {
   const { user, logout } = useAuth0();
 
   const getInitials = (name?: string) => {
