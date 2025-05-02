@@ -14,6 +14,7 @@ import { withAuthenticationRequired } from "@auth0/auth0-react";
 import AuthTokenRouteGuard from "./AuthTokenRouteGuard";
 import Logo from "@/assets/pictures/Logo Tsahal Conection.png";
 import "./App.css";
+import FormsRapports from "./pages/forms-rapports/Form-Rapports";
 
 const ProtectedAppLayout = withAuthenticationRequired(AppLayout, {
   onRedirecting: () => (
@@ -38,6 +39,7 @@ function App() {
           <Route path="data" element={<Data />} />
           <Route path="expert-connection" element={<ExpertConnection />} />
           <Route path="mahzor-giyus" element={<MahzorGiyus />} />
+          <Route path="forms-rapports" element={<FormsRapports />} />
         </Route>
       </Routes>
     </Router>

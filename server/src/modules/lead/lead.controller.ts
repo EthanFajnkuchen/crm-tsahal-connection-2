@@ -57,6 +57,7 @@ export class LeadController {
   }
 
   @Get('expert-co-charts')
+  @Permissions('read:data')
   async getStats(@Query('current') current: string) {
     const isCurrent = current === 'true';
     const stats = await this.leadService.getProductStats(isCurrent);
@@ -64,16 +65,19 @@ export class LeadController {
   }
 
   @Get('expert-co-stats-by-year')
+  @Permissions('read:data')
   async getStatsByYear() {
     return this.leadService.getStatsExpertCoByYear();
   }
 
   @Get('mahzor-giyus-counts')
+  @Permissions('read:data')
   async getMahzorGiyusCounts() {
     return this.leadService.getMahzorGiyusCounts();
   }
 
   @Get('download')
+  @Permissions('read:data')
   async downloadLeads() {
     return this.leadService.downloadLeads();
   }

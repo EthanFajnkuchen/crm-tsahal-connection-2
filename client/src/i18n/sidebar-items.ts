@@ -5,6 +5,8 @@ import {
   CalendarCheck,
   BriefcaseBusiness,
   PersonStanding,
+  FormInput,
+  BookCopy,
 } from "lucide-react";
 
 export const SIDEBAR_ITEMS = [
@@ -18,4 +20,9 @@ export const SIDEBAR_ITEMS = [
   { displayName: "Mahzor Giyus", link: "/mahzor-giyus", icon: CalendarCheck },
   { displayName: "Tafkidim", link: "/tafkidim", icon: BriefcaseBusiness },
   { displayName: "Volontaires", link: "/volontaires", icon: PersonStanding },
+  {
+    displayName: "Forms & Rapports",
+    link: "/forms-rapports",
+    icon: BookCopy,
+  },
 ];
