@@ -3,7 +3,6 @@ import useCurrentPageName from "@/hooks/use-current-page-name";
 import { SearchInput } from "@/components/app-components/search-input/search-input";
 import UserProfile from "@/components/app-components/user-profile/user-profile";
 
-
 const HeaderDesktop: React.FC = () => {
   const pageTitle = useCurrentPageName();
 
@@ -18,7 +17,7 @@ const HeaderDesktop: React.FC = () => {
           placeholder="Search"
           className="w-48 lg:w-96"
         />
-        <UserProfile fallback="RM" />
+        <UserProfile />
       </div>
     </header>
   );
