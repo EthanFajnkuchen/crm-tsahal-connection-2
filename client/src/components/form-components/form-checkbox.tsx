@@ -1,8 +1,6 @@
-import * as React from "react";
 import { Control, Controller, FieldValues, Path } from "react-hook-form";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { cn } from "@/lib/utils";
 
 type Mode = "EDIT" | "VIEW";
 
@@ -20,7 +18,6 @@ const FormCheckbox = <T extends FieldValues>({
   name,
   label,
   error,
-  className,
   mode = "EDIT",
 }: FormCheckboxProps<T>) => {
   return (
