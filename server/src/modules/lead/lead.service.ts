@@ -1,6 +1,8 @@
 import {
+  BadRequestException,
   Injectable,
   InternalServerErrorException,
+  NotFoundException,
   StreamableFile,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -609,6 +611,118 @@ export class LeadService {
         type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         disposition: 'attachment; filename="leads.xlsx"',
       });
+    } catch (error) {
+      throw new InternalServerErrorException(error.message);
+    }
+  }
+
+  async getLeadById(leadId: string) {
+    if (!leadId) {
+      throw new BadRequestException('ID is required');
+    }
+
+    try {
+      const lead = await this.leadRepository.findOne({
+        where: { ID: parseInt(leadId) },
+      });
+
+      if (!lead) {
+        throw new NotFoundException('Lead not found');
+      }
+
+      const leadData = {
+        ID: lead.ID,
+        dateInscription: lead.dateInscription,
+        statutCandidat: lead.statutCandidat,
+        mahzorGiyus: lead.mahzorGiyus,
+        typeGiyus: lead.typeGiyus,
+        pikoud: lead.pikoud,
+        dateFinService: lead.dateFinService,
+        typePoste: lead.typePoste,
+        nomPoste: lead.nomPoste,
+        expertConnection: lead.expertConnection,
+        produitEC1: lead.produitEC1,
+        produitEC2: lead.produitEC2,
+        produitEC3: lead.produitEC3,
+        produitEC4: lead.produitEC4,
+        produitEC5: lead.produitEC5,
+        firstName: lead.firstName,
+        lastName: lead.lastName,
+        birthDate: lead.birthDate,
+        gender: lead.gender,
+        email: lead.email,
+        phoneNumber: lead.phoneNumber,
+        isWhatsAppSame: lead.isWhatsAppSame,
+        whatsappNumber: lead.whatsappNumber,
+        city: lead.city,
+        isOnlyChild: lead.isOnlyChild,
+        contactUrgenceLastName: lead.contactUrgenceLastName,
+        contactUrgenceFirstName: lead.contactUrgenceFirstName,
+        contactUrgencePhoneNumber: lead.contactUrgencePhoneNumber,
+        contactUrgenceMail: lead.contactUrgenceMail,
+        contactUrgenceRelation: lead.contactUrgenceRelation,
+        StatutLoiRetour: lead.StatutLoiRetour,
+        conversionDate: lead.conversionDate,
+        conversionAgency: lead.conversionAgency,
+        statutResidentIsrael: lead.statutResidentIsrael,
+        anneeAlyah: lead.anneeAlyah,
+        numberOfNationalities: lead.numberOfNationalities,
+        nationality1: lead.nationality1,
+        passportNumber1: lead.passportNumber1,
+        nationality2: lead.nationality2,
+        passportNumber2: lead.passportNumber2,
+        nationality3: lead.nationality3,
+        passportNumber3: lead.passportNumber3,
+        hasIsraeliID: lead.hasIsraeliID,
+        israeliIDNumber: lead.israeliIDNumber,
+        bacObtention: lead.bacObtention,
+        bacCountry: lead.bacCountry,
+        bacType: lead.bacType,
+        israeliBacSchool: lead.israeliBacSchool,
+        frenchBacSchoolIsrael: lead.frenchBacSchoolIsrael,
+        otherSchoolName: lead.otherSchoolName,
+        jewishSchool: lead.jewishSchool,
+        frenchBacSchoolFrance: lead.frenchBacSchoolFrance,
+        academicDiploma: lead.academicDiploma,
+        higherEducationCountry: lead.higherEducationCountry,
+        universityNameHebrew: lead.universityNameHebrew,
+        diplomaNameHebrew: lead.diplomaNameHebrew,
+        universityNameFrench: lead.universityNameFrench,
+        diplomaNameFrench: lead.diplomaNameFrench,
+        arrivalAge: lead.arrivalAge,
+        programParticipation: lead.programParticipation,
+        programName: lead.programName,
+        schoolYears: lead.schoolYears,
+        armyDeferralProgram: lead.armyDeferralProgram,
+        programNameHebrewArmyDeferral: lead.programNameHebrewArmyDeferral,
+        currentStatus: lead.currentStatus,
+        soldierAloneStatus: lead.soldierAloneStatus,
+        serviceType: lead.serviceType,
+        mahalPath: lead.mahalPath,
+        studyPath: lead.studyPath,
+        tsavRishonStatus: lead.tsavRishonStatus,
+        recruitmentCenter: lead.recruitmentCenter,
+        tsavRishonDate: lead.tsavRishonDate,
+        tsavRishonGradesReceived: lead.tsavRishonGradesReceived,
+        daparNote: lead.daparNote,
+        medicalProfile: lead.medicalProfile,
+        hebrewScore: lead.hebrewScore,
+        yomHameaStatus: lead.yomHameaStatus,
+        yomHameaDate: lead.yomHameaDate,
+        yomSayerotStatus: lead.yomSayerotStatus,
+        yomSayerotDate: lead.yomSayerotDate,
+        armyEntryDateStatus: lead.armyEntryDateStatus,
+        giyusDate: lead.giyusDate,
+        michveAlonTraining: lead.michveAlonTraining,
+        summary: lead.summary,
+        dateProduitEC1: lead.dateProduitEC1,
+        dateProduitEC2: lead.dateProduitEC2,
+        dateProduitEC3: lead.dateProduitEC3,
+        dateProduitEC4: lead.dateProduitEC4,
+        dateProduitEC5: lead.dateProduitEC5,
+      };
+
+      return leadData;
     } catch (error) {
       throw new InternalServerErrorException(error.message);
     }

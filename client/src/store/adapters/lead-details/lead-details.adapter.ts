@@ -1,0 +1,114 @@
+import { API_ROUTES } from "@/constants/api-routes";
+
+const M2M_TOKEN = import.meta.env.VITE_API_M2M_TOKEN;
+
+export interface LeadDetails {
+  id: number;
+  dateInscription: string;
+  statutCandidat: string;
+  mahzorGiyus: string;
+  typeGiyus: string;
+  pikoud: string;
+  dateFinService: string;
+  typePoste: string;
+  nomPoste: string;
+  expertConnection: string;
+  produitEC1?: string;
+  produitEC2?: string;
+  produitEC3?: string;
+  produitEC4?: string;
+  produitEC5?: string;
+  firstName: string;
+  lastName: string;
+  birthDate: string;
+  gender: string;
+  email: string;
+  phoneNumber: string;
+  isWhatsAppSame: boolean;
+  whatsappNumber?: string;
+  city: string;
+  isOnlyChild: string;
+  contactUrgenceLastName: string;
+  contactUrgenceFirstName: string;
+  contactUrgencePhoneNumber: string;
+  contactUrgenceMail: string;
+  contactUrgenceRelation: string;
+  statutLoiRetour: string;
+  conversionDate: string;
+  conversionAgency: string;
+  statutResidentIsrael: string;
+  anneeAlyah: string;
+  numberOfNationalities: string;
+  nationality1: string;
+  passportNumber1: string;
+  nationality2?: string;
+  passportNumber2?: string;
+  nationality3?: string;
+  passportNumber3?: string;
+  hasIsraeliID: string;
+  israeliIDNumber: string;
+  bacObtention: string;
+  bacCountry: string;
+  bacType: string;
+  israeliBacSchool: string;
+  frenchBacSchoolIsrael: string;
+  otherSchoolName: string;
+  jewishSchool: string;
+  frenchBacSchoolFrance: string;
+  academicDiploma: string;
+  higherEducationCountry: string;
+  universityNameHebrew: string;
+  diplomaNameHebrew: string;
+  universityNameFrench: string;
+  diplomaNameFrench: string;
+  arrivalAge: string;
+  programParticipation: string;
+  programName: string;
+  schoolYears: string;
+  armyDeferralProgram: string;
+  programNameHebrewArmyDeferral: string;
+  currentStatus: string;
+  soldierAloneStatus: string;
+  serviceType: string;
+  mahalPath: string;
+  studyPath: string;
+  tsavRishonStatus: string;
+  recruitmentCenter: string;
+  tsavRishonDate: string;
+  tsavRishonGradesReceived: string;
+  daparNote: string;
+  medicalProfile: string;
+  hebrewScore: string;
+  yomHameaStatus: string;
+  yomHameaDate: string;
+  yomSayerotStatus: string;
+  yomSayerotDate: string;
+  armyEntryDateStatus: string;
+  giyusDate: string;
+  michveAlonTraining: string;
+  summary: string;
+  dateProduitEC1?: string;
+  dateProduitEC2?: string;
+  dateProduitEC3?: string;
+  dateProduitEC4?: string;
+  dateProduitEC5?: string;
+}
+
+export const fetchLeadDetails = async (id: string): Promise<LeadDetails> => {
+  try {
+    const response = await fetch(`${API_ROUTES.LEAD_DETAILS}/${id}`, {
+      headers: {
+        Authorization: `Bearer ${M2M_TOKEN}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch lead details");
+    }
+
+    return response.json();
+  } catch (error) {
+    console.error("Error fetching lead details:", error);
+    throw error;
+  }
+};

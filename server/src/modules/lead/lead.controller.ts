@@ -1,4 +1,12 @@
-import { Body, Controller, Get, HttpCode, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  Param,
+  Post,
+  Query,
+} from '@nestjs/common';
 import { LeadService } from './lead.service';
 import { Lead } from './lead.entity';
 import { LeadStatistics } from './type';
@@ -80,5 +88,11 @@ export class LeadController {
   @Permissions('read:data')
   async downloadLeads() {
     return this.leadService.downloadLeads();
+  }
+
+  @Get(':id')
+  @Permissions('read:data')
+  async getLeadById(@Param('id') id: string) {
+    return this.leadService.getLeadById(id);
   }
 }
