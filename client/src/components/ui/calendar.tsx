@@ -5,12 +5,7 @@ import {
   ChevronsLeft,
   ChevronsRight,
 } from "lucide-react";
-import {
-  DayPicker,
-  CaptionProps,
-  useDayPicker,
-  useNavigation,
-} from "react-day-picker";
+import { DayPicker, CaptionProps, useNavigation } from "react-day-picker";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 
