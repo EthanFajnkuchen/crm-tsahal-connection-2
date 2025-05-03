@@ -13,6 +13,7 @@ import expertCoChartsCurrentReducer from "./slices/expert-connection/charts-curr
 import expertCoStatsByYearReducer from "./slices/expert-connection/stats-by-year.slice";
 import MahzorGiyusReducer from "./slices/mahzor-giyus/mahzor-giyus.slice";
 import ExcelReducer from "./slices/data/excel.slice";
+import leadDetailsReducer from "./slices/lead-details/lead-details.slice";
 
 export const store = configureStore({
   reducer: {
@@ -30,6 +31,7 @@ export const store = configureStore({
     exportCoStatsByYear: expertCoStatsByYearReducer,
     mahzorGiyus: MahzorGiyusReducer,
     downloadExcel: ExcelReducer,
+    leadDetails: leadDetailsReducer,
   },
 });
 

@@ -11,4 +11,5 @@ export const API_ROUTES = {
   EXPERT_CO_CHARTS: `${BACKEND_BASE_URL}/api/leads/expert-co-charts`,
   EXPERT_CO_STATS_BY_YEAR: `${BACKEND_BASE_URL}/api/leads/expert-co-stats-by-year`,
   MAHZOR_GIYUS: `${BACKEND_BASE_URL}/api/leads/mahzor-giyus-counts`,
+  LEAD_DETAILS: `${BACKEND_BASE_URL}/api/leads`,
 };
