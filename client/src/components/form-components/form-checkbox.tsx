@@ -11,6 +11,7 @@ interface FormCheckboxProps<T extends FieldValues> {
   error?: string;
   mode?: Mode;
   className?: string;
+  hidden?: boolean;
 }
 
 const FormCheckbox = <T extends FieldValues>({
@@ -19,7 +20,10 @@ const FormCheckbox = <T extends FieldValues>({
   label,
   error,
   mode = "EDIT",
+  hidden = false,
 }: FormCheckboxProps<T>) => {
+  if (hidden) return null;
+
   return (
     <div className="space-y-2">
       {mode === "EDIT" ? (
@@ -31,7 +35,7 @@ const FormCheckbox = <T extends FieldValues>({
               {label && (
                 <Label
                   htmlFor={name}
-                  className="text-sm text-gray-500 leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 "
+                  className="text-sm text-gray-500 leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 font-[Poppins]"
                 >
                   {label}
                 </Label>
@@ -55,7 +59,7 @@ const FormCheckbox = <T extends FieldValues>({
               {label && (
                 <Label
                   htmlFor={name}
-                  className="text-sm text-muted-foreground font-semibold"
+                  className="text-sm text-muted-foreground font-regular font-[Poppins]"
                 >
                   {label}
                 </Label>

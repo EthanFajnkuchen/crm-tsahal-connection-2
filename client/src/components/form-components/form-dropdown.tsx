@@ -19,6 +19,7 @@ interface FormDropdownProps<T extends FieldValues> {
   mode?: Mode;
   className?: string;
   options: { value: string; label: string }[];
+  hidden?: boolean;
 }
 
 const FormDropdown = <T extends FieldValues>({
@@ -29,14 +30,17 @@ const FormDropdown = <T extends FieldValues>({
   className,
   mode = "EDIT",
   options,
+  hidden = false,
 }: FormDropdownProps<T>) => {
+  if (hidden) return null;
+
   return (
     <div className="space-y-2">
       {label && (
         <Label
           htmlFor={name}
           className={cn(
-            "text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70",
+            "text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 font-[Poppins]",
             mode === "VIEW" ? "text-muted-foreground" : "text-gray-500"
           )}
         >
@@ -71,7 +75,7 @@ const FormDropdown = <T extends FieldValues>({
           control={control}
           name={name}
           render={({ field }) => (
-            <p className="text-sm font-medium">
+            <p className="text-sm font-medium font-[Poppins]">
               {options.find((opt) => opt.value === field.value)?.label || "-"}
             </p>
           )}

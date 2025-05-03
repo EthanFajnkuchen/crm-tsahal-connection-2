@@ -6,6 +6,7 @@ import { fetchLeadDetailsThunk } from "../../store/thunks/lead-details/lead-deta
 import { RootState, AppDispatch } from "../../store/store";
 import { Lead } from "@/types/lead";
 import { GeneralSection } from "./components/general-section";
+import { ExpertConnectionSection } from "./components/expert-connection-section";
 
 const LeadDetailsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -38,6 +39,17 @@ const LeadDetailsPage: React.FC = () => {
         contactUrgencePhoneNumber: lead.contactUrgencePhoneNumber || "",
         contactUrgenceMail: lead.contactUrgenceMail || "",
         contactUrgenceRelation: lead.contactUrgenceRelation || "",
+        expertConnection: lead.expertConnection || "",
+        produitEC1: lead.produitEC1 || "",
+        produitEC2: lead.produitEC2 || "",
+        produitEC3: lead.produitEC3 || "",
+        produitEC4: lead.produitEC4 || "",
+        produitEC5: lead.produitEC5 || "",
+        dateProduitEC1: lead.dateProduitEC1 || "",
+        dateProduitEC2: lead.dateProduitEC2 || "",
+        dateProduitEC3: lead.dateProduitEC3 || "",
+        dateProduitEC4: lead.dateProduitEC4 || "",
+        dateProduitEC5: lead.dateProduitEC5 || "",
       });
     }
   }, [lead, reset]);
@@ -56,7 +68,16 @@ const LeadDetailsPage: React.FC = () => {
     return <div className="text-center p-4">No lead found</div>;
   }
 
-  return <div className="p-4">{lead && <GeneralSection lead={lead} />}</div>;
+  return (
+    <div className="p-4 space-y-4">
+      {lead && (
+        <>
+          <GeneralSection lead={lead} />
+          <ExpertConnectionSection lead={lead} />
+        </>
+      )}
+    </div>
+  );
 };
 
 export default LeadDetailsPage;

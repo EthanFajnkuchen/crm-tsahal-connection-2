@@ -22,6 +22,7 @@ interface FormDatePickerProps<T extends FieldValues> {
   mode?: Mode;
   className?: string;
   readOnly?: boolean;
+  hidden?: boolean;
 }
 
 const FormDatePicker = <T extends FieldValues>({
@@ -32,7 +33,10 @@ const FormDatePicker = <T extends FieldValues>({
   className,
   mode = "EDIT",
   readOnly = false,
+  hidden = false,
 }: FormDatePickerProps<T>) => {
+  if (hidden) return null;
+
   const formatDisplayDate = (dateString: string) => {
     return format(parseISO(dateString), "dd/MM/yyyy", { locale: fr });
   };
@@ -47,7 +51,7 @@ const FormDatePicker = <T extends FieldValues>({
         <Label
           htmlFor={name}
           className={cn(
-            "text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70",
+            "text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 font-[Poppins]",
             mode === "VIEW" ? "text-muted-foreground" : "text-gray-500"
           )}
         >
@@ -97,7 +101,7 @@ const FormDatePicker = <T extends FieldValues>({
           control={control}
           name={name}
           render={({ field }) => (
-            <p className="text-sm font-medium">
+            <p className="text-sm font-medium font-[Poppins]">
               {field.value ? formatDisplayDate(field.value) : "-"}
             </p>
           )}

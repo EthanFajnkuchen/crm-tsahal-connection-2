@@ -6,12 +6,12 @@ interface FormSectionProps {
   children: React.ReactNode;
   mode?: "EDIT" | "VIEW";
   onModeChange?: () => void;
-  onSave?: (data: any) => void;
+  onSave?: () => void;
   onCancel?: () => void;
 }
 
 interface FormSubSectionProps {
-  title: string;
+  title?: string;
   children: React.ReactNode;
   mode?: "EDIT" | "VIEW";
 }
@@ -27,7 +27,7 @@ const FormSubSection: React.FC<FormSubSectionProps> = ({
 }) => {
   return (
     <div className="space-y-4">
-      <h4 className="text-xl font-medium text-black">{title}</h4>
+      <h4 className="text-xl font-medium text-black font-[Poppins]">{title}</h4>
       <div className="grid grid-cols-3 gap-4">
         {React.Children.map(children, (child) => {
           if (React.isValidElement<FormChildProps>(child)) {
@@ -43,32 +43,23 @@ const FormSubSection: React.FC<FormSubSectionProps> = ({
 const FormSection: React.FC<FormSectionProps> = ({
   title,
   children,
+  mode = "VIEW",
+  onModeChange,
   onSave,
+  onCancel,
 }) => {
-  const [mode, setMode] = React.useState<"EDIT" | "VIEW">("VIEW");
-
-  const handleSave = () => {
-    if (onSave) {
-      onSave({});
-    }
-    setMode("VIEW");
-  };
-
-  const handleCancel = () => {
-    setMode("VIEW");
-  };
-
   return (
     <div className="bg-white m-3 p-4 rounded-2xl">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-2xl font-semibold">{title}</h3>
+        <h3 className="text-2xl font-semibold font-[Poppins]">{title}</h3>
         <div className="flex gap-2">
           {mode === "VIEW" ? (
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => setMode("EDIT")}
+              onClick={onModeChange}
               className="h-8 border"
+              type="button"
             >
               Modifier
             </Button>
@@ -77,16 +68,18 @@ const FormSection: React.FC<FormSectionProps> = ({
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={handleCancel}
+                onClick={onCancel}
                 className="h-8 border"
+                type="button"
               >
                 Annuler
               </Button>
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={handleSave}
+                onClick={onSave}
                 className="h-8 border bg-purple-600 text-white hover:bg-purple-700 hover:text-white"
+                type="submit"
               >
                 Sauvegarder
               </Button>

@@ -13,6 +13,8 @@ interface FormInputProps<T extends FieldValues>
   label?: string;
   error?: string;
   mode?: Mode;
+  hidden?: boolean;
+  className?: string;
 }
 
 const FormInput = <T extends FieldValues>({
@@ -22,14 +24,17 @@ const FormInput = <T extends FieldValues>({
   error,
   className,
   mode = "EDIT",
+  hidden = false,
   ...props
 }: FormInputProps<T>) => {
+  if (hidden) return null;
+
   return (
     <div className="space-y-2">
       <Label
         htmlFor={name}
         className={cn(
-          "text-sm text-gray-500 leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+          "text-sm text-gray-500 leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 font-[Poppins]"
         )}
       >
         {label}
@@ -54,7 +59,9 @@ const FormInput = <T extends FieldValues>({
           control={control}
           name={name}
           render={({ field }) => (
-            <p className="text-sm font-medium">{field.value || "-"}</p>
+            <p className="text-sm font-medium font-[Poppins]">
+              {field.value || "-"}
+            </p>
           )}
         />
       )}
