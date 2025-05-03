@@ -23,7 +23,7 @@ export interface Lead {
   isWhatsAppSame: boolean;
   whatsappNumber?: string;
   city: string;
-  isOnlyChild: boolean;
+  isOnlyChild: boolean | string;
   contactUrgenceLastName: string;
   contactUrgenceFirstName: string;
   contactUrgencePhoneNumber: string;
