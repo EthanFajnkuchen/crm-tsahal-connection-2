@@ -23,6 +23,7 @@ export class LeadService {
     const queryBuilder = this.leadRepository
       .createQueryBuilder('lead')
       .select([
+        'lead.ID',
         'lead.dateInscription',
         'lead.firstName',
         'lead.lastName',

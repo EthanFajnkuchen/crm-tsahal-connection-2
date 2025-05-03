@@ -1,22 +1,12 @@
 import { API_ROUTES } from "@/constants/api-routes";
+import { Lead } from "@/types/lead";
 
 const M2M_TOKEN = import.meta.env.VITE_API_M2M_TOKEN;
 
-export interface Lead {
-  id: string;
-  dateInscription: string;
-  email?: string;
-  firstName: string;
-  lastName: string;
-  statutCandidat: string;
-}
-
-export const searchLeads = async (searchInput: string): Promise<Lead[]> => {
+export const searchLeads = async (query: string): Promise<Lead[]> => {
   try {
     const response = await fetch(
-      `${API_ROUTES.DATA_TABLE_LEADS}search?input=${encodeURIComponent(
-        searchInput
-      )}`,
+      `${API_ROUTES.DATA_TABLE_LEADS}search?input=${encodeURIComponent(query)}`,
       {
         headers: {
           Authorization: `Bearer ${M2M_TOKEN}`,

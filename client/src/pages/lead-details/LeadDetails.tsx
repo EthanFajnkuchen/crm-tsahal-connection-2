@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useForm } from "react-hook-form";
 import { fetchLeadDetailsThunk } from "../../store/thunks/lead-details/lead-details.thunk";
 import { RootState, AppDispatch } from "../../store/store";
+import { Lead } from "@/types/lead";
 import { FormInput } from "@/components/form-components/form-input";
 import {
   FormSection,
@@ -14,21 +15,6 @@ import { FormDropdown } from "@/components/form-components/form-dropdown";
 import { FormDatePicker } from "@/components/form-components/form-date-picker";
 import { RELATION } from "@/i18n/emergency-contact";
 
-interface LeadFormData {
-  firstName: string;
-  lastName: string;
-  dateInscription: string;
-  birthDate: string;
-  city: string;
-  gender: string;
-  isOnlyChild: boolean;
-  contactUrgenceFirstName: string;
-  contactUrgenceLastName: string;
-  contactUrgencePhoneNumber: string;
-  contactUrgenceMail: string;
-  contactUrgenceRelation: string;
-}
-
 const LeadDetailsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const dispatch = useDispatch<AppDispatch>();
@@ -38,7 +24,7 @@ const LeadDetailsPage: React.FC = () => {
     error,
   } = useSelector((state: RootState) => state.leadDetails);
   const [mode, setMode] = useState<"EDIT" | "VIEW">("VIEW");
-  const { control, reset, handleSubmit } = useForm<LeadFormData>();
+  const { control, reset, handleSubmit } = useForm<Partial<Lead>>();
 
   useEffect(() => {
     if (id) {
@@ -55,7 +41,7 @@ const LeadDetailsPage: React.FC = () => {
         birthDate: lead.birthDate,
         city: lead.city,
         gender: lead.gender || "",
-        isOnlyChild: Boolean(lead.isOnlyChild),
+        isOnlyChild: lead.isOnlyChild === "Oui" ? true : false,
         contactUrgenceFirstName: lead.contactUrgenceFirstName || "",
         contactUrgenceLastName: lead.contactUrgenceLastName || "",
         contactUrgencePhoneNumber: lead.contactUrgencePhoneNumber || "",
@@ -65,11 +51,13 @@ const LeadDetailsPage: React.FC = () => {
     }
   }, [lead, reset]);
 
+  console.log({ lead });
+
   const handleModeChange = () => {
     setMode(mode === "VIEW" ? "EDIT" : "VIEW");
   };
 
-  const handleSave = (data: LeadFormData) => {
+  const handleSave = (data: Partial<Lead>) => {
     console.log("Saving data:", data);
     // TODO: Implement save logic
     setMode("VIEW");
