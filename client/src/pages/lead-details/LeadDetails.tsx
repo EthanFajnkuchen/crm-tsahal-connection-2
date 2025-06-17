@@ -8,6 +8,7 @@ import { Lead } from "@/types/lead";
 import { GeneralSection } from "./components/general-section";
 import { ExpertConnectionSection } from "./components/expert-connection-section";
 import { JudaismNationalitySection } from "./components/judaism-nationality-section";
+import { EducationSection } from "./components/education-section";
 
 const LeadDetailsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -76,6 +77,7 @@ const LeadDetailsPage: React.FC = () => {
           <GeneralSection lead={lead} />
           <ExpertConnectionSection lead={lead} />
           <JudaismNationalitySection lead={lead} />
+          <EducationSection lead={lead} />
         </>
       )}
     </div>
