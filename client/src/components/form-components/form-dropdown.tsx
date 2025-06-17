@@ -63,7 +63,7 @@ const FormDropdown = <T extends FieldValues>({
               <SelectContent>
                 {options.map((option) => (
                   <SelectItem key={option.value} value={option.value}>
-                    {option.label}
+                    {option.value}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -76,7 +76,7 @@ const FormDropdown = <T extends FieldValues>({
           name={name}
           render={({ field }) => (
             <p className="text-sm font-medium font-[Poppins]">
-              {options.find((opt) => opt.value === field.value)?.label || "-"}
+              {options.find((opt) => opt.value === field.value)?.value || "-"}
             </p>
           )}
         />

@@ -29,7 +29,7 @@ export interface Lead {
   contactUrgencePhoneNumber: string;
   contactUrgenceMail: string;
   contactUrgenceRelation: string;
-  statutLoiRetour: string;
+  StatutLoiRetour: string;
   conversionDate: string;
   conversionAgency: string;
   statutResidentIsrael: string;

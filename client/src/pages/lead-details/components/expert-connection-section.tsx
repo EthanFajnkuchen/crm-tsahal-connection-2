@@ -53,7 +53,6 @@ export const ExpertConnectionSection = ({
     },
   });
 
-  // 👇 On regarde les valeurs ACTUELLES du form (pas juste lead)
   const produitEC1 = watch("produitEC1");
   const dateProduitEC1 = watch("dateProduitEC1");
   const produitEC2 = watch("produitEC2");
