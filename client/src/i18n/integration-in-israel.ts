@@ -1,4 +1,4 @@
-export const INTEGRTION_IN_ISRAEL = {
+export const INTEGRATION_IN_ISRAEL = {
   age_get_in_israel: [
     { value: "Avant mes 14 ans", displayName: "Avant mes 14 ans" },
     { value: "Après mes 14 ans", displayName: "Après mes 14 ans" },
