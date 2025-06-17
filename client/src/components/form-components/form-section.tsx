@@ -28,7 +28,7 @@ const FormSubSection: React.FC<FormSubSectionProps> = ({
   return (
     <div className="space-y-4">
       <h4 className="text-xl font-medium text-black font-[Poppins]">{title}</h4>
-      <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1  lg:grid-cols-3 gap-4">
         {React.Children.map(children, (child) => {
           if (React.isValidElement<FormChildProps>(child)) {
             return React.cloneElement(child, { mode });
