@@ -40,6 +40,11 @@ export const EducationSection = ({ lead }: EducationSectionProps) => {
   const jewishSchool = useWatch({ control, name: "jewishSchool" });
   const israeliBacSchool = useWatch({ control, name: "israeliBacSchool" });
   const otherSchoolName = useWatch({ control, name: "otherSchoolName" });
+  const academicDiploma = useWatch({ control, name: "academicDiploma" });
+  const higherEducationCountry = useWatch({
+    control,
+    name: "higherEducationCountry",
+  });
 
   const handleModeChange = () => {
     setMode((prevMode) => (prevMode === "VIEW" ? "EDIT" : "VIEW"));
@@ -65,7 +70,7 @@ export const EducationSection = ({ lead }: EducationSectionProps) => {
         onSave={handleSubmit(handleSave)}
         onCancel={handleCancel}
       >
-        <FormSubSection>
+        <FormSubSection title="Enseignement secondaire">
           <FormDropdown
             control={control}
             name="bacObtention"
@@ -167,6 +172,67 @@ export const EducationSection = ({ lead }: EducationSectionProps) => {
             }
           />
           {/**Fin Parcours Français*/}
+        </FormSubSection>
+        <FormSubSection title="Enseignement supérieure/académique">
+          <FormDropdown
+            control={control}
+            name="academicDiploma"
+            label="Obtention diplome supérieure/académique"
+            mode={mode}
+            options={EDUCATION.has_higher_education.map((option) => ({
+              value: option.value,
+              label: option.displayName,
+            }))}
+          />
+          <FormDropdown
+            control={control}
+            name="higherEducationCountry"
+            label="Pays d'enseignement supérieur"
+            mode={mode}
+            options={EDUCATION.country_higher_education.map((option) => ({
+              value: option.value,
+              label: option.displayName,
+            }))}
+            hidden={academicDiploma === "Non"}
+          />
+          <FormInput
+            control={control}
+            name="universityNameHebrew"
+            label="Nom universite en hebreu"
+            mode={mode}
+            hidden={
+              academicDiploma === "Non" || higherEducationCountry !== "Israël"
+            }
+          />
+          <FormInput
+            control={control}
+            name="diplomaNameHebrew"
+            label="Nom diplome en hebreu"
+            mode={mode}
+            hidden={
+              academicDiploma === "Non" || higherEducationCountry !== "Israël"
+            }
+          />
+          <FormInput
+            control={control}
+            name="universityNameFrench"
+            label="Nom universite en français"
+            mode={mode}
+            hidden={
+              academicDiploma === "Non" ||
+              higherEducationCountry !== "À l'étranger"
+            }
+          />
+          <FormInput
+            control={control}
+            name="diplomaNameFrench"
+            label="Nom diplome en français"
+            mode={mode}
+            hidden={
+              academicDiploma === "Non" ||
+              higherEducationCountry !== "À l'étranger"
+            }
+          />
         </FormSubSection>
       </FormSection>
     </form>
