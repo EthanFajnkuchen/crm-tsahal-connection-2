@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { useForm } from "react-hook-form";
@@ -10,6 +10,7 @@ import { ExpertConnectionSection } from "./components/expert-connection-section"
 import { JudaismNationalitySection } from "./components/judaism-nationality-section";
 import { EducationSection } from "./components/education-section";
 import { IntegrationIsraelSection } from "./components/integration-israel-section";
+import { TsahalSection } from "./components/tsahal-section";
 
 const LeadDetailsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -53,6 +54,57 @@ const LeadDetailsPage: React.FC = () => {
         dateProduitEC3: lead.dateProduitEC3 || "",
         dateProduitEC4: lead.dateProduitEC4 || "",
         dateProduitEC5: lead.dateProduitEC5 || "",
+        bacObtention: lead.bacObtention || "",
+        bacCountry: lead.bacCountry || "",
+        bacType: lead.bacType || "",
+        israeliBacSchool: lead.israeliBacSchool || "",
+        frenchBacSchoolIsrael: lead.frenchBacSchoolIsrael || "",
+        otherSchoolName: lead.otherSchoolName || "",
+        jewishSchool: lead.jewishSchool || "",
+        frenchBacSchoolFrance: lead.frenchBacSchoolFrance || "",
+        academicDiploma: lead.academicDiploma || "",
+        higherEducationCountry: lead.higherEducationCountry || "",
+        universityNameHebrew: lead.universityNameHebrew || "",
+        diplomaNameHebrew: lead.diplomaNameHebrew || "",
+        universityNameFrench: lead.universityNameFrench || "",
+        diplomaNameFrench: lead.diplomaNameFrench || "",
+        StatutLoiRetour: lead.StatutLoiRetour || "",
+        conversionDate: lead.conversionDate || "",
+        conversionAgency: lead.conversionAgency || "",
+        statutResidentIsrael: lead.statutResidentIsrael || "",
+        anneeAlyah: lead.anneeAlyah || "",
+        numberOfNationalities: lead.numberOfNationalities || "",
+        nationality1: lead.nationality1 || "",
+        passportNumber1: lead.passportNumber1 || "",
+        nationality2: lead.nationality2 || "",
+        passportNumber2: lead.passportNumber2 || "",
+        nationality3: lead.nationality3 || "",
+        passportNumber3: lead.passportNumber3 || "",
+        hasIsraeliID: lead.hasIsraeliID || "",
+        arrivalAge: lead.arrivalAge || "",
+        programParticipation: lead.programParticipation || "",
+        programName: lead.programName || "",
+        schoolYears: lead.schoolYears || "",
+        armyDeferralProgram: lead.armyDeferralProgram || "",
+        programNameHebrewArmyDeferral: lead.programNameHebrewArmyDeferral || "",
+        soldierAloneStatus: lead.soldierAloneStatus || "",
+        serviceType: lead.serviceType || "",
+        mahalPath: lead.mahalPath || "",
+        studyPath: lead.studyPath || "",
+        tsavRishonStatus: lead.tsavRishonStatus || "",
+        recruitmentCenter: lead.recruitmentCenter || "",
+        tsavRishonDate: lead.tsavRishonDate || "",
+        tsavRishonGradesReceived: lead.tsavRishonGradesReceived || "",
+        daparNote: lead.daparNote || "",
+        medicalProfile: lead.medicalProfile || "",
+        hebrewScore: lead.hebrewScore || "",
+        yomHameaStatus: lead.yomHameaStatus || "",
+        yomHameaDate: lead.yomHameaDate || "",
+        yomSayerotStatus: lead.yomSayerotStatus || "",
+        yomSayerotDate: lead.yomSayerotDate || "",
+        armyEntryDateStatus: lead.armyEntryDateStatus || "",
+        giyusDate: lead.giyusDate || "",
+        michveAlonTraining: lead.michveAlonTraining || "",
       });
     }
   }, [lead, reset]);
@@ -80,6 +132,7 @@ const LeadDetailsPage: React.FC = () => {
           <JudaismNationalitySection lead={lead} />
           <EducationSection lead={lead} />
           <IntegrationIsraelSection lead={lead} />
+          <TsahalSection lead={lead} />
         </>
       )}
     </div>
