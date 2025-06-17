@@ -51,7 +51,9 @@ const FormSection: React.FC<FormSectionProps> = ({
   return (
     <div className="bg-white m-3 p-4 rounded-2xl">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-2xl font-semibold font-[Poppins]">{title}</h3>
+        <h3 className="text-2xl font-semibold font-[Poppins] text-[#601886]">
+          {title}
+        </h3>
         <div className="flex gap-2">
           {mode === "VIEW" ? (
             <Button
