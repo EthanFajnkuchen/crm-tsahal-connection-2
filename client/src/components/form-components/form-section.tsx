@@ -1,5 +1,6 @@
 import * as React from "react";
 import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 
 interface FormSectionProps {
   title: string;
@@ -8,6 +9,7 @@ interface FormSectionProps {
   onModeChange?: () => void;
   onSave?: () => void;
   onCancel?: () => void;
+  isLoading?: boolean;
 }
 
 interface FormSubSectionProps {
@@ -47,6 +49,7 @@ const FormSection: React.FC<FormSectionProps> = ({
   onModeChange,
   onSave,
   onCancel,
+  isLoading = false,
 }) => {
   return (
     <div className="bg-white m-3 p-4 rounded-2xl">
@@ -73,6 +76,7 @@ const FormSection: React.FC<FormSectionProps> = ({
                 onClick={onCancel}
                 className="h-8 border"
                 type="button"
+                disabled={isLoading}
               >
                 Annuler
               </Button>
@@ -82,8 +86,16 @@ const FormSection: React.FC<FormSectionProps> = ({
                 onClick={onSave}
                 className="h-8 border bg-purple-600 text-white hover:bg-purple-700 hover:text-white"
                 type="submit"
+                disabled={isLoading}
               >
-                Sauvegarder
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Sauvegarde...
+                  </>
+                ) : (
+                  "Sauvegarder"
+                )}
               </Button>
             </>
           )}

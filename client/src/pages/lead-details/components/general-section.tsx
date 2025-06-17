@@ -10,12 +10,20 @@ import { FormDropdown } from "@/components/form-components/form-dropdown";
 import { FormDatePicker } from "@/components/form-components/form-date-picker";
 import { RELATION } from "@/i18n/emergency-contact";
 import { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "@/store/store";
+import { updateLeadThunk } from "@/store/thunks/lead-details/lead-details.thunk";
 
 interface GeneralSectionProps {
   lead: Lead;
 }
 
 export const GeneralSection = ({ lead }: GeneralSectionProps) => {
+  const dispatch = useDispatch<AppDispatch>();
+  const { isUpdating, updateStatus, updateError } = useSelector(
+    (state: RootState) => state.leadDetails
+  );
+
   const [mode, setMode] = useState<"EDIT" | "VIEW">("VIEW");
   const { control, handleSubmit, reset } = useForm<Partial<Lead>>({
     defaultValues: {
@@ -38,10 +46,25 @@ export const GeneralSection = ({ lead }: GeneralSectionProps) => {
     setMode((prevMode) => (prevMode === "VIEW" ? "EDIT" : "VIEW"));
   };
 
-  const handleSave = (data: Partial<Lead>) => {
-    console.log("Saving data:", data);
-    // TODO: Implement save logic
-    setMode("VIEW");
+  const handleSave = async (data: Partial<Lead>) => {
+    try {
+      // Convert boolean isOnlyChild back to string format expected by the API
+      const formattedData = {
+        ...data,
+        isOnlyChild: data.isOnlyChild ? "Oui" : "Non",
+      };
+
+      await dispatch(
+        updateLeadThunk({
+          id: lead.ID.toString(),
+          updateData: formattedData,
+        })
+      ).unwrap();
+
+      setMode("VIEW");
+    } catch (error) {
+      console.error("Failed to update lead:", error);
+    }
   };
 
   const handleCancel = () => {
@@ -57,6 +80,7 @@ export const GeneralSection = ({ lead }: GeneralSectionProps) => {
         onModeChange={handleModeChange}
         onSave={handleSubmit(handleSave)}
         onCancel={handleCancel}
+        isLoading={isUpdating}
       >
         <FormSubSection title="Informations générales">
           <FormDatePicker
@@ -139,6 +163,12 @@ export const GeneralSection = ({ lead }: GeneralSectionProps) => {
             }))}
           />
         </FormSubSection>
+
+        {updateError && (
+          <div className="text-red-500 text-sm mt-2">
+            Erreur lors de la mise à jour: {updateError}
+          </div>
+        )}
       </FormSection>
     </form>
   );

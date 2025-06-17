@@ -1,5 +1,8 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { fetchLeadDetailsThunk } from "../../thunks/lead-details/lead-details.thunk";
+import {
+  fetchLeadDetailsThunk,
+  updateLeadThunk,
+} from "../../thunks/lead-details/lead-details.thunk";
 import { LeadDetails } from "../../adapters/lead-details/lead-details.adapter";
 
 interface LeadDetailsState {
@@ -7,6 +10,9 @@ interface LeadDetailsState {
   status: "idle" | "loading" | "succeeded" | "failed";
   isLoading: boolean;
   error: string | null;
+  updateStatus: "idle" | "loading" | "succeeded" | "failed";
+  isUpdating: boolean;
+  updateError: string | null;
 }
 
 const initialState: LeadDetailsState = {
@@ -14,6 +20,9 @@ const initialState: LeadDetailsState = {
   status: "idle",
   isLoading: false,
   error: null,
+  updateStatus: "idle",
+  isUpdating: false,
+  updateError: null,
 };
 
 const leadDetailsSlice = createSlice({
@@ -35,6 +44,21 @@ const leadDetailsSlice = createSlice({
         state.isLoading = false;
         state.status = "failed";
         state.error = action.error.message ?? "Failed to fetch lead details";
+      })
+      .addCase(updateLeadThunk.pending, (state) => {
+        state.isUpdating = true;
+        state.updateStatus = "loading";
+        state.updateError = null;
+      })
+      .addCase(updateLeadThunk.fulfilled, (state, action) => {
+        state.isUpdating = false;
+        state.updateStatus = "succeeded";
+        state.data = action.payload;
+      })
+      .addCase(updateLeadThunk.rejected, (state, action) => {
+        state.isUpdating = false;
+        state.updateStatus = "failed";
+        state.updateError = action.error.message ?? "Failed to update lead";
       });
   },
 });
