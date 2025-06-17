@@ -730,6 +730,7 @@ export class LeadService {
   }
 
   async updateLead(leadId: string, updateData: UpdateLeadDto): Promise<Lead> {
+    console.log(updateData);
     if (!leadId) {
       throw new BadRequestException('ID is required');
     }
@@ -748,6 +749,7 @@ export class LeadService {
 
       // Sauvegarder les modifications
       const updatedLead = await this.leadRepository.save(existingLead);
+      console.log(updatedLead);
 
       return updatedLead;
     } catch (error) {

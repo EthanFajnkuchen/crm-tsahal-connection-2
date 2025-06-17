@@ -13,6 +13,7 @@ import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
 import { updateLeadThunk } from "@/store/thunks/lead-details/lead-details.thunk";
+import { toast } from "sonner";
 
 interface GeneralSectionProps {
   lead: Lead;
@@ -48,7 +49,6 @@ export const GeneralSection = ({ lead }: GeneralSectionProps) => {
 
   const handleSave = async (data: Partial<Lead>) => {
     try {
-      // Convert boolean isOnlyChild back to string format expected by the API
       const formattedData = {
         ...data,
         isOnlyChild: data.isOnlyChild ? "Oui" : "Non",
@@ -61,9 +61,11 @@ export const GeneralSection = ({ lead }: GeneralSectionProps) => {
         })
       ).unwrap();
 
+      toast.success("Le lead a été modifié avec succès");
       setMode("VIEW");
     } catch (error) {
       console.error("Failed to update lead:", error);
+      toast.error("Erreur lors de la modification du lead");
     }
   };
 
@@ -163,12 +165,6 @@ export const GeneralSection = ({ lead }: GeneralSectionProps) => {
             }))}
           />
         </FormSubSection>
-
-        {updateError && (
-          <div className="text-red-500 text-sm mt-2">
-            Erreur lors de la mise à jour: {updateError}
-          </div>
-        )}
       </FormSection>
     </form>
   );

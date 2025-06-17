@@ -6,6 +6,7 @@ import { Auth0Provider } from "@auth0/auth0-react";
 import { Provider } from "react-redux";
 import { store } from "@/store/store.ts";
 import AuthWrapper from "./AuthWrapper.tsx";
+import { Toaster } from "@/components/ui/sonner";
 
 createRoot(document.getElementById("root")!).render(
   <Auth0Provider
@@ -27,6 +28,7 @@ createRoot(document.getElementById("root")!).render(
     <Provider store={store}>
       <AuthWrapper>
         <App />
+        <Toaster />
       </AuthWrapper>
     </Provider>
   </Auth0Provider>

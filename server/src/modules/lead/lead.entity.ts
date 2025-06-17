@@ -74,8 +74,8 @@ export class Lead {
   @Column({ length: 100 })
   city: string;
 
-  @Column()
-  isOnlyChild: boolean;
+  @Column({ length: 5 })
+  isOnlyChild: string;
 
   @Column({ length: 100 })
   contactUrgenceLastName: string;
