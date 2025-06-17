@@ -93,7 +93,7 @@ export const JudaismNationalitySection = ({
             name="conversionDate"
             label="Date de conversion"
             mode={mode}
-            hidden={statutLoiRetour === "Juif"}
+            hidden={statutLoiRetour !== "Juif converti"}
           />
           <FormDropdown
             control={control}
@@ -104,7 +104,7 @@ export const JudaismNationalitySection = ({
               value: option.value,
               label: option.displayName,
             }))}
-            hidden={statutLoiRetour === "Juif"}
+            hidden={statutLoiRetour !== "Juif converti"}
           />
         </FormSubSection>
 

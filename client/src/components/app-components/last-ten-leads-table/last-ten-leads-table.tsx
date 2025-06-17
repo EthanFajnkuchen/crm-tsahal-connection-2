@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { AppDispatch, RootState } from "@/store/store";
 import { fetchLastTenLeadsThunk } from "@/store/thunks/dashboard/last-ten-leads.thunk";
 import { Lead } from "@/types/lead";
@@ -56,6 +57,7 @@ const columns: ColumnDef<Lead, unknown>[] = [
 
 export function LastTenLeadTable() {
   const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
 
   const {
     data: lastTenLeads,
@@ -67,6 +69,12 @@ export function LastTenLeadTable() {
     dispatch(fetchLastTenLeadsThunk());
   }, [dispatch]);
 
+  const handleRowClick = (lead: any) => {
+    if (lead.ID) {
+      navigate(`/lead-details/${lead.ID}`);
+    }
+  };
+
   return (
     <div className="">
       <DataTable
@@ -74,6 +82,7 @@ export function LastTenLeadTable() {
         data={lastTenLeads || []}
         isLoading={isLoading}
         error={error}
+        onRowClick={handleRowClick}
       />
     </div>
   );
