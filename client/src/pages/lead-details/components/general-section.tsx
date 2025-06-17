@@ -1,4 +1,4 @@
-import { Control, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { Lead } from "@/types/lead";
 import { FormInput } from "@/components/form-components/form-input";
 import {
