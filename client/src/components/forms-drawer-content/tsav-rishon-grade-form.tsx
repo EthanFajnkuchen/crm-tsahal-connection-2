@@ -105,7 +105,7 @@ const TsavRishonDrawerContent = (closeDrawer: () => void): React.ReactNode => {
                       <Button
                         variant="outline"
                         role="combobox"
-                        className="w-full justify-between font-normal text-left font-medium"
+                        className="w-full justify-between text-left font-medium"
                       >
                         {leadsValue.length > 0
                           ? `${leadsValue.length} sélectionné(s)`
