@@ -120,7 +120,7 @@ function Calendar({
         Caption: CustomCaption,
       }}
       fromYear={1900}
-      toYear={new Date().getFullYear()}
+      toYear={new Date().getFullYear() + 40}
       {...props}
     />
   );
