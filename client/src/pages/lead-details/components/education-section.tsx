@@ -19,9 +19,9 @@ interface EducationSectionProps {
 
 export const EducationSection = ({ lead }: EducationSectionProps) => {
   const dispatch = useDispatch<AppDispatch>();
-  const { isUpdating } = useSelector((state: RootState) => state.leadDetails);
 
   const [mode, setMode] = useState<"EDIT" | "VIEW">("VIEW");
+  const [localIsLoading, setLocalIsLoading] = useState(false);
   const { control, handleSubmit, reset } = useForm<Partial<Lead>>({
     defaultValues: {
       bacObtention: lead.bacObtention || "",
@@ -77,6 +77,7 @@ export const EducationSection = ({ lead }: EducationSectionProps) => {
   };
 
   const handleSave = async (data: Partial<Lead>) => {
+    setLocalIsLoading(true);
     try {
       await dispatch(
         updateLeadThunk({
@@ -90,6 +91,8 @@ export const EducationSection = ({ lead }: EducationSectionProps) => {
     } catch (error) {
       console.error("Failed to update lead:", error);
       toast.error("Erreur lors de la modification du lead");
+    } finally {
+      setLocalIsLoading(false);
     }
   };
 
@@ -106,7 +109,7 @@ export const EducationSection = ({ lead }: EducationSectionProps) => {
         onModeChange={handleModeChange}
         onSave={handleSubmit(handleSave)}
         onCancel={handleCancel}
-        isLoading={isUpdating}
+        isLoading={localIsLoading}
       >
         <FormSubSection title="Enseignement secondaire">
           <FormDropdown
@@ -118,6 +121,7 @@ export const EducationSection = ({ lead }: EducationSectionProps) => {
               value: option.value,
               label: option.displayName,
             }))}
+            isLoading={localIsLoading}
           />
           <FormDropdown
             control={control}
@@ -129,6 +133,7 @@ export const EducationSection = ({ lead }: EducationSectionProps) => {
               label: option.displayName,
             }))}
             hidden={bacObtention === "Non"}
+            isLoading={localIsLoading}
           />
           {/** Parcours Israelien*/}
           <FormDropdown
@@ -141,6 +146,7 @@ export const EducationSection = ({ lead }: EducationSectionProps) => {
               label: option.displayName,
             }))}
             hidden={bacObtention === "Non" || bacCountry !== "Israel"}
+            isLoading={localIsLoading}
           />
           <FormDropdown
             control={control}
@@ -156,6 +162,7 @@ export const EducationSection = ({ lead }: EducationSectionProps) => {
               bacCountry !== "Israel" ||
               bacType !== "BAC israélien"
             }
+            isLoading={localIsLoading}
           />
           <FormInput
             control={control}
@@ -168,6 +175,7 @@ export const EducationSection = ({ lead }: EducationSectionProps) => {
               bacType !== "BAC israélien" ||
               otherSchoolName !== israeliBacSchool
             }
+            isLoading={localIsLoading}
           />
           <FormDropdown
             control={control}
@@ -183,6 +191,7 @@ export const EducationSection = ({ lead }: EducationSectionProps) => {
               bacCountry !== "Israel" ||
               bacType !== "BAC étranger"
             }
+            isLoading={localIsLoading}
           />
           {/**Fin Parcours Israelien*/}
 
@@ -197,6 +206,7 @@ export const EducationSection = ({ lead }: EducationSectionProps) => {
               label: option.displayName,
             }))}
             hidden={bacObtention === "Non" || bacCountry !== "Étranger"}
+            isLoading={localIsLoading}
           />
           <FormInput
             control={control}
@@ -208,6 +218,7 @@ export const EducationSection = ({ lead }: EducationSectionProps) => {
               bacCountry !== "Étranger" ||
               jewishSchool !== "Oui"
             }
+            isLoading={localIsLoading}
           />
           {/**Fin Parcours Français*/}
         </FormSubSection>
@@ -221,6 +232,7 @@ export const EducationSection = ({ lead }: EducationSectionProps) => {
               value: option.value,
               label: option.displayName,
             }))}
+            isLoading={localIsLoading}
           />
           <FormDropdown
             control={control}
@@ -232,6 +244,7 @@ export const EducationSection = ({ lead }: EducationSectionProps) => {
               label: option.displayName,
             }))}
             hidden={academicDiploma === "Non"}
+            isLoading={localIsLoading}
           />
           <FormInput
             control={control}
@@ -241,6 +254,7 @@ export const EducationSection = ({ lead }: EducationSectionProps) => {
             hidden={
               academicDiploma === "Non" || higherEducationCountry !== "Israël"
             }
+            isLoading={localIsLoading}
           />
           <FormInput
             control={control}
@@ -250,6 +264,7 @@ export const EducationSection = ({ lead }: EducationSectionProps) => {
             hidden={
               academicDiploma === "Non" || higherEducationCountry !== "Israël"
             }
+            isLoading={localIsLoading}
           />
           <FormInput
             control={control}
@@ -260,6 +275,7 @@ export const EducationSection = ({ lead }: EducationSectionProps) => {
               academicDiploma === "Non" ||
               higherEducationCountry !== "À l'étranger"
             }
+            isLoading={localIsLoading}
           />
           <FormInput
             control={control}
@@ -270,6 +286,7 @@ export const EducationSection = ({ lead }: EducationSectionProps) => {
               academicDiploma === "Non" ||
               higherEducationCountry !== "À l'étranger"
             }
+            isLoading={localIsLoading}
           />
         </FormSubSection>
       </FormSection>

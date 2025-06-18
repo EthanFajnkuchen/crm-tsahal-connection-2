@@ -21,11 +21,9 @@ interface GeneralSectionProps {
 
 export const GeneralSection = ({ lead }: GeneralSectionProps) => {
   const dispatch = useDispatch<AppDispatch>();
-  const { isUpdating, updateStatus, updateError } = useSelector(
-    (state: RootState) => state.leadDetails
-  );
 
   const [mode, setMode] = useState<"EDIT" | "VIEW">("VIEW");
+  const [localIsLoading, setLocalIsLoading] = useState(false);
   const { control, handleSubmit, reset } = useForm<Partial<Lead>>({
     defaultValues: {
       firstName: lead.firstName,
@@ -65,6 +63,7 @@ export const GeneralSection = ({ lead }: GeneralSectionProps) => {
   };
 
   const handleSave = async (data: Partial<Lead>) => {
+    setLocalIsLoading(true);
     try {
       const formattedData = {
         ...data,
@@ -83,6 +82,8 @@ export const GeneralSection = ({ lead }: GeneralSectionProps) => {
     } catch (error) {
       console.error("Failed to update lead:", error);
       toast.error("Erreur lors de la modification du lead");
+    } finally {
+      setLocalIsLoading(false);
     }
   };
 
@@ -99,7 +100,7 @@ export const GeneralSection = ({ lead }: GeneralSectionProps) => {
         onModeChange={handleModeChange}
         onSave={handleSubmit(handleSave)}
         onCancel={handleCancel}
-        isLoading={isUpdating}
+        isLoading={localIsLoading}
       >
         <FormSubSection title="Informations générales">
           <FormDatePicker
@@ -108,20 +109,29 @@ export const GeneralSection = ({ lead }: GeneralSectionProps) => {
             label="Date d'inscription"
             mode={mode}
             readOnly={true}
+            isLoading={localIsLoading}
           />
           <FormInput
             control={control}
             name="firstName"
             label="Prénom"
             mode={mode}
+            isLoading={localIsLoading}
           />
           <FormInput
             control={control}
             name="lastName"
             label="Nom"
             mode={mode}
+            isLoading={localIsLoading}
           />
-          <FormInput control={control} name="city" label="Ville" mode={mode} />
+          <FormInput
+            control={control}
+            name="city"
+            label="Ville"
+            mode={mode}
+            isLoading={localIsLoading}
+          />
           <FormDropdown
             control={control}
             name="gender"
@@ -131,18 +141,21 @@ export const GeneralSection = ({ lead }: GeneralSectionProps) => {
               { value: "Masculin", label: "Masculin" },
               { value: "Féminin", label: "Féminin" },
             ]}
+            isLoading={localIsLoading}
           />
           <FormDatePicker
             control={control}
             name="birthDate"
             label="Date de naissance"
             mode={mode}
+            isLoading={localIsLoading}
           />
           <FormCheckbox
             control={control}
             name="isOnlyChild"
             label="Enfant unique"
             mode={mode}
+            isLoading={localIsLoading}
           />
         </FormSubSection>
 
@@ -152,24 +165,28 @@ export const GeneralSection = ({ lead }: GeneralSectionProps) => {
             name="contactUrgenceFirstName"
             label="Prénom"
             mode={mode}
+            isLoading={localIsLoading}
           />
           <FormInput
             control={control}
             name="contactUrgenceLastName"
             label="Nom"
             mode={mode}
+            isLoading={localIsLoading}
           />
           <FormInput
             control={control}
             name="contactUrgencePhoneNumber"
             label="Numéro de téléphone"
             mode={mode}
+            isLoading={localIsLoading}
           />
           <FormInput
             control={control}
             name="contactUrgenceMail"
             label="Email"
             mode={mode}
+            isLoading={localIsLoading}
           />
           <FormDropdown
             control={control}
@@ -180,6 +197,7 @@ export const GeneralSection = ({ lead }: GeneralSectionProps) => {
               value: option.value,
               label: option.displayName,
             }))}
+            isLoading={localIsLoading}
           />
         </FormSubSection>
       </FormSection>

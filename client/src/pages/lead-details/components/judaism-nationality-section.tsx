@@ -24,9 +24,9 @@ export const JudaismNationalitySection = ({
   lead,
 }: JudaismNationalitySectionProps) => {
   const dispatch = useDispatch<AppDispatch>();
-  const { isUpdating } = useSelector((state: RootState) => state.leadDetails);
 
   const [mode, setMode] = useState<"EDIT" | "VIEW">("VIEW");
+  const [localIsLoading, setLocalIsLoading] = useState(false);
   const { control, handleSubmit, reset } = useForm<Partial<Lead>>({
     defaultValues: {
       StatutLoiRetour: lead.StatutLoiRetour || "",
@@ -83,6 +83,7 @@ export const JudaismNationalitySection = ({
   };
 
   const handleSave = async (data: Partial<Lead>) => {
+    setLocalIsLoading(true);
     try {
       await dispatch(
         updateLeadThunk({
@@ -96,6 +97,8 @@ export const JudaismNationalitySection = ({
     } catch (error) {
       console.error("Failed to update lead:", error);
       toast.error("Erreur lors de la modification du lead");
+    } finally {
+      setLocalIsLoading(false);
     }
   };
 
@@ -112,7 +115,7 @@ export const JudaismNationalitySection = ({
         onModeChange={handleModeChange}
         onSave={handleSubmit(handleSave)}
         onCancel={handleCancel}
-        isLoading={isUpdating}
+        isLoading={localIsLoading}
       >
         <FormSubSection title="Religion">
           <FormDropdown
@@ -124,6 +127,7 @@ export const JudaismNationalitySection = ({
               value: option.value,
               label: option.displayName,
             }))}
+            isLoading={localIsLoading}
           />
           <FormDatePicker
             control={control}
@@ -131,6 +135,7 @@ export const JudaismNationalitySection = ({
             label="Date de conversion"
             mode={mode}
             hidden={statutLoiRetour !== "Juif converti"}
+            isLoading={localIsLoading}
           />
           <FormDropdown
             control={control}
@@ -142,6 +147,7 @@ export const JudaismNationalitySection = ({
               label: option.displayName,
             }))}
             hidden={statutLoiRetour !== "Juif converti"}
+            isLoading={localIsLoading}
           />
         </FormSubSection>
 
@@ -155,6 +161,7 @@ export const JudaismNationalitySection = ({
               value: option.value,
               label: option.displayName,
             }))}
+            isLoading={localIsLoading}
           />
           <FormInput
             control={control}
@@ -166,6 +173,7 @@ export const JudaismNationalitySection = ({
                 statutResidentIsrael || ""
               )
             }
+            isLoading={localIsLoading}
           />
           <FormDropdown
             control={control}
@@ -176,6 +184,7 @@ export const JudaismNationalitySection = ({
               value: option.value.toString(),
               label: option.displayName,
             }))}
+            isLoading={localIsLoading}
           />
           <FormDropdown
             control={control}
@@ -186,12 +195,14 @@ export const JudaismNationalitySection = ({
               value: option.value,
               label: option.displayName,
             }))}
+            isLoading={localIsLoading}
           />
           <FormInput
             control={control}
             name="passportNumber1"
             label="Numéro de passeport 1"
             mode={mode}
+            isLoading={localIsLoading}
           />
           <FormDropdown
             control={control}
@@ -203,6 +214,7 @@ export const JudaismNationalitySection = ({
               label: option.displayName,
             }))}
             hidden={numberOfNationalities === "1"}
+            isLoading={localIsLoading}
           />
           <FormInput
             control={control}
@@ -210,6 +222,7 @@ export const JudaismNationalitySection = ({
             label="Numéro de passeport 2"
             mode={mode}
             hidden={numberOfNationalities === "1"}
+            isLoading={localIsLoading}
           />
           <FormDropdown
             control={control}
@@ -223,6 +236,7 @@ export const JudaismNationalitySection = ({
             hidden={
               numberOfNationalities === "1" || numberOfNationalities === "2"
             }
+            isLoading={localIsLoading}
           />
 
           <FormInput
@@ -233,6 +247,7 @@ export const JudaismNationalitySection = ({
             hidden={
               numberOfNationalities === "1" || numberOfNationalities === "2"
             }
+            isLoading={localIsLoading}
           />
         </FormSubSection>
       </FormSection>

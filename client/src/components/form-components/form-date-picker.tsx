@@ -13,6 +13,7 @@ import { format, parseISO, parse, isValid } from "date-fns";
 import { fr } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type Mode = "EDIT" | "VIEW";
 
@@ -27,6 +28,8 @@ interface FormDatePickerProps<T extends FieldValues> {
   hidden?: boolean;
   fromYear?: number;
   toYear?: number;
+  required?: boolean;
+  isLoading?: boolean;
 }
 
 // Separate component to handle the input logic with hooks
@@ -253,8 +256,19 @@ const FormDatePicker = <T extends FieldValues>({
   hidden = false,
   fromYear = 1900,
   toYear = new Date().getFullYear() + 40,
+  required = false,
+  isLoading = false,
 }: FormDatePickerProps<T>) => {
   if (hidden) return null;
+
+  if (isLoading) {
+    return (
+      <div className="space-y-2">
+        <Skeleton className="h-4 w-20" />
+        <Skeleton className="h-10 w-full" />
+      </div>
+    );
+  }
 
   const formatDisplayDate = (dateString: string) => {
     return format(parseISO(dateString), "dd/MM/yyyy", { locale: fr });
@@ -313,6 +327,9 @@ const FormDatePicker = <T extends FieldValues>({
           )}
         >
           {label}
+          {mode === "EDIT" && required && (
+            <span className="text-red-500 ml-1">*</span>
+          )}
         </Label>
       )}
       {mode === "EDIT" ? (

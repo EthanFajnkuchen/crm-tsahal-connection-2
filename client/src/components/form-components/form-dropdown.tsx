@@ -2,6 +2,7 @@ import { Control, Controller, FieldValues, Path } from "react-hook-form";
 import { Label } from "@/components/ui/label";
 import { SingleSelect } from "@/components/ui/single-select";
 import { cn } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type Mode = "EDIT" | "VIEW";
 
@@ -14,6 +15,8 @@ interface FormDropdownProps<T extends FieldValues> {
   className?: string;
   options: { value: string; label: string }[];
   hidden?: boolean;
+  required?: boolean;
+  isLoading?: boolean;
 }
 
 const FormDropdown = <T extends FieldValues>({
@@ -25,8 +28,19 @@ const FormDropdown = <T extends FieldValues>({
   mode = "EDIT",
   options,
   hidden = false,
+  required = false,
+  isLoading = false,
 }: FormDropdownProps<T>) => {
   if (hidden) return null;
+
+  if (isLoading) {
+    return (
+      <div className="space-y-2">
+        <Skeleton className="h-4 w-20" />
+        <Skeleton className="h-10 w-full" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-2">
@@ -39,6 +53,9 @@ const FormDropdown = <T extends FieldValues>({
           )}
         >
           {label}
+          {mode === "EDIT" && required && (
+            <span className="text-red-500 ml-1">*</span>
+          )}
         </Label>
       )}
       {mode === "EDIT" ? (

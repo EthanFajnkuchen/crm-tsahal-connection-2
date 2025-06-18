@@ -3,6 +3,7 @@ import { Control, Controller, FieldValues, Path } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type Mode = "EDIT" | "VIEW";
 
@@ -15,6 +16,7 @@ interface FormInputProps<T extends FieldValues>
   mode?: Mode;
   hidden?: boolean;
   className?: string;
+  isLoading?: boolean;
 }
 
 const FormInput = <T extends FieldValues>({
@@ -25,9 +27,19 @@ const FormInput = <T extends FieldValues>({
   className,
   mode = "EDIT",
   hidden = false,
+  isLoading = false,
   ...props
 }: FormInputProps<T>) => {
   if (hidden) return null;
+
+  if (isLoading) {
+    return (
+      <div className="space-y-2">
+        <Skeleton className="h-4 w-20" />
+        <Skeleton className="h-10 w-full" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-2">

@@ -21,9 +21,9 @@ export const IntegrationIsraelSection = ({
   lead,
 }: IntegrationIsraelSectionProps) => {
   const dispatch = useDispatch<AppDispatch>();
-  const { isUpdating } = useSelector((state: RootState) => state.leadDetails);
 
   const [mode, setMode] = useState<"EDIT" | "VIEW">("VIEW");
+  const [localIsLoading, setLocalIsLoading] = useState(false);
   const { control, handleSubmit, reset } = useForm<Partial<Lead>>({
     defaultValues: {
       arrivalAge: lead.arrivalAge || "",
@@ -65,6 +65,7 @@ export const IntegrationIsraelSection = ({
   };
 
   const handleSave = async (data: Partial<Lead>) => {
+    setLocalIsLoading(true);
     try {
       await dispatch(
         updateLeadThunk({
@@ -78,6 +79,8 @@ export const IntegrationIsraelSection = ({
     } catch (error) {
       console.error("Failed to update lead:", error);
       toast.error("Erreur lors de la modification du lead");
+    } finally {
+      setLocalIsLoading(false);
     }
   };
 
@@ -94,7 +97,7 @@ export const IntegrationIsraelSection = ({
         onModeChange={handleModeChange}
         onSave={handleSubmit(handleSave)}
         onCancel={handleCancel}
-        isLoading={isUpdating}
+        isLoading={localIsLoading}
       >
         <FormSubSection>
           <FormDropdown
@@ -106,6 +109,7 @@ export const IntegrationIsraelSection = ({
               value: option.value,
               label: option.displayName,
             }))}
+            isLoading={localIsLoading}
           />
           <FormDropdown
             control={control}
@@ -119,6 +123,7 @@ export const IntegrationIsraelSection = ({
               })
             )}
             hidden={arrivalAge !== "Après mes 14 ans"}
+            isLoading={localIsLoading}
           />
           <FormDropdown
             control={control}
@@ -142,6 +147,7 @@ export const IntegrationIsraelSection = ({
               ].includes(programParticipation ?? "") ||
               arrivalAge !== "Après mes 14 ans"
             }
+            isLoading={localIsLoading}
           />
           <FormInput
             control={control}
@@ -161,6 +167,7 @@ export const IntegrationIsraelSection = ({
               ].includes(programParticipation ?? "") ||
               arrivalAge !== "Après mes 14 ans"
             }
+            isLoading={localIsLoading}
           />
           <FormDropdown
             control={control}
@@ -173,6 +180,7 @@ export const IntegrationIsraelSection = ({
                 label: option.displayName,
               })
             )}
+            isLoading={localIsLoading}
           />
           <FormInput
             control={control}
@@ -184,6 +192,7 @@ export const IntegrationIsraelSection = ({
                 armyDeferralProgram ?? ""
               )
             }
+            isLoading={localIsLoading}
           />
         </FormSubSection>
       </FormSection>

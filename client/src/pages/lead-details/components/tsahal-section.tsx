@@ -19,9 +19,9 @@ interface TsahalSectionProps {
 
 export const TsahalSection = ({ lead }: TsahalSectionProps) => {
   const dispatch = useDispatch<AppDispatch>();
-  const { isUpdating } = useSelector((state: RootState) => state.leadDetails);
 
   const [mode, setMode] = useState<"EDIT" | "VIEW">("VIEW");
+  const [localIsLoading, setLocalIsLoading] = useState(false);
   const { control, handleSubmit, reset } = useForm<Partial<Lead>>({
     defaultValues: {
       soldierAloneStatus: lead.soldierAloneStatus || "",
@@ -102,6 +102,7 @@ export const TsahalSection = ({ lead }: TsahalSectionProps) => {
   };
 
   const handleSave = async (data: Partial<Lead>) => {
+    setLocalIsLoading(true);
     try {
       await dispatch(
         updateLeadThunk({
@@ -115,6 +116,8 @@ export const TsahalSection = ({ lead }: TsahalSectionProps) => {
     } catch (error) {
       console.error("Failed to update lead:", error);
       toast.error("Erreur lors de la modification du lead");
+    } finally {
+      setLocalIsLoading(false);
     }
   };
 
@@ -131,7 +134,7 @@ export const TsahalSection = ({ lead }: TsahalSectionProps) => {
         onModeChange={handleModeChange}
         onSave={handleSubmit(handleSave)}
         onCancel={handleCancel}
-        isLoading={isUpdating}
+        isLoading={localIsLoading}
       >
         <FormSubSection>
           <FormDropdown
@@ -143,6 +146,7 @@ export const TsahalSection = ({ lead }: TsahalSectionProps) => {
               value: option.value,
               label: option.displayName,
             }))}
+            isLoading={localIsLoading}
           />
           <FormDropdown
             control={control}
@@ -153,6 +157,7 @@ export const TsahalSection = ({ lead }: TsahalSectionProps) => {
               value: option.value,
               label: option.displayName,
             }))}
+            isLoading={localIsLoading}
           />
           <FormDropdown
             control={control}
@@ -164,6 +169,7 @@ export const TsahalSection = ({ lead }: TsahalSectionProps) => {
               label: option.displayName,
             }))}
             hidden={serviceType !== "Mahal"}
+            isLoading={localIsLoading}
           />
           <FormDropdown
             control={control}
@@ -175,6 +181,7 @@ export const TsahalSection = ({ lead }: TsahalSectionProps) => {
               label: option.displayName,
             }))}
             hidden={serviceType !== "Service complet"}
+            isLoading={localIsLoading}
           />
           <FormDropdown
             control={control}
@@ -185,6 +192,7 @@ export const TsahalSection = ({ lead }: TsahalSectionProps) => {
               value: option.value,
               label: option.displayName,
             }))}
+            isLoading={localIsLoading}
           />
           <FormDropdown
             control={control}
@@ -196,6 +204,7 @@ export const TsahalSection = ({ lead }: TsahalSectionProps) => {
               label: option.displayName,
             }))}
             hidden={tsavRishonStatus !== "Oui"}
+            isLoading={localIsLoading}
           />
           <FormDatePicker
             control={control}
@@ -203,6 +212,7 @@ export const TsahalSection = ({ lead }: TsahalSectionProps) => {
             label="Date Tsav Rishon"
             mode={mode}
             hidden={tsavRishonStatus !== "Oui"}
+            isLoading={localIsLoading}
           />
           <FormDropdown
             control={control}
@@ -214,6 +224,7 @@ export const TsahalSection = ({ lead }: TsahalSectionProps) => {
               label: option.displayName,
             }))}
             hidden={tsavRishonStatus !== "Oui"}
+            isLoading={localIsLoading}
           />
           <FormDropdown
             control={control}
@@ -225,6 +236,7 @@ export const TsahalSection = ({ lead }: TsahalSectionProps) => {
               label: option.displayName,
             }))}
             hidden={tsavRishonGradesReceived !== "Oui"}
+            isLoading={localIsLoading}
           />
           <FormDropdown
             control={control}
@@ -236,6 +248,7 @@ export const TsahalSection = ({ lead }: TsahalSectionProps) => {
               label: option.displayName,
             }))}
             hidden={tsavRishonGradesReceived !== "Oui"}
+            isLoading={localIsLoading}
           />
           <FormDropdown
             control={control}
@@ -247,6 +260,7 @@ export const TsahalSection = ({ lead }: TsahalSectionProps) => {
               label: option.displayName,
             }))}
             hidden={tsavRishonGradesReceived !== "Oui"}
+            isLoading={localIsLoading}
           />
           <FormDropdown
             control={control}
@@ -257,6 +271,7 @@ export const TsahalSection = ({ lead }: TsahalSectionProps) => {
               value: option.value,
               label: option.displayName,
             }))}
+            isLoading={localIsLoading}
           />
           <FormDatePicker
             control={control}
@@ -264,6 +279,7 @@ export const TsahalSection = ({ lead }: TsahalSectionProps) => {
             label="Date Yom Hamea"
             mode={mode}
             hidden={yomHameaStatus !== "Oui"}
+            isLoading={localIsLoading}
           />
           <FormDropdown
             control={control}
@@ -274,6 +290,7 @@ export const TsahalSection = ({ lead }: TsahalSectionProps) => {
               value: option.value,
               label: option.displayName,
             }))}
+            isLoading={localIsLoading}
           />
           <FormDatePicker
             control={control}
@@ -281,6 +298,7 @@ export const TsahalSection = ({ lead }: TsahalSectionProps) => {
             label="Date Yom Sayerot"
             mode={mode}
             hidden={yomSayerotStatus !== "Oui"}
+            isLoading={localIsLoading}
           />
           <FormDropdown
             control={control}
@@ -291,6 +309,7 @@ export const TsahalSection = ({ lead }: TsahalSectionProps) => {
               value: option.value,
               label: option.displayName,
             }))}
+            isLoading={localIsLoading}
           />
           <FormDatePicker
             control={control}
@@ -298,6 +317,7 @@ export const TsahalSection = ({ lead }: TsahalSectionProps) => {
             label="Date Giyus"
             mode={mode}
             hidden={armyEntryDateStatus !== "Oui"}
+            isLoading={localIsLoading}
           />
           <FormDropdown
             control={control}
@@ -309,6 +329,7 @@ export const TsahalSection = ({ lead }: TsahalSectionProps) => {
               label: option.displayName,
             }))}
             hidden={armyEntryDateStatus !== "Oui"}
+            isLoading={localIsLoading}
           />
         </FormSubSection>
       </FormSection>

@@ -1,4 +1,4 @@
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { Lead } from "@/types/lead";
 import {
   FormSection,
@@ -39,13 +39,18 @@ export const ExpertConnectionSection = ({
   lead,
 }: ExpertConnectionSectionProps) => {
   const dispatch = useDispatch<AppDispatch>();
-  const { isUpdating, updateStatus, updateError } = useSelector(
-    (state: RootState) => state.leadDetails
-  );
 
   const [mode, setMode] = useState<"EDIT" | "VIEW">("VIEW");
+  const [localIsLoading, setLocalIsLoading] = useState(false);
 
-  const { control, handleSubmit, reset, watch } = useForm<Partial<Lead>>({
+  const {
+    control,
+    handleSubmit,
+    reset,
+    watch,
+    formState: { errors, isValid },
+  } = useForm<Partial<Lead>>({
+    mode: "onChange",
     defaultValues: {
       expertConnection: lead.expertConnection || "",
       produitEC1: lead.produitEC1 || "",
@@ -78,6 +83,7 @@ export const ExpertConnectionSection = ({
     });
   }, [lead, reset]);
 
+  const expertConnection = watch("expertConnection");
   const produitEC1 = watch("produitEC1");
   const dateProduitEC1 = watch("dateProduitEC1");
   const produitEC2 = watch("produitEC2");
@@ -89,11 +95,40 @@ export const ExpertConnectionSection = ({
   const produitEC5 = watch("produitEC5");
   const dateProduitEC5 = watch("dateProduitEC5");
 
+  // Helper function to determine if a field is required
+  const isFieldRequired = (fieldName: string) => {
+    switch (fieldName) {
+      case "produitEC1":
+        return expertConnection === "Oui";
+      case "dateProduitEC1":
+        return expertConnection === "Oui" || !!produitEC1;
+      case "produitEC2":
+        return !!dateProduitEC2;
+      case "dateProduitEC2":
+        return !!produitEC2;
+      case "produitEC3":
+        return !!dateProduitEC3;
+      case "dateProduitEC3":
+        return !!produitEC3;
+      case "produitEC4":
+        return !!dateProduitEC4;
+      case "dateProduitEC4":
+        return !!produitEC4;
+      case "produitEC5":
+        return !!dateProduitEC5;
+      case "dateProduitEC5":
+        return !!produitEC5;
+      default:
+        return false;
+    }
+  };
+
   const handleModeChange = () => {
     setMode("EDIT");
   };
 
   const handleSave = async (data: Partial<Lead>) => {
+    setLocalIsLoading(true);
     try {
       await dispatch(
         updateLeadThunk({
@@ -107,6 +142,8 @@ export const ExpertConnectionSection = ({
     } catch (error) {
       console.error("Failed to update lead:", error);
       toast.error("Erreur lors de la modification du lead");
+    } finally {
+      setLocalIsLoading(false);
     }
   };
 
@@ -123,7 +160,8 @@ export const ExpertConnectionSection = ({
         onModeChange={handleModeChange}
         onSave={handleSubmit(handleSave)}
         onCancel={handleCancel}
-        isLoading={isUpdating}
+        isLoading={localIsLoading}
+        saveDisabled={!isValid}
       >
         <FormSubSection>
           <FormDropdown
@@ -135,118 +173,288 @@ export const ExpertConnectionSection = ({
               { value: "Oui", label: "Oui" },
               { value: "Non", label: "Non" },
             ]}
+            isLoading={localIsLoading}
           />
 
-          <FormDropdown
+          <Controller
             control={control}
             name="produitEC1"
-            label="Produit 1"
-            mode={mode}
-            options={expertConnectionOptions}
-            hidden={mode === "VIEW" && !produitEC1 && !dateProduitEC1}
+            rules={{
+              validate: (value, formValues) => {
+                if (formValues.expertConnection === "Oui" && !value) {
+                  return "Ce champ est obligatoire";
+                }
+                return true;
+              },
+            }}
+            render={({ field }) => (
+              <FormDropdown
+                control={control}
+                name="produitEC1"
+                label="Produit 1"
+                mode={mode}
+                options={expertConnectionOptions}
+                required={isFieldRequired("produitEC1")}
+                hidden={mode === "VIEW" && !produitEC1 && !dateProduitEC1}
+                isLoading={localIsLoading}
+              />
+            )}
           />
-          <FormDatePicker
+
+          <Controller
             control={control}
             name="dateProduitEC1"
-            label="Date Produit 1"
-            mode={mode}
-            hidden={mode === "VIEW" && !produitEC1 && !dateProduitEC1}
+            rules={{
+              validate: (value, formValues) => {
+                if (
+                  (formValues.expertConnection === "Oui" ||
+                    formValues.produitEC1) &&
+                  !value
+                ) {
+                  return "Ce champ est obligatoire";
+                }
+                return true;
+              },
+            }}
+            render={({ field }) => (
+              <FormDatePicker
+                control={control}
+                name="dateProduitEC1"
+                label="Date Produit 1"
+                mode={mode}
+                required={isFieldRequired("dateProduitEC1")}
+                hidden={mode === "VIEW" && !produitEC1 && !dateProduitEC1}
+                isLoading={localIsLoading}
+              />
+            )}
           />
 
-          <FormDropdown
+          <Controller
             control={control}
             name="produitEC2"
-            label="Produit 2"
-            mode={mode}
-            options={expertConnectionOptions}
-            hidden={
-              mode === "VIEW"
-                ? !produitEC2 && !dateProduitEC2
-                : !produitEC1 && !dateProduitEC1
-            }
+            rules={{
+              validate: (value, formValues) => {
+                if (formValues.dateProduitEC2 && !value) {
+                  return "Ce champ est obligatoire";
+                }
+                return true;
+              },
+            }}
+            render={({ field }) => (
+              <FormDropdown
+                control={control}
+                name="produitEC2"
+                label="Produit 2"
+                mode={mode}
+                options={expertConnectionOptions}
+                required={isFieldRequired("produitEC2")}
+                hidden={
+                  mode === "VIEW"
+                    ? !produitEC2 && !dateProduitEC2
+                    : !produitEC1 && !dateProduitEC1
+                }
+                isLoading={localIsLoading}
+              />
+            )}
           />
-          <FormDatePicker
+
+          <Controller
             control={control}
             name="dateProduitEC2"
-            label="Date Produit 2"
-            mode={mode}
-            hidden={
-              mode === "VIEW"
-                ? !produitEC2 && !dateProduitEC2
-                : !produitEC1 && !dateProduitEC1
-            }
+            rules={{
+              validate: (value, formValues) => {
+                if (formValues.produitEC2 && !value) {
+                  return "Ce champ est obligatoire";
+                }
+                return true;
+              },
+            }}
+            render={({ field }) => (
+              <FormDatePicker
+                control={control}
+                name="dateProduitEC2"
+                label="Date Produit 2"
+                mode={mode}
+                required={isFieldRequired("dateProduitEC2")}
+                hidden={
+                  mode === "VIEW"
+                    ? !produitEC2 && !dateProduitEC2
+                    : !produitEC1 && !dateProduitEC1
+                }
+                isLoading={localIsLoading}
+              />
+            )}
           />
 
-          <FormDropdown
+          <Controller
             control={control}
             name="produitEC3"
-            label="Produit 3"
-            mode={mode}
-            options={expertConnectionOptions}
-            hidden={
-              mode === "VIEW"
-                ? !produitEC3 && !dateProduitEC3
-                : !produitEC2 && !dateProduitEC2
-            }
+            rules={{
+              validate: (value, formValues) => {
+                if (formValues.dateProduitEC3 && !value) {
+                  return "Ce champ est obligatoire";
+                }
+                return true;
+              },
+            }}
+            render={({ field }) => (
+              <FormDropdown
+                control={control}
+                name="produitEC3"
+                label="Produit 3"
+                mode={mode}
+                options={expertConnectionOptions}
+                required={isFieldRequired("produitEC3")}
+                hidden={
+                  mode === "VIEW"
+                    ? !produitEC3 && !dateProduitEC3
+                    : !produitEC2 && !dateProduitEC2
+                }
+                isLoading={localIsLoading}
+              />
+            )}
           />
-          <FormDatePicker
+
+          <Controller
             control={control}
             name="dateProduitEC3"
-            label="Date Produit 3"
-            mode={mode}
-            hidden={
-              mode === "VIEW"
-                ? !produitEC3 && !dateProduitEC3
-                : !produitEC2 && !dateProduitEC2
-            }
+            rules={{
+              validate: (value, formValues) => {
+                if (formValues.produitEC3 && !value) {
+                  return "Ce champ est obligatoire";
+                }
+                return true;
+              },
+            }}
+            render={({ field }) => (
+              <FormDatePicker
+                control={control}
+                name="dateProduitEC3"
+                label="Date Produit 3"
+                mode={mode}
+                required={isFieldRequired("dateProduitEC3")}
+                hidden={
+                  mode === "VIEW"
+                    ? !produitEC3 && !dateProduitEC3
+                    : !produitEC2 && !dateProduitEC2
+                }
+                isLoading={localIsLoading}
+              />
+            )}
           />
 
-          <FormDropdown
+          <Controller
             control={control}
             name="produitEC4"
-            label="Produit 4"
-            mode={mode}
-            options={expertConnectionOptions}
-            hidden={
-              mode === "VIEW"
-                ? !produitEC4 && !dateProduitEC4
-                : !produitEC3 && !dateProduitEC3
-            }
-          />
-          <FormDatePicker
-            control={control}
-            name="dateProduitEC4"
-            label="Date Produit 4"
-            mode={mode}
-            hidden={
-              mode === "VIEW"
-                ? !produitEC4 && !dateProduitEC4
-                : !produitEC3 && !dateProduitEC3
-            }
+            rules={{
+              validate: (value, formValues) => {
+                if (formValues.dateProduitEC4 && !value) {
+                  return "Ce champ est obligatoire";
+                }
+                return true;
+              },
+            }}
+            render={({ field }) => (
+              <FormDropdown
+                control={control}
+                name="produitEC4"
+                label="Produit 4"
+                mode={mode}
+                options={expertConnectionOptions}
+                required={isFieldRequired("produitEC4")}
+                hidden={
+                  mode === "VIEW"
+                    ? !produitEC4 && !dateProduitEC4
+                    : !produitEC3 && !dateProduitEC3
+                }
+                isLoading={localIsLoading}
+              />
+            )}
           />
 
-          <FormDropdown
+          <Controller
+            control={control}
+            name="dateProduitEC4"
+            rules={{
+              validate: (value, formValues) => {
+                if (formValues.produitEC4 && !value) {
+                  return "Ce champ est obligatoire";
+                }
+                return true;
+              },
+            }}
+            render={({ field }) => (
+              <FormDatePicker
+                control={control}
+                name="dateProduitEC4"
+                label="Date Produit 4"
+                mode={mode}
+                required={isFieldRequired("dateProduitEC4")}
+                hidden={
+                  mode === "VIEW"
+                    ? !produitEC4 && !dateProduitEC4
+                    : !produitEC3 && !dateProduitEC3
+                }
+                isLoading={localIsLoading}
+              />
+            )}
+          />
+
+          <Controller
             control={control}
             name="produitEC5"
-            label="Produit 5"
-            mode={mode}
-            options={expertConnectionOptions}
-            hidden={
-              mode === "VIEW"
-                ? !produitEC5 && !dateProduitEC5
-                : !produitEC4 && !dateProduitEC4
-            }
+            rules={{
+              validate: (value, formValues) => {
+                if (formValues.dateProduitEC5 && !value) {
+                  return "Ce champ est obligatoire";
+                }
+                return true;
+              },
+            }}
+            render={({ field }) => (
+              <FormDropdown
+                control={control}
+                name="produitEC5"
+                label="Produit 5"
+                mode={mode}
+                options={expertConnectionOptions}
+                required={isFieldRequired("produitEC5")}
+                hidden={
+                  mode === "VIEW"
+                    ? !produitEC5 && !dateProduitEC5
+                    : !produitEC4 && !dateProduitEC4
+                }
+                isLoading={localIsLoading}
+              />
+            )}
           />
-          <FormDatePicker
+
+          <Controller
             control={control}
             name="dateProduitEC5"
-            label="Date Produit 5"
-            mode={mode}
-            hidden={
-              mode === "VIEW"
-                ? !produitEC5 && !dateProduitEC5
-                : !produitEC4 && !dateProduitEC4
-            }
+            rules={{
+              validate: (value, formValues) => {
+                if (formValues.produitEC5 && !value) {
+                  return "Ce champ est obligatoire";
+                }
+                return true;
+              },
+            }}
+            render={({ field }) => (
+              <FormDatePicker
+                control={control}
+                name="dateProduitEC5"
+                label="Date Produit 5"
+                mode={mode}
+                required={isFieldRequired("dateProduitEC5")}
+                hidden={
+                  mode === "VIEW"
+                    ? !produitEC5 && !dateProduitEC5
+                    : !produitEC4 && !dateProduitEC4
+                }
+                isLoading={localIsLoading}
+              />
+            )}
           />
         </FormSubSection>
       </FormSection>

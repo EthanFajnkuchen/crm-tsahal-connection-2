@@ -10,6 +10,7 @@ interface FormSectionProps {
   onSave?: () => void;
   onCancel?: () => void;
   isLoading?: boolean;
+  saveDisabled?: boolean;
 }
 
 interface FormSubSectionProps {
@@ -50,6 +51,7 @@ const FormSection: React.FC<FormSectionProps> = ({
   onSave,
   onCancel,
   isLoading = false,
+  saveDisabled = false,
 }) => {
   return (
     <div className="bg-white m-3 p-4 rounded-2xl">
@@ -86,7 +88,7 @@ const FormSection: React.FC<FormSectionProps> = ({
                 onClick={onSave}
                 className="h-8 border bg-purple-600 text-white hover:bg-purple-700 hover:text-white"
                 type="submit"
-                disabled={isLoading}
+                disabled={isLoading || saveDisabled}
               >
                 {isLoading ? (
                   <>

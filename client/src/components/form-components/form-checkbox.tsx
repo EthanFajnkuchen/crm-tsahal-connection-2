@@ -1,6 +1,7 @@
 import { Control, Controller, FieldValues, Path } from "react-hook-form";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type Mode = "EDIT" | "VIEW";
 
@@ -12,6 +13,7 @@ interface FormCheckboxProps<T extends FieldValues> {
   mode?: Mode;
   className?: string;
   hidden?: boolean;
+  isLoading?: boolean;
 }
 
 const FormCheckbox = <T extends FieldValues>({
@@ -21,8 +23,18 @@ const FormCheckbox = <T extends FieldValues>({
   error,
   mode = "EDIT",
   hidden = false,
+  isLoading = false,
 }: FormCheckboxProps<T>) => {
   if (hidden) return null;
+
+  if (isLoading) {
+    return (
+      <div className="space-y-2">
+        <Skeleton className="h-4 w-20" />
+        <Skeleton className="h-5 w-5" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-2">
