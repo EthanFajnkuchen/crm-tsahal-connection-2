@@ -1,12 +1,6 @@
 import { Control, Controller, FieldValues, Path } from "react-hook-form";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { SingleSelect } from "@/components/ui/single-select";
 import { cn } from "@/lib/utils";
 
 type Mode = "EDIT" | "VIEW";
@@ -52,22 +46,13 @@ const FormDropdown = <T extends FieldValues>({
           control={control}
           name={name}
           render={({ field }) => (
-            <Select
+            <SingleSelect
+              options={options}
               value={field.value}
-              onValueChange={field.onChange}
-              disabled={mode !== "EDIT"}
-            >
-              <SelectTrigger id={name} className={className}>
-                <SelectValue placeholder="Sélectionner" />
-              </SelectTrigger>
-              <SelectContent>
-                {options.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.value}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              onChange={field.onChange}
+              placeholder="Sélectionner"
+              className={className}
+            />
           )}
         />
       ) : (

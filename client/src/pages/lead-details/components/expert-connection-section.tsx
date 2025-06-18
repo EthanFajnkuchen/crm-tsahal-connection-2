@@ -7,6 +7,10 @@ import {
 import { FormDropdown } from "@/components/form-components/form-dropdown";
 import { FormDatePicker } from "@/components/form-components/form-date-picker";
 import { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "@/store/store";
+import { updateLeadThunk } from "@/store/thunks/lead-details/lead-details.thunk";
+import { toast } from "sonner";
 
 interface ExpertConnectionSectionProps {
   lead: Lead;
@@ -29,12 +33,17 @@ const expertConnectionOptions = [
     value: "Orientation individuelle sur les postes",
     label: "Orientation individuelle sur les postes",
   },
-  { value: "vide", label: "Vide" },
+{ value: "null", label: "Vide" },
 ];
 
 export const ExpertConnectionSection = ({
   lead,
 }: ExpertConnectionSectionProps) => {
+  const dispatch = useDispatch<AppDispatch>();
+  const { isUpdating, updateStatus, updateError } = useSelector(
+    (state: RootState) => state.leadDetails
+  );
+
   const [mode, setMode] = useState<"EDIT" | "VIEW">("VIEW");
 
   const { control, handleSubmit, reset, watch } = useForm<Partial<Lead>>({
@@ -68,10 +77,21 @@ export const ExpertConnectionSection = ({
     setMode("EDIT");
   };
 
-  const handleSave = (data: Partial<Lead>) => {
-    console.log("Saving data:", data);
-    // TODO: Implement save logic
-    setMode("VIEW");
+  const handleSave = async (data: Partial<Lead>) => {
+    try {
+      await dispatch(
+        updateLeadThunk({
+          id: lead.ID.toString(),
+          updateData: data,
+        })
+      ).unwrap();
+
+      toast.success("Le lead a été modifié avec succès");
+      setMode("VIEW");
+    } catch (error) {
+      console.error("Failed to update lead:", error);
+      toast.error("Erreur lors de la modification du lead");
+    }
   };
 
   const handleCancel = () => {
@@ -87,12 +107,14 @@ export const ExpertConnectionSection = ({
         onModeChange={handleModeChange}
         onSave={handleSubmit(handleSave)}
         onCancel={handleCancel}
+        isLoading={isUpdating}
       >
         <FormSubSection>
           <FormDropdown
             control={control}
             name="expertConnection"
             label="Expert Connection"
+            mode={mode}
             options={[
               { value: "Oui", label: "Oui" },
               { value: "Non", label: "Non" },
@@ -103,6 +125,7 @@ export const ExpertConnectionSection = ({
             control={control}
             name="produitEC1"
             label="Produit 1"
+            mode={mode}
             options={expertConnectionOptions}
             hidden={mode === "VIEW" && !produitEC1 && !dateProduitEC1}
           />
@@ -110,6 +133,7 @@ export const ExpertConnectionSection = ({
             control={control}
             name="dateProduitEC1"
             label="Date Produit 1"
+            mode={mode}
             hidden={mode === "VIEW" && !produitEC1 && !dateProduitEC1}
           />
 
@@ -117,6 +141,7 @@ export const ExpertConnectionSection = ({
             control={control}
             name="produitEC2"
             label="Produit 2"
+            mode={mode}
             options={expertConnectionOptions}
             hidden={
               mode === "VIEW"
@@ -128,6 +153,7 @@ export const ExpertConnectionSection = ({
             control={control}
             name="dateProduitEC2"
             label="Date Produit 2"
+            mode={mode}
             hidden={
               mode === "VIEW"
                 ? !produitEC2 && !dateProduitEC2
@@ -139,6 +165,7 @@ export const ExpertConnectionSection = ({
             control={control}
             name="produitEC3"
             label="Produit 3"
+            mode={mode}
             options={expertConnectionOptions}
             hidden={
               mode === "VIEW"
@@ -150,6 +177,7 @@ export const ExpertConnectionSection = ({
             control={control}
             name="dateProduitEC3"
             label="Date Produit 3"
+            mode={mode}
             hidden={
               mode === "VIEW"
                 ? !produitEC3 && !dateProduitEC3
@@ -161,6 +189,7 @@ export const ExpertConnectionSection = ({
             control={control}
             name="produitEC4"
             label="Produit 4"
+            mode={mode}
             options={expertConnectionOptions}
             hidden={
               mode === "VIEW"
@@ -172,6 +201,7 @@ export const ExpertConnectionSection = ({
             control={control}
             name="dateProduitEC4"
             label="Date Produit 4"
+            mode={mode}
             hidden={
               mode === "VIEW"
                 ? !produitEC4 && !dateProduitEC4
@@ -183,6 +213,7 @@ export const ExpertConnectionSection = ({
             control={control}
             name="produitEC5"
             label="Produit 5"
+            mode={mode}
             options={expertConnectionOptions}
             hidden={
               mode === "VIEW"
@@ -194,6 +225,7 @@ export const ExpertConnectionSection = ({
             control={control}
             name="dateProduitEC5"
             label="Date Produit 5"
+            mode={mode}
             hidden={
               mode === "VIEW"
                 ? !produitEC5 && !dateProduitEC5

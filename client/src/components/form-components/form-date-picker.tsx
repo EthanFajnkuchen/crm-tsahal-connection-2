@@ -87,11 +87,33 @@ const FormDatePicker = <T extends FieldValues>({
                   mode="single"
                   selected={field.value ? new Date(field.value) : undefined}
                   defaultMonth={field.value ? new Date(field.value) : undefined}
-                  onSelect={(date) =>
-                    date && field.onChange(formatValueDate(date))
-                  }
+                  onSelect={(date) => {
+                    if (date) {
+                      const selectedDateString = formatValueDate(date);
+                      // If the same date is clicked again, clear the field
+                      if (field.value === selectedDateString) {
+                        field.onChange("");
+                      } else {
+                        field.onChange(selectedDateString);
+                      }
+                    } else {
+                      field.onChange("");
+                    }
+                  }}
                   initialFocus
                 />
+                {field.value && (
+                  <div className="p-3 border-t">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full"
+                      onClick={() => field.onChange("")}
+                    >
+                      Effacer la date
+                    </Button>
+                  </div>
+                )}
               </PopoverContent>
             </Popover>
           )}

@@ -17,7 +17,7 @@ import type { FormValues } from "./types";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Button } from "../ui/button";
 import { Checkbox } from "../ui/checkbox";
-import { DeselectableSelect } from "../ui/desectable-select";
+import { SingleSelect } from "../ui/single-select";
 import { ChevronsUpDown } from "lucide-react";
 import {
   Command,
@@ -150,7 +150,6 @@ const TsavRishonDrawerContent = (closeDrawer: () => void): React.ReactNode => {
           }}
         />
 
-        {/* Note Dapar avec DeselectableSelect */}
         <FormField
           control={form.control}
           name="noteDapar"
@@ -158,7 +157,7 @@ const TsavRishonDrawerContent = (closeDrawer: () => void): React.ReactNode => {
             <FormItem>
               <FormLabel>Note Dapar</FormLabel>
               <FormControl>
-                <DeselectableSelect
+                <SingleSelect
                   options={daparOptions}
                   value={field.value}
                   onChange={field.onChange}
@@ -178,7 +177,7 @@ const TsavRishonDrawerContent = (closeDrawer: () => void): React.ReactNode => {
             <FormItem>
               <FormLabel>Simoul Ivrit</FormLabel>
               <FormControl>
-                <DeselectableSelect
+                <SingleSelect
                   options={hebrewOptions}
                   value={field.value}
                   onChange={field.onChange}
@@ -198,7 +197,7 @@ const TsavRishonDrawerContent = (closeDrawer: () => void): React.ReactNode => {
             <FormItem>
               <FormLabel>Profil médical</FormLabel>
               <FormControl>
-                <DeselectableSelect
+                <SingleSelect
                   options={medicalOptions}
                   value={field.value}
                   onChange={field.onChange}
