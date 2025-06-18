@@ -6,14 +6,21 @@ import {
   FormSubSection,
 } from "@/components/form-components/form-section";
 import { FormDropdown } from "@/components/form-components/form-dropdown";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { EDUCATION } from "@/i18n/education";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "@/store/store";
+import { updateLeadThunk } from "@/store/thunks/lead-details/lead-details.thunk";
+import { toast } from "sonner";
 
 interface EducationSectionProps {
   lead: Lead;
 }
 
 export const EducationSection = ({ lead }: EducationSectionProps) => {
+  const dispatch = useDispatch<AppDispatch>();
+  const { isUpdating } = useSelector((state: RootState) => state.leadDetails);
+
   const [mode, setMode] = useState<"EDIT" | "VIEW">("VIEW");
   const { control, handleSubmit, reset } = useForm<Partial<Lead>>({
     defaultValues: {
@@ -34,6 +41,25 @@ export const EducationSection = ({ lead }: EducationSectionProps) => {
     },
   });
 
+  useEffect(() => {
+    reset({
+      bacObtention: lead.bacObtention || "",
+      bacCountry: lead.bacCountry || "",
+      bacType: lead.bacType || "",
+      israeliBacSchool: lead.israeliBacSchool || "",
+      frenchBacSchoolIsrael: lead.frenchBacSchoolIsrael || "",
+      otherSchoolName: lead.otherSchoolName || "",
+      jewishSchool: lead.jewishSchool || "",
+      frenchBacSchoolFrance: lead.frenchBacSchoolFrance || "",
+      academicDiploma: lead.academicDiploma || "",
+      higherEducationCountry: lead.higherEducationCountry || "",
+      universityNameHebrew: lead.universityNameHebrew || "",
+      diplomaNameHebrew: lead.diplomaNameHebrew || "",
+      universityNameFrench: lead.universityNameFrench || "",
+      diplomaNameFrench: lead.diplomaNameFrench || "",
+    });
+  }, [lead, reset]);
+
   const bacObtention = useWatch({ control, name: "bacObtention" });
   const bacCountry = useWatch({ control, name: "bacCountry" });
   const bacType = useWatch({ control, name: "bacType" });
@@ -50,10 +76,21 @@ export const EducationSection = ({ lead }: EducationSectionProps) => {
     setMode((prevMode) => (prevMode === "VIEW" ? "EDIT" : "VIEW"));
   };
 
-  const handleSave = (data: Partial<Lead>) => {
-    console.log("Saving data:", data);
-    // TODO: Implement save logic
-    setMode("VIEW");
+  const handleSave = async (data: Partial<Lead>) => {
+    try {
+      await dispatch(
+        updateLeadThunk({
+          id: lead.ID.toString(),
+          updateData: data,
+        })
+      ).unwrap();
+
+      toast.success("Le lead a été modifié avec succès");
+      setMode("VIEW");
+    } catch (error) {
+      console.error("Failed to update lead:", error);
+      toast.error("Erreur lors de la modification du lead");
+    }
   };
 
   const handleCancel = () => {
@@ -69,6 +106,7 @@ export const EducationSection = ({ lead }: EducationSectionProps) => {
         onModeChange={handleModeChange}
         onSave={handleSubmit(handleSave)}
         onCancel={handleCancel}
+        isLoading={isUpdating}
       >
         <FormSubSection title="Enseignement secondaire">
           <FormDropdown

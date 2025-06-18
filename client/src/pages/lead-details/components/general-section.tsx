@@ -9,7 +9,7 @@ import { FormCheckbox } from "@/components/form-components/form-checkbox";
 import { FormDropdown } from "@/components/form-components/form-dropdown";
 import { FormDatePicker } from "@/components/form-components/form-date-picker";
 import { RELATION } from "@/i18n/emergency-contact";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
 import { updateLeadThunk } from "@/store/thunks/lead-details/lead-details.thunk";
@@ -42,6 +42,23 @@ export const GeneralSection = ({ lead }: GeneralSectionProps) => {
       contactUrgenceRelation: lead.contactUrgenceRelation || "",
     },
   });
+
+  useEffect(() => {
+    reset({
+      firstName: lead.firstName,
+      lastName: lead.lastName,
+      dateInscription: lead.dateInscription,
+      birthDate: lead.birthDate,
+      city: lead.city,
+      gender: lead.gender || "",
+      isOnlyChild: lead.isOnlyChild === "Oui" ? true : false,
+      contactUrgenceFirstName: lead.contactUrgenceFirstName || "",
+      contactUrgenceLastName: lead.contactUrgenceLastName || "",
+      contactUrgencePhoneNumber: lead.contactUrgencePhoneNumber || "",
+      contactUrgenceMail: lead.contactUrgenceMail || "",
+      contactUrgenceRelation: lead.contactUrgenceRelation || "",
+    });
+  }, [lead, reset]);
 
   const handleModeChange = () => {
     setMode((prevMode) => (prevMode === "VIEW" ? "EDIT" : "VIEW"));

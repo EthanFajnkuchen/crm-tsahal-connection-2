@@ -9,8 +9,12 @@ import { FormDropdown } from "@/components/form-components/form-dropdown";
 import { FormDatePicker } from "@/components/form-components/form-date-picker";
 import { JUDAISM } from "@/i18n/judaism";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { NATIONALITY } from "@/i18n/nationality";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "@/store/store";
+import { updateLeadThunk } from "@/store/thunks/lead-details/lead-details.thunk";
+import { toast } from "sonner";
 
 interface JudaismNationalitySectionProps {
   lead: Lead;
@@ -19,6 +23,9 @@ interface JudaismNationalitySectionProps {
 export const JudaismNationalitySection = ({
   lead,
 }: JudaismNationalitySectionProps) => {
+  const dispatch = useDispatch<AppDispatch>();
+  const { isUpdating } = useSelector((state: RootState) => state.leadDetails);
+
   const [mode, setMode] = useState<"EDIT" | "VIEW">("VIEW");
   const { control, handleSubmit, reset } = useForm<Partial<Lead>>({
     defaultValues: {
@@ -37,6 +44,24 @@ export const JudaismNationalitySection = ({
       hasIsraeliID: lead.hasIsraeliID || "",
     },
   });
+
+  useEffect(() => {
+    reset({
+      StatutLoiRetour: lead.StatutLoiRetour || "",
+      conversionDate: lead.conversionDate || "",
+      conversionAgency: lead.conversionAgency || "",
+      statutResidentIsrael: lead.statutResidentIsrael || "",
+      anneeAlyah: lead.anneeAlyah || "",
+      numberOfNationalities: lead.numberOfNationalities || "",
+      nationality1: lead.nationality1 || "",
+      passportNumber1: lead.passportNumber1 || "",
+      nationality2: lead.nationality2 || "",
+      passportNumber2: lead.passportNumber2 || "",
+      nationality3: lead.nationality3 || "",
+      passportNumber3: lead.passportNumber3 || "",
+      hasIsraeliID: lead.hasIsraeliID || "",
+    });
+  }, [lead, reset]);
 
   const statutLoiRetour = useWatch({ control, name: "StatutLoiRetour" });
   const statutResidentIsrael = useWatch({
@@ -57,10 +82,21 @@ export const JudaismNationalitySection = ({
     setMode((prevMode) => (prevMode === "VIEW" ? "EDIT" : "VIEW"));
   };
 
-  const handleSave = (data: Partial<Lead>) => {
-    console.log("Saving data:", data);
-    // TODO: Implement save logic
-    setMode("VIEW");
+  const handleSave = async (data: Partial<Lead>) => {
+    try {
+      await dispatch(
+        updateLeadThunk({
+          id: lead.ID.toString(),
+          updateData: data,
+        })
+      ).unwrap();
+
+      toast.success("Le lead a été modifié avec succès");
+      setMode("VIEW");
+    } catch (error) {
+      console.error("Failed to update lead:", error);
+      toast.error("Erreur lors de la modification du lead");
+    }
   };
 
   const handleCancel = () => {
@@ -76,6 +112,7 @@ export const JudaismNationalitySection = ({
         onModeChange={handleModeChange}
         onSave={handleSubmit(handleSave)}
         onCancel={handleCancel}
+        isLoading={isUpdating}
       >
         <FormSubSection title="Religion">
           <FormDropdown

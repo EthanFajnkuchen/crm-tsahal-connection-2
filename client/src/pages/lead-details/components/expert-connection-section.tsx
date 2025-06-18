@@ -6,7 +6,7 @@ import {
 } from "@/components/form-components/form-section";
 import { FormDropdown } from "@/components/form-components/form-dropdown";
 import { FormDatePicker } from "@/components/form-components/form-date-picker";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
 import { updateLeadThunk } from "@/store/thunks/lead-details/lead-details.thunk";
@@ -33,7 +33,6 @@ const expertConnectionOptions = [
     value: "Orientation individuelle sur les postes",
     label: "Orientation individuelle sur les postes",
   },
-{ value: "null", label: "Vide" },
 ];
 
 export const ExpertConnectionSection = ({
@@ -61,6 +60,23 @@ export const ExpertConnectionSection = ({
       dateProduitEC5: lead.dateProduitEC5 || "",
     },
   });
+
+  // Mettre à jour les valeurs du formulaire quand le lead change
+  useEffect(() => {
+    reset({
+      expertConnection: lead.expertConnection || "",
+      produitEC1: lead.produitEC1 || "",
+      produitEC2: lead.produitEC2 || "",
+      produitEC3: lead.produitEC3 || "",
+      produitEC4: lead.produitEC4 || "",
+      produitEC5: lead.produitEC5 || "",
+      dateProduitEC1: lead.dateProduitEC1 || "",
+      dateProduitEC2: lead.dateProduitEC2 || "",
+      dateProduitEC3: lead.dateProduitEC3 || "",
+      dateProduitEC4: lead.dateProduitEC4 || "",
+      dateProduitEC5: lead.dateProduitEC5 || "",
+    });
+  }, [lead, reset]);
 
   const produitEC1 = watch("produitEC1");
   const dateProduitEC1 = watch("dateProduitEC1");

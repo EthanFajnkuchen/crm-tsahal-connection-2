@@ -102,18 +102,6 @@ const FormDatePicker = <T extends FieldValues>({
                   }}
                   initialFocus
                 />
-                {field.value && (
-                  <div className="p-3 border-t">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="w-full"
-                      onClick={() => field.onChange("")}
-                    >
-                      Effacer la date
-                    </Button>
-                  </div>
-                )}
               </PopoverContent>
             </Popover>
           )}

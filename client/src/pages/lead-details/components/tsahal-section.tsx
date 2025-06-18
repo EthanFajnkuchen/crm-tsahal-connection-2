@@ -6,14 +6,21 @@ import {
 } from "@/components/form-components/form-section";
 import { FormDropdown } from "@/components/form-components/form-dropdown";
 import { FormDatePicker } from "@/components/form-components/form-date-picker";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { MILITARY } from "@/i18n/military";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "@/store/store";
+import { updateLeadThunk } from "@/store/thunks/lead-details/lead-details.thunk";
+import { toast } from "sonner";
 
 interface TsahalSectionProps {
   lead: Lead;
 }
 
 export const TsahalSection = ({ lead }: TsahalSectionProps) => {
+  const dispatch = useDispatch<AppDispatch>();
+  const { isUpdating } = useSelector((state: RootState) => state.leadDetails);
+
   const [mode, setMode] = useState<"EDIT" | "VIEW">("VIEW");
   const { control, handleSubmit, reset } = useForm<Partial<Lead>>({
     defaultValues: {
@@ -37,6 +44,29 @@ export const TsahalSection = ({ lead }: TsahalSectionProps) => {
       michveAlonTraining: lead.michveAlonTraining || "",
     },
   });
+
+  useEffect(() => {
+    reset({
+      soldierAloneStatus: lead.soldierAloneStatus || "",
+      serviceType: lead.serviceType || "",
+      mahalPath: lead.mahalPath || "",
+      studyPath: lead.studyPath || "",
+      tsavRishonStatus: lead.tsavRishonStatus || "",
+      recruitmentCenter: lead.recruitmentCenter || "",
+      tsavRishonDate: lead.tsavRishonDate || "",
+      tsavRishonGradesReceived: lead.tsavRishonGradesReceived || "",
+      daparNote: lead.daparNote || "",
+      medicalProfile: lead.medicalProfile || "",
+      hebrewScore: lead.hebrewScore || "",
+      yomHameaStatus: lead.yomHameaStatus || "",
+      yomHameaDate: lead.yomHameaDate || "",
+      yomSayerotStatus: lead.yomSayerotStatus || "",
+      yomSayerotDate: lead.yomSayerotDate || "",
+      armyEntryDateStatus: lead.armyEntryDateStatus || "",
+      giyusDate: lead.giyusDate || "",
+      michveAlonTraining: lead.michveAlonTraining || "",
+    });
+  }, [lead, reset]);
 
   const serviceType = useWatch({
     control,
@@ -71,10 +101,21 @@ export const TsahalSection = ({ lead }: TsahalSectionProps) => {
     setMode((prevMode) => (prevMode === "VIEW" ? "EDIT" : "VIEW"));
   };
 
-  const handleSave = (data: Partial<Lead>) => {
-    console.log("Saving data:", data);
-    // TODO: Implement save logic
-    setMode("VIEW");
+  const handleSave = async (data: Partial<Lead>) => {
+    try {
+      await dispatch(
+        updateLeadThunk({
+          id: lead.ID.toString(),
+          updateData: data,
+        })
+      ).unwrap();
+
+      toast.success("Le lead a été modifié avec succès");
+      setMode("VIEW");
+    } catch (error) {
+      console.error("Failed to update lead:", error);
+      toast.error("Erreur lors de la modification du lead");
+    }
   };
 
   const handleCancel = () => {
@@ -90,6 +131,7 @@ export const TsahalSection = ({ lead }: TsahalSectionProps) => {
         onModeChange={handleModeChange}
         onSave={handleSubmit(handleSave)}
         onCancel={handleCancel}
+        isLoading={isUpdating}
       >
         <FormSubSection>
           <FormDropdown

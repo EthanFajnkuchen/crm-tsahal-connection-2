@@ -67,7 +67,7 @@ export function SingleSelect({
           className={cn("w-full justify-between", className)}
         >
           {selectedValue
-            ? options.find((option) => option.value === selectedValue)?.label
+            ? options.find((option) => option.value === selectedValue)?.value
             : placeholder}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
@@ -92,7 +92,7 @@ export function SingleSelect({
                         : "opacity-0"
                     )}
                   />
-                  {option.label}
+                  {option.value}
                 </CommandItem>
               ))}
             </CommandGroup>

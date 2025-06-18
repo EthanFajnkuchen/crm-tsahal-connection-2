@@ -5,9 +5,13 @@ import {
   FormSubSection,
 } from "@/components/form-components/form-section";
 import { FormDropdown } from "@/components/form-components/form-dropdown";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { INTEGRATION_IN_ISRAEL } from "@/i18n/integration-in-israel";
 import { FormInput } from "@/components/form-components/form-input";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "@/store/store";
+import { updateLeadThunk } from "@/store/thunks/lead-details/lead-details.thunk";
+import { toast } from "sonner";
 
 interface IntegrationIsraelSectionProps {
   lead: Lead;
@@ -16,6 +20,9 @@ interface IntegrationIsraelSectionProps {
 export const IntegrationIsraelSection = ({
   lead,
 }: IntegrationIsraelSectionProps) => {
+  const dispatch = useDispatch<AppDispatch>();
+  const { isUpdating } = useSelector((state: RootState) => state.leadDetails);
+
   const [mode, setMode] = useState<"EDIT" | "VIEW">("VIEW");
   const { control, handleSubmit, reset } = useForm<Partial<Lead>>({
     defaultValues: {
@@ -27,6 +34,17 @@ export const IntegrationIsraelSection = ({
       programNameHebrewArmyDeferral: lead.programNameHebrewArmyDeferral || "",
     },
   });
+
+  useEffect(() => {
+    reset({
+      arrivalAge: lead.arrivalAge || "",
+      programParticipation: lead.programParticipation || "",
+      programName: lead.programName || "",
+      schoolYears: lead.schoolYears || "",
+      armyDeferralProgram: lead.armyDeferralProgram || "",
+      programNameHebrewArmyDeferral: lead.programNameHebrewArmyDeferral || "",
+    });
+  }, [lead, reset]);
 
   const programParticipation = useWatch({
     control,
@@ -46,10 +64,21 @@ export const IntegrationIsraelSection = ({
     setMode((prevMode) => (prevMode === "VIEW" ? "EDIT" : "VIEW"));
   };
 
-  const handleSave = (data: Partial<Lead>) => {
-    console.log("Saving data:", data);
-    // TODO: Implement save logic
-    setMode("VIEW");
+  const handleSave = async (data: Partial<Lead>) => {
+    try {
+      await dispatch(
+        updateLeadThunk({
+          id: lead.ID.toString(),
+          updateData: data,
+        })
+      ).unwrap();
+
+      toast.success("Le lead a été modifié avec succès");
+      setMode("VIEW");
+    } catch (error) {
+      console.error("Failed to update lead:", error);
+      toast.error("Erreur lors de la modification du lead");
+    }
   };
 
   const handleCancel = () => {
@@ -65,6 +94,7 @@ export const IntegrationIsraelSection = ({
         onModeChange={handleModeChange}
         onSave={handleSubmit(handleSave)}
         onCancel={handleCancel}
+        isLoading={isUpdating}
       >
         <FormSubSection>
           <FormDropdown
