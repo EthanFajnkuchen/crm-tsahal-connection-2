@@ -1,14 +1,7 @@
 import { API_ROUTES } from "@/constants/api-routes";
+import { Lead } from "@/types/lead";
 
 const M2M_TOKEN = import.meta.env.VITE_API_M2M_TOKEN;
-
-export interface Lead {
-  dateInscription: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  statutCandidat: string;
-}
 
 export const fetchLastTenLeads = async (): Promise<Lead[]> => {
   try {

@@ -5,6 +5,7 @@ import {
   HttpCode,
   Param,
   Post,
+  Put,
   Query,
 } from '@nestjs/common';
 import { LeadService } from './lead.service';
@@ -12,7 +13,7 @@ import { Lead } from './lead.entity';
 import { LeadStatistics } from './type';
 import { parseLimitParam } from 'src/shared/utils/util';
 import { Permissions } from './../../shared/decorators/permissions.decorator';
-import { LeadFilterDto } from './lead.dto';
+import { LeadFilterDto, UpdateLeadDto } from './lead.dto';
 
 @Controller('api/leads')
 export class LeadController {
@@ -94,5 +95,14 @@ export class LeadController {
   @Permissions('read:data')
   async getLeadById(@Param('id') id: string) {
     return this.leadService.getLeadById(id);
+  }
+
+  @Put(':id')
+  @Permissions('write:data')
+  async updateLead(
+    @Param('id') id: string,
+    @Body() updateData: UpdateLeadDto,
+  ): Promise<Lead> {
+    return this.leadService.updateLead(id, updateData);
   }
 }

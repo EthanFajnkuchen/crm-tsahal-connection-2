@@ -9,7 +9,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, MoreThan, Brackets, Not, IsNull } from 'typeorm';
 import { Lead } from './lead.entity';
 import { LeadStatistics } from './type';
-import { LeadFilterDto } from './lead.dto';
+import { LeadFilterDto, UpdateLeadDto } from './lead.dto';
 import { PassThrough } from 'stream';
 import { Workbook } from 'exceljs';
 @Injectable()
@@ -23,6 +23,7 @@ export class LeadService {
     const queryBuilder = this.leadRepository
       .createQueryBuilder('lead')
       .select([
+        'lead.ID',
         'lead.dateInscription',
         'lead.firstName',
         'lead.lastName',
@@ -725,6 +726,42 @@ export class LeadService {
       return leadData;
     } catch (error) {
       throw new InternalServerErrorException(error.message);
+    }
+  }
+
+  async updateLead(leadId: string, updateData: UpdateLeadDto): Promise<Lead> {
+    console.log(updateData);
+    if (!leadId) {
+      throw new BadRequestException('ID is required');
+    }
+
+    try {
+      const existingLead = await this.leadRepository.findOne({
+        where: { ID: parseInt(leadId) },
+      });
+
+      if (!existingLead) {
+        throw new NotFoundException('Lead not found');
+      }
+
+      // Appliquer les mises à jour
+      Object.assign(existingLead, updateData);
+
+      // Sauvegarder les modifications
+      const updatedLead = await this.leadRepository.save(existingLead);
+      console.log(updatedLead);
+
+      return updatedLead;
+    } catch (error) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof BadRequestException
+      ) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        `Failed to update lead: ${error.message}`,
+      );
     }
   }
 }

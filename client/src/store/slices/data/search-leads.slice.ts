@@ -1,6 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { searchLeadsThunk } from "../../thunks/data/search-leads.thunk";
-import { Lead } from "../../adapters/data/search-leads.adapter";
+import { Lead } from "@/types/lead";
 
 interface SearchLeadsState {
   data: Lead[] | null;

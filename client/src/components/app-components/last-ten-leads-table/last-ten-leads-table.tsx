@@ -1,8 +1,10 @@
 import { useEffect } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { AppDispatch, RootState } from "@/store/store";
 import { fetchLastTenLeadsThunk } from "@/store/thunks/dashboard/last-ten-leads.thunk";
+import { Lead } from "@/types/lead";
 
 import { DataTable } from "@/components/app-components/table/table";
 import { Button } from "@/components/ui/button";
@@ -10,20 +12,7 @@ import { ArrowUpDown } from "lucide-react";
 import StatusBadge from "@/components/app-components/badge-status/badge-status";
 import { useBadgeStyle } from "@/hooks/use-badges-styles";
 
-type Lead = {
-  id: string;
-  dateInscription: Date;
-  prenom: string;
-  nom: string;
-  status:
-    | "À traiter"
-    | "En cours de traitement"
-    | "Dossier traité"
-    | "Ne répond pas/Ne sait pas"
-    | "Pas de notre ressort";
-};
-
-const columns: ColumnDef<Lead>[] = [
+const columns: ColumnDef<Lead, unknown>[] = [
   {
     accessorKey: "dateInscription",
     header: ({ column }) => (
@@ -37,24 +26,26 @@ const columns: ColumnDef<Lead>[] = [
       </Button>
     ),
     cell: ({ row }) => {
-      const date = row.getValue("dateInscription") as Date;
+      const date = new Date(row.getValue("dateInscription"));
       const formatted = date.toLocaleDateString("fr-FR");
       return <div>{formatted}</div>;
     },
   },
   {
-    accessorKey: "prenom",
+    accessorKey: "firstName",
     header: "Prénom",
   },
   {
-    accessorKey: "nom",
+    accessorKey: "lastName",
     header: "Nom",
   },
   {
-    accessorKey: "status",
+    accessorKey: "statutCandidat",
     header: "Status",
     cell: ({ row }) => {
-      const status = row.getValue("status") as keyof typeof useBadgeStyle;
+      const status = row.getValue(
+        "statutCandidat"
+      ) as keyof typeof useBadgeStyle;
       return (
         <div className="min-w-[200px] md:min-w-[180px]">
           <StatusBadge status={status} />
@@ -66,6 +57,7 @@ const columns: ColumnDef<Lead>[] = [
 
 export function LastTenLeadTable() {
   const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
 
   const {
     data: lastTenLeads,
@@ -77,22 +69,20 @@ export function LastTenLeadTable() {
     dispatch(fetchLastTenLeadsThunk());
   }, [dispatch]);
 
-  const transformedData: Lead[] =
-    lastTenLeads?.map((lead, index) => ({
-      id: `${index}-${lead.email}`,
-      dateInscription: new Date(lead.dateInscription),
-      prenom: lead.firstName,
-      nom: lead.lastName,
-      status: lead.statutCandidat as Lead["status"],
-    })) || [];
+  const handleRowClick = (lead: any) => {
+    if (lead.ID) {
+      navigate(`/lead-details/${lead.ID}`);
+    }
+  };
 
   return (
     <div className="">
       <DataTable
         columns={columns}
-        data={transformedData}
+        data={lastTenLeads || []}
         isLoading={isLoading}
         error={error}
+        onRowClick={handleRowClick}
       />
     </div>
   );

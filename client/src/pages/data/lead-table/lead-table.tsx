@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { ArrowUpDown, Download, Loader2 } from "lucide-react";
 
 import { DataTable } from "@/components/app-components/table/table";
@@ -8,22 +8,16 @@ import StatusBadge from "@/components/app-components/badge-status/badge-status";
 import Section from "@/components/app-components/section/section";
 import { Button } from "@/components/ui/button";
 import type { ColumnDef } from "@tanstack/react-table";
+import { Lead } from "@/types/lead";
 
 import { RootState, AppDispatch } from "@/store/store";
 import { fetchAllLeadsThunk } from "@/store/thunks/data/all-leads.thunk";
 import { searchLeadsThunk } from "@/store/thunks/data/search-leads.thunk";
 import { downloadLeadsThunk } from "@/store/thunks/data/excel.thunk";
 
-type Lead = {
-  id: string;
-  inscriptionDate: string;
-  fullName: string;
-  status: string;
-};
-
 const columns: ColumnDef<Lead>[] = [
   {
-    accessorKey: "inscriptionDate",
+    accessorKey: "dateInscription",
     header: ({ column }) => (
       <Button
         variant="link"
@@ -35,19 +29,23 @@ const columns: ColumnDef<Lead>[] = [
       </Button>
     ),
     cell: ({ row }) => {
-      const date = row.getValue("inscriptionDate") as string;
+      const date = row.getValue("dateInscription") as string;
       return new Date(date).toLocaleDateString("fr-FR");
     },
   },
   {
-    accessorKey: "fullName",
-    header: "Nom complet",
+    accessorKey: "firstName",
+    header: "Prénom",
   },
   {
-    accessorKey: "status",
+    accessorKey: "lastName",
+    header: "Nom",
+  },
+  {
+    accessorKey: "statutCandidat",
     header: "Statut du candidat",
     cell: ({ row }) => {
-      const status = row.getValue("status") as string;
+      const status = row.getValue("statutCandidat") as string;
       return (
         <div className="min-w-[200px] md:min-w-[180px]">
           <StatusBadge status={status} />
@@ -59,6 +57,7 @@ const columns: ColumnDef<Lead>[] = [
 
 export function LeadTable() {
   const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const searchQuery = searchParams.get("search");
 
@@ -76,13 +75,7 @@ export function LeadTable() {
     }
   }, [dispatch, searchQuery]);
 
-  const formattedData: Lead[] =
-    data?.map((lead) => ({
-      id: lead.id,
-      inscriptionDate: lead.dateInscription,
-      fullName: `${lead.firstName} ${lead.lastName}`,
-      status: lead.statutCandidat,
-    })) || [];
+  console.log({ data });
 
   const handleDownloadExcel = async () => {
     try {
@@ -121,9 +114,10 @@ export function LeadTable() {
     >
       <DataTable
         columns={columns}
-        data={formattedData}
+        data={(data as Lead[]) || []}
         isLoading={isLoading}
         error={error}
+        onRowClick={(row) => navigate(`/lead-details/${(row as any).ID}`)}
       />
     </Section>
   );

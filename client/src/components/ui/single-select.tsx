@@ -22,7 +22,7 @@ interface Option {
   label: string;
 }
 
-interface DeselectableSelectProps {
+interface SingleSelectProps {
   options: Option[];
   placeholder?: string;
   searchPlaceholder?: string;
@@ -32,7 +32,7 @@ interface DeselectableSelectProps {
   className?: string;
 }
 
-export function DeselectableSelect({
+export function SingleSelect({
   options,
   placeholder = "Sélectionner une option...",
   searchPlaceholder = "Rechercher...",
@@ -40,7 +40,7 @@ export function DeselectableSelect({
   value,
   onChange,
   className,
-}: DeselectableSelectProps) {
+}: SingleSelectProps) {
   const [open, setOpen] = React.useState(false);
   const [selectedValue, setSelectedValue] = React.useState<string | undefined>(
     value
@@ -51,7 +51,6 @@ export function DeselectableSelect({
   }, [value]);
 
   const handleSelect = (currentValue: string) => {
-    // Si la valeur actuelle est déjà sélectionnée, on la désélectionne
     const newValue = currentValue === selectedValue ? "" : currentValue;
     setSelectedValue(newValue);
     onChange?.(newValue);
@@ -68,7 +67,7 @@ export function DeselectableSelect({
           className={cn("w-full justify-between", className)}
         >
           {selectedValue
-            ? options.find((option) => option.value === selectedValue)?.label
+            ? options.find((option) => option.value === selectedValue)?.value
             : placeholder}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
@@ -93,7 +92,7 @@ export function DeselectableSelect({
                         : "opacity-0"
                     )}
                   />
-                  {option.label}
+                  {option.value}
                 </CommandItem>
               ))}
             </CommandGroup>

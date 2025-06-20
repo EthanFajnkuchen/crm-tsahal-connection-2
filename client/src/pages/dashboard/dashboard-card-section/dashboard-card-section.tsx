@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
 import { fetchCardLeadsThunk } from "@/store/thunks/dashboard/card-leads.thunk";
 import { fetchFilteredLeadsThunk } from "@/store/thunks/dashboard/filtered-card-leads.thunk";
+import { useNavigate } from "react-router-dom";
 
 import { DASHBOARD_CARDS_ITEMS } from "@/i18n/dashboard-card";
 import CardDashboard from "@/components/app-components/card-dashboard/card-dashboard";
@@ -23,6 +24,7 @@ import {
 
 const DashboardCardsSection: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
 
   useEffect(() => {
     dispatch(fetchCardLeadsThunk());
@@ -87,6 +89,12 @@ const DashboardCardsSection: React.FC = () => {
     }
   }, [isPopupOpen, selectedCardApiKey, dispatch]);
 
+  const handleRowClick = (lead: any) => {
+    if (lead.id) {
+      navigate(`/lead-details/${lead.id}`);
+    }
+  };
+
   return (
     <Section title={"Statistiques actuelles"}>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 ">
@@ -122,6 +130,7 @@ const DashboardCardsSection: React.FC = () => {
               data={filteredLeads || []}
               isLoading={isLoadingFiltered}
               error={null}
+              onRowClick={handleRowClick}
             />
           </div>
         </DialogContent>
