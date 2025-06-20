@@ -87,6 +87,13 @@ export function processTsahalData(
   if (tsahalData.armyEntryDateStatus === "Non") {
     tsahalData.giyusDate = "";
     tsahalData.michveAlonTraining = "";
+    tsahalData.mahzorGiyus = "";
+    tsahalData.typeGiyus = "";
+  }
+
+  if (tsahalData.giyusDate === "") {
+    tsahalData.mahzorGiyus = "";
+    tsahalData.typeGiyus = "";
   }
 
   return tsahalData;

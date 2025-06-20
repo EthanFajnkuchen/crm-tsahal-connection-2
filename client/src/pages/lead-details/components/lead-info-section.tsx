@@ -47,6 +47,7 @@ export const LeadInfoSection = ({ lead }: LeadInfoSectionProps) => {
       dateFinService: lead.dateFinService,
       mahalPath: lead.mahalPath,
       serviceType: lead.serviceType,
+      armyEntryDateStatus: lead.armyEntryDateStatus,
     },
   });
 
@@ -82,6 +83,7 @@ export const LeadInfoSection = ({ lead }: LeadInfoSectionProps) => {
       dateFinService: lead.dateFinService,
       mahalPath: lead.mahalPath,
       serviceType: lead.serviceType,
+      armyEntryDateStatus: lead.armyEntryDateStatus,
     });
   }, [lead, reset]);
 
@@ -96,9 +98,8 @@ export const LeadInfoSection = ({ lead }: LeadInfoSectionProps) => {
         ...data,
         mahzorGiyus: mahzorGiyus,
         typeGiyus: typeGiyus,
+        armyEntryDateStatus: data.giyusDate ? "Oui" : "Non",
       };
-
-      console.log(formattedData);
 
       await dispatch(
         updateLeadThunk({

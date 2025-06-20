@@ -6,10 +6,7 @@ export const useTypeGiyus = (
   currentStatus: string | undefined,
   serviceType: string | undefined
 ): string => {
-  console.log({ giyusDate });
-  console.log({ mahalPath });
-  console.log({ currentStatus });
-  console.log({ serviceType });
+
   return useMemo(() => {
     let typeGiyus = "";
     console.log("enter");
