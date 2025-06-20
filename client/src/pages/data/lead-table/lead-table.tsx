@@ -114,7 +114,7 @@ export function LeadTable() {
     >
       <DataTable
         columns={columns}
-        data={data || []}
+        data={(data as Lead[]) || []}
         isLoading={isLoading}
         error={error}
         onRowClick={(row) => navigate(`/lead-details/${(row as any).ID}`)}
