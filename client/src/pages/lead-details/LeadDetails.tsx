@@ -9,6 +9,7 @@ import { JudaismNationalitySection } from "./components/judaism-nationality-sect
 import { EducationSection } from "./components/education-section";
 import { IntegrationIsraelSection } from "./components/integration-israel-section";
 import { TsahalSection } from "./components/tsahal-section";
+import { LeadInfoSection } from "./components/lead-info-section";
 
 const LeadDetailsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -43,6 +44,7 @@ const LeadDetailsPage: React.FC = () => {
     <div className="p-4 space-y-4">
       {lead && (
         <>
+          <LeadInfoSection lead={lead} />
           <GeneralSection lead={lead} />
           <ExpertConnectionSection lead={lead} />
           <JudaismNationalitySection lead={lead} />
