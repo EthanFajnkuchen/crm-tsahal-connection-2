@@ -37,7 +37,6 @@ const DatePickerInput = ({
   field,
   formatDisplayDate,
   formatValueDate,
-  parseInputDate,
   className,
   readOnly,
   fromYear,

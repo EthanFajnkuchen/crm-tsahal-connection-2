@@ -1,8 +1,6 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import {
-  fetchLastTenLeads,
-  Lead,
-} from "../../adapters/dashboard/last-ten-leads.adapter";
+import { fetchLastTenLeads } from "../../adapters/dashboard/last-ten-leads.adapter";
+import { Lead } from "@/types/lead";
 
 export const fetchLastTenLeadsThunk = createAsyncThunk<Lead[]>(
   "dashboard/fetchLastTenLeads",

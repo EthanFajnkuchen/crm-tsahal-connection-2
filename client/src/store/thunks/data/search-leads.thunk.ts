@@ -1,5 +1,6 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { searchLeads, Lead } from "../../adapters/data/search-leads.adapter";
+import { searchLeads } from "../../adapters/data/search-leads.adapter";
+import { Lead } from "@/types/lead";
 
 export const searchLeadsThunk = createAsyncThunk<Lead[], string>(
   "leads/searchLeads",

@@ -3,7 +3,6 @@ import { useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchLeadDetailsThunk } from "../../store/thunks/lead-details/lead-details.thunk";
 import { RootState, AppDispatch } from "../../store/store";
-import { Lead } from "@/types/lead";
 import { GeneralSection } from "./components/general-section";
 import { ExpertConnectionSection } from "./components/expert-connection-section";
 import { JudaismNationalitySection } from "./components/judaism-nationality-section";
