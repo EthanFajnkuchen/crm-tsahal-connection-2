@@ -45,6 +45,8 @@ export const LeadInfoSection = ({ lead }: LeadInfoSectionProps) => {
       nomPoste: lead.nomPoste,
       pikoud: lead.pikoud,
       dateFinService: lead.dateFinService,
+      mahalPath: lead.mahalPath,
+      serviceType: lead.serviceType,
     },
   });
 
@@ -78,6 +80,8 @@ export const LeadInfoSection = ({ lead }: LeadInfoSectionProps) => {
       nomPoste: lead.nomPoste,
       pikoud: lead.pikoud,
       dateFinService: lead.dateFinService,
+      mahalPath: lead.mahalPath,
+      serviceType: lead.serviceType,
     });
   }, [lead, reset]);
 
@@ -88,9 +92,6 @@ export const LeadInfoSection = ({ lead }: LeadInfoSectionProps) => {
   const handleSave = async (data: Partial<Lead>) => {
     setLocalIsLoading(true);
     try {
-      console.log(data.giyusDate);
-      console.log(mahzorGiyus);
-      console.log(typeGiyus);
       const formattedData = {
         ...data,
         mahzorGiyus: mahzorGiyus,
@@ -149,7 +150,7 @@ export const LeadInfoSection = ({ lead }: LeadInfoSectionProps) => {
             label="Situation actuelle"
             mode={mode}
             isLoading={localIsLoading}
-            options={CURRENT_STATUS.current_status.map((option) => ({
+            options={CURRENT_STATUS.all_status.map((option) => ({
               value: option.value,
               label: option.displayName,
             }))}
