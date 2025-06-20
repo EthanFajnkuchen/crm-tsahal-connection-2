@@ -16,6 +16,9 @@ import { CURRENT_STATUS } from "@/i18n/current-status";
 import { STATUS_CANDIDAT } from "@/i18n/status-candidat";
 import { TYPE_GIYUS } from "@/i18n/type-giyus";
 import { PIKOUD } from "@/i18n/pikoud";
+import { useMahzorGiyus } from "@/hooks/use-mahzor-giyus";
+import { useTypeGiyus } from "@/hooks/use-type-giyus";
+
 interface LeadInfoSectionProps {
   lead: Lead;
 }
@@ -25,7 +28,7 @@ export const LeadInfoSection = ({ lead }: LeadInfoSectionProps) => {
 
   const [mode, setMode] = useState<"EDIT" | "VIEW">("VIEW");
   const [localIsLoading, setLocalIsLoading] = useState(false);
-  const { control, handleSubmit, reset } = useForm<Partial<Lead>>({
+  const { control, handleSubmit, reset, watch } = useForm<Partial<Lead>>({
     defaultValues: {
       firstName: lead.firstName,
       lastName: lead.lastName,
@@ -44,6 +47,19 @@ export const LeadInfoSection = ({ lead }: LeadInfoSectionProps) => {
       dateFinService: lead.dateFinService,
     },
   });
+
+  const giyusDate = watch("giyusDate");
+  const mahalPath = watch("mahalPath");
+  const currentStatus = watch("currentStatus");
+  const serviceType = watch("serviceType");
+
+  const mahzorGiyus = useMahzorGiyus(giyusDate);
+  const typeGiyus = useTypeGiyus(
+    giyusDate,
+    mahalPath,
+    currentStatus,
+    serviceType
+  );
 
   useEffect(() => {
     reset({
@@ -72,10 +88,16 @@ export const LeadInfoSection = ({ lead }: LeadInfoSectionProps) => {
   const handleSave = async (data: Partial<Lead>) => {
     setLocalIsLoading(true);
     try {
+      console.log(data.giyusDate);
+      console.log(mahzorGiyus);
+      console.log(typeGiyus);
       const formattedData = {
         ...data,
-        isOnlyChild: data.isOnlyChild ? "Oui" : "Non",
+        mahzorGiyus: mahzorGiyus,
+        typeGiyus: typeGiyus,
       };
+
+      console.log(formattedData);
 
       await dispatch(
         updateLeadThunk({
@@ -160,6 +182,7 @@ export const LeadInfoSection = ({ lead }: LeadInfoSectionProps) => {
             label="Mahzor Giyus"
             mode={mode}
             isLoading={localIsLoading}
+            readOnly={true}
           />
           <FormDatePicker
             control={control}

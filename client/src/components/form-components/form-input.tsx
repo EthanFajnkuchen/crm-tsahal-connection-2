@@ -17,6 +17,7 @@ interface FormInputProps<T extends FieldValues>
   hidden?: boolean;
   className?: string;
   isLoading?: boolean;
+  readOnly?: boolean;
 }
 
 const FormInput = <T extends FieldValues>({
@@ -28,6 +29,7 @@ const FormInput = <T extends FieldValues>({
   mode = "EDIT",
   hidden = false,
   isLoading = false,
+  readOnly = false,
   ...props
 }: FormInputProps<T>) => {
   if (hidden) return null;
@@ -63,6 +65,7 @@ const FormInput = <T extends FieldValues>({
                 error && "border-red-500 focus-visible:ring-red-500",
                 className
               )}
+              disabled={readOnly}
             />
           )}
         />
