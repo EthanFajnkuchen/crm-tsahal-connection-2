@@ -11,6 +11,7 @@ import { useDispatch } from "react-redux";
 import { AppDispatch } from "@/store/store";
 import { updateLeadThunk } from "@/store/thunks/lead-details/lead-details.thunk";
 import { toast } from "sonner";
+import { processExpertConnectionData } from "../setters/expert-connection-setter";
 
 interface ExpertConnectionSectionProps {
   lead: Lead;
@@ -129,11 +130,12 @@ export const ExpertConnectionSection = ({
 
   const handleSave = async (data: Partial<Lead>) => {
     setLocalIsLoading(true);
+    const processedData = processExpertConnectionData(data);
     try {
       await dispatch(
         updateLeadThunk({
           id: lead.ID.toString(),
-          updateData: data,
+          updateData: processedData,
         })
       ).unwrap();
 
