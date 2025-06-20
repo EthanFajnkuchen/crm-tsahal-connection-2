@@ -12,6 +12,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
 import { updateLeadThunk } from "@/store/thunks/lead-details/lead-details.thunk";
 import { toast } from "sonner";
+import { processTsahalData } from "../setters/tsahal-setter";
 
 interface TsahalSectionProps {
   lead: Lead;
@@ -103,11 +104,12 @@ export const TsahalSection = ({ lead }: TsahalSectionProps) => {
 
   const handleSave = async (data: Partial<Lead>) => {
     setLocalIsLoading(true);
+    const processedData = processTsahalData(data);
     try {
       await dispatch(
         updateLeadThunk({
           id: lead.ID.toString(),
-          updateData: data,
+          updateData: processedData,
         })
       ).unwrap();
 

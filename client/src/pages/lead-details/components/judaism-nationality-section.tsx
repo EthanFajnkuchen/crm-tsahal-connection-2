@@ -15,6 +15,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
 import { updateLeadThunk } from "@/store/thunks/lead-details/lead-details.thunk";
 import { toast } from "sonner";
+import { processJudaismNationalityData } from "../setters/judaism-nationality-setter";
 
 interface JudaismNationalitySectionProps {
   lead: Lead;
@@ -84,11 +85,12 @@ export const JudaismNationalitySection = ({
 
   const handleSave = async (data: Partial<Lead>) => {
     setLocalIsLoading(true);
+    const formattedData = processJudaismNationalityData(data);
     try {
       await dispatch(
         updateLeadThunk({
           id: lead.ID.toString(),
-          updateData: data,
+          updateData: formattedData,
         })
       ).unwrap();
 

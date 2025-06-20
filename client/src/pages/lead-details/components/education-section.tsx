@@ -8,10 +8,11 @@ import {
 import { FormDropdown } from "@/components/form-components/form-dropdown";
 import { useState, useEffect } from "react";
 import { EDUCATION } from "@/i18n/education";
-import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "@/store/store";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "@/store/store";
 import { updateLeadThunk } from "@/store/thunks/lead-details/lead-details.thunk";
 import { toast } from "sonner";
+import { processEducationData } from "../setters/education-setter";
 
 interface EducationSectionProps {
   lead: Lead;
@@ -78,11 +79,12 @@ export const EducationSection = ({ lead }: EducationSectionProps) => {
 
   const handleSave = async (data: Partial<Lead>) => {
     setLocalIsLoading(true);
+    const processedData = processEducationData(data);
     try {
       await dispatch(
         updateLeadThunk({
           id: lead.ID.toString(),
-          updateData: data,
+          updateData: processedData,
         })
       ).unwrap();
 
