@@ -49,7 +49,7 @@ export const ExpertConnectionSection = ({
     handleSubmit,
     reset,
     watch,
-    formState: { errors, isValid },
+    formState: { isValid },
   } = useForm<Partial<Lead>>({
     mode: "onChange",
     defaultValues: {
