@@ -189,6 +189,7 @@ export const ExpertConnectionSection = ({
             }}
             render={({ field }) => (
               <FormDropdown
+                {...field}
                 control={control}
                 name="produitEC1"
                 label="Produit 1"
@@ -218,6 +219,7 @@ export const ExpertConnectionSection = ({
             }}
             render={({ field }) => (
               <FormDatePicker
+                {...field}
                 control={control}
                 name="dateProduitEC1"
                 label="Date Produit 1"
@@ -242,6 +244,7 @@ export const ExpertConnectionSection = ({
             }}
             render={({ field }) => (
               <FormDropdown
+                {...field}
                 control={control}
                 name="produitEC2"
                 label="Produit 2"
@@ -271,6 +274,7 @@ export const ExpertConnectionSection = ({
             }}
             render={({ field }) => (
               <FormDatePicker
+                {...field}
                 control={control}
                 name="dateProduitEC2"
                 label="Date Produit 2"
@@ -299,6 +303,7 @@ export const ExpertConnectionSection = ({
             }}
             render={({ field }) => (
               <FormDropdown
+                {...field}
                 control={control}
                 name="produitEC3"
                 label="Produit 3"
@@ -328,6 +333,7 @@ export const ExpertConnectionSection = ({
             }}
             render={({ field }) => (
               <FormDatePicker
+                {...field}
                 control={control}
                 name="dateProduitEC3"
                 label="Date Produit 3"
@@ -356,6 +362,7 @@ export const ExpertConnectionSection = ({
             }}
             render={({ field }) => (
               <FormDropdown
+                {...field}
                 control={control}
                 name="produitEC4"
                 label="Produit 4"
@@ -385,6 +392,7 @@ export const ExpertConnectionSection = ({
             }}
             render={({ field }) => (
               <FormDatePicker
+                {...field}
                 control={control}
                 name="dateProduitEC4"
                 label="Date Produit 4"
@@ -413,6 +421,7 @@ export const ExpertConnectionSection = ({
             }}
             render={({ field }) => (
               <FormDropdown
+                {...field}
                 control={control}
                 name="produitEC5"
                 label="Produit 5"
@@ -442,6 +451,7 @@ export const ExpertConnectionSection = ({
             }}
             render={({ field }) => (
               <FormDatePicker
+                {...field}
                 control={control}
                 name="dateProduitEC5"
                 label="Date Produit 5"
