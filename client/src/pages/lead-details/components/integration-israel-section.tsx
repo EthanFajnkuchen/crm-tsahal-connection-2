@@ -8,8 +8,8 @@ import { FormDropdown } from "@/components/form-components/form-dropdown";
 import { useState, useEffect } from "react";
 import { INTEGRATION_IN_ISRAEL } from "@/i18n/integration-in-israel";
 import { FormInput } from "@/components/form-components/form-input";
-import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "@/store/store";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "@/store/store";
 import { updateLeadThunk } from "@/store/thunks/lead-details/lead-details.thunk";
 import { toast } from "sonner";
 

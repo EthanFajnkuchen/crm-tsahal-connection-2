@@ -10,8 +10,8 @@ import { FormDropdown } from "@/components/form-components/form-dropdown";
 import { FormDatePicker } from "@/components/form-components/form-date-picker";
 import { RELATION } from "@/i18n/emergency-contact";
 import { useState, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "@/store/store";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "@/store/store";
 import { updateLeadThunk } from "@/store/thunks/lead-details/lead-details.thunk";
 import { toast } from "sonner";
 

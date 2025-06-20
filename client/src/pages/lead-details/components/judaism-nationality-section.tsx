@@ -11,8 +11,8 @@ import { JUDAISM } from "@/i18n/judaism";
 
 import { useState, useEffect } from "react";
 import { NATIONALITY } from "@/i18n/nationality";
-import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "@/store/store";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "@/store/store";
 import { updateLeadThunk } from "@/store/thunks/lead-details/lead-details.thunk";
 import { toast } from "sonner";
 import { processJudaismNationalityData } from "../setters/judaism-nationality-setter";
