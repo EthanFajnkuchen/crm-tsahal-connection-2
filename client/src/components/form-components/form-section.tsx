@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 
 interface FormSectionProps {
-  title: string;
+  title: React.ReactNode;
   children: React.ReactNode;
   mode?: "EDIT" | "VIEW";
   onModeChange?: () => void;

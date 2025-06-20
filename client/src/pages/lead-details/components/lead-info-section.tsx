@@ -18,6 +18,7 @@ import { TYPE_GIYUS } from "@/i18n/type-giyus";
 import { PIKOUD } from "@/i18n/pikoud";
 import { useMahzorGiyus } from "@/hooks/use-mahzor-giyus";
 import { useTypeGiyus } from "@/hooks/use-type-giyus";
+import { useExpertCoBadge } from "@/hooks/use-expert-co-badge";
 
 interface LeadInfoSectionProps {
   lead: Lead;
@@ -63,6 +64,15 @@ export const LeadInfoSection = ({ lead }: LeadInfoSectionProps) => {
     currentStatus,
     serviceType
   );
+
+  const expertCoBadge = useExpertCoBadge({
+    expertConnection: lead.expertConnection,
+    produitEC1: lead.produitEC1,
+    produitEC2: lead.produitEC2,
+    produitEC3: lead.produitEC3,
+    produitEC4: lead.produitEC4,
+    produitEC5: lead.produitEC5,
+  });
 
   useEffect(() => {
     reset({
@@ -126,7 +136,12 @@ export const LeadInfoSection = ({ lead }: LeadInfoSectionProps) => {
   return (
     <form onSubmit={handleSubmit(handleSave)}>
       <FormSection
-        title={lead.firstName + " " + lead.lastName}
+        title={
+          <div className="flex items-center gap-2">
+            {lead.firstName + " " + lead.lastName}
+            {expertCoBadge}
+          </div>
+        }
         mode={mode}
         onModeChange={handleModeChange}
         onSave={handleSubmit(handleSave)}
