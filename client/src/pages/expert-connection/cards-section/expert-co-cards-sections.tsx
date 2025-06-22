@@ -19,10 +19,10 @@ import {
   openPopup,
   closePopup,
 } from "@/store/slices/expert-connection/expert-co-stats.slice";
-
+import { useNavigate } from "react-router-dom";
 const ExpertCoCardsSection: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
-
+  const navigate = useNavigate();
   useEffect(() => {
     dispatch(fetchExpertCoStatsThunk());
   }, [dispatch]);
@@ -80,6 +80,12 @@ const ExpertCoCardsSection: React.FC = () => {
     dispatch(openPopup(apiKey));
   };
 
+  const handleRowClick = (lead: any) => {
+    if (lead.id) {
+      navigate(`/lead-details/${lead.id}`);
+    }
+  };
+
   useEffect(() => {
     if (isPopupOpen && selectedCardApiKey) {
       fetchFilteredData(selectedCardApiKey);
@@ -131,6 +137,7 @@ const ExpertCoCardsSection: React.FC = () => {
               }
               isLoading={isLoadingFiltered}
               error={null}
+              onRowClick={handleRowClick}
             />
           </div>
         </DialogContent>
