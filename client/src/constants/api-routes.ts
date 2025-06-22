@@ -13,4 +13,6 @@ export const API_ROUTES = {
   MAHZOR_GIYUS: `${BACKEND_BASE_URL}/api/leads/mahzor-giyus-counts`,
   LEAD_DETAILS: `${BACKEND_BASE_URL}/api/leads`,
   UPDATE_LEAD: `${BACKEND_BASE_URL}/api/leads`,
+  DISCUSSIONS: `${BACKEND_BASE_URL}/api/discussions`,
+  DISCUSSIONS_BY_LEAD: `${BACKEND_BASE_URL}/api/discussions/lead`,
 };
