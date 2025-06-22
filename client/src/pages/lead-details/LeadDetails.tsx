@@ -59,7 +59,7 @@ const LeadDetailsPage: React.FC = () => {
                   flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all duration-200
                   ${
                     activeTab === tab.id
-                      ? "bg-purple-100 text-purple-700 border border-purple -200 shadow-sm"
+                      ? "bg-purple-100 text-purple-700 border border-purple-200 shadow-sm"
                       : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
                   }
                 `}
