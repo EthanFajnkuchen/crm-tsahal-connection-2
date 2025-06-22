@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { Lead } from "@/types/lead";
 import {
   CreateDiscussionDto,
@@ -16,10 +17,11 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { AppDispatch, RootState } from "@/store/store";
 import {
-  createDiscussion,
-  updateDiscussion,
-} from "@/store/adapters/discussions/discussions.adapter";
+  createDiscussionThunk,
+  updateDiscussionThunk,
+} from "@/store/thunks/discussions/discussions.thunk";
 
 interface CreateDiscussionDrawerProps {
   isOpen: boolean;
@@ -42,7 +44,8 @@ export const CreateDiscussionDrawer: React.FC<CreateDiscussionDrawerProps> = ({
   lead,
   onDiscussionCreated,
 }) => {
-  const [isLoading, setIsLoading] = useState(false);
+  const dispatch = useDispatch<AppDispatch>();
+  const { isCreating } = useSelector((state: RootState) => state.discussions);
   const [formData, setFormData] = useState({
     date_discussion: new Date().toISOString().split("T")[0],
     contenu: "",
@@ -56,7 +59,6 @@ export const CreateDiscussionDrawer: React.FC<CreateDiscussionDrawerProps> = ({
       return;
     }
 
-    setIsLoading(true);
     try {
       const discussionData: CreateDiscussionDto = {
         id_lead: lead.ID,
@@ -64,7 +66,7 @@ export const CreateDiscussionDrawer: React.FC<CreateDiscussionDrawerProps> = ({
         contenu: formData.contenu,
       };
 
-      await createDiscussion(discussionData);
+      await dispatch(createDiscussionThunk(discussionData)).unwrap();
       toast.success("Discussion ajoutée avec succès");
 
       // Reset form
@@ -76,10 +78,7 @@ export const CreateDiscussionDrawer: React.FC<CreateDiscussionDrawerProps> = ({
       onDiscussionCreated();
       onClose();
     } catch (error) {
-      console.error("Error adding discussion:", error);
       toast.error("Erreur lors de l'ajout de la discussion");
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -162,7 +161,7 @@ export const CreateDiscussionDrawer: React.FC<CreateDiscussionDrawerProps> = ({
           buttonContent="Ajouter la discussion"
           onSave={handleSave}
           disabled={!formData.contenu.trim()}
-          isLoading={isLoading}
+          isLoading={isCreating}
           formId="create-discussion-form"
           type="submit"
         />
@@ -178,7 +177,8 @@ export const EditDiscussionDrawer: React.FC<EditDiscussionDrawerProps> = ({
   discussion,
   onDiscussionUpdated,
 }) => {
-  const [isLoading, setIsLoading] = useState(false);
+  const dispatch = useDispatch<AppDispatch>();
+  const { isUpdating } = useSelector((state: RootState) => state.discussions);
   const [formData, setFormData] = useState({
     date_discussion: discussion?.date_discussion || "",
     contenu: discussion?.contenu || "",
@@ -204,23 +204,24 @@ export const EditDiscussionDrawer: React.FC<EditDiscussionDrawerProps> = ({
       return;
     }
 
-    setIsLoading(true);
     try {
       const updateData: UpdateDiscussionDto = {
         date_discussion: formData.date_discussion,
         contenu: formData.contenu,
       };
 
-      await updateDiscussion(discussion.ID, updateData);
+      await dispatch(
+        updateDiscussionThunk({
+          id: discussion.ID,
+          updateData,
+        })
+      ).unwrap();
       toast.success("Discussion modifiée avec succès");
 
       onDiscussionUpdated();
       onClose();
     } catch (error) {
-      console.error("Error updating discussion:", error);
       toast.error("Erreur lors de la modification de la discussion");
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -316,7 +317,7 @@ export const EditDiscussionDrawer: React.FC<EditDiscussionDrawerProps> = ({
           buttonContent="Modifier la discussion"
           onSave={handleSave}
           disabled={!formData.contenu.trim()}
-          isLoading={isLoading}
+          isLoading={isUpdating}
           formId="edit-discussion-form"
           type="submit"
         />

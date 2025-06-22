@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { Lead } from "@/types/lead";
-import { Discussion } from "@/types/discussion";
 import { FormSection } from "@/components/form-components/form-section";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -11,51 +11,47 @@ import {
 } from "./create-discussion-drawer";
 import { Calendar, MessageSquare, Edit, Trash2, Plus } from "lucide-react";
 import { toast } from "sonner";
+import { AppDispatch, RootState } from "@/store/store";
 import {
-  fetchDiscussionsByLeadId,
-  deleteDiscussion,
-} from "@/store/adapters/discussions/discussions.adapter";
+  fetchDiscussionsByLeadIdThunk,
+  deleteDiscussionThunk,
+} from "@/store/thunks/discussions/discussions.thunk";
+import { useState } from "react";
+import { Discussion } from "@/types/discussion";
 
 interface DiscussionsSectionProps {
   lead: Lead;
 }
 
 export const DiscussionsSection = ({ lead }: DiscussionsSectionProps) => {
-  const [discussions, setDiscussions] = useState<Discussion[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const dispatch = useDispatch<AppDispatch>();
   const [isCreateDrawerOpen, setIsCreateDrawerOpen] = useState(false);
   const [isEditDrawerOpen, setIsEditDrawerOpen] = useState(false);
   const [selectedDiscussion, setSelectedDiscussion] =
     useState<Discussion | null>(null);
 
-  useEffect(() => {
-    loadDiscussions();
-  }, [lead.ID]);
+  const { discussions, isLoading, error, isDeleting, currentLeadId } =
+    useSelector((state: RootState) => state.discussions);
 
-  const loadDiscussions = async () => {
-    setIsLoading(true);
-    try {
-      const data = await fetchDiscussionsByLeadId(lead.ID);
-      setDiscussions(data);
-    } catch (error) {
-      console.error("Error loading discussions:", error);
-      toast.error("Erreur lors du chargement des discussions");
-    } finally {
-      setIsLoading(false);
+  useEffect(() => {
+    // Only fetch if we don't have discussions for this lead or if it's a different lead
+    if (currentLeadId !== lead.ID) {
+      dispatch(fetchDiscussionsByLeadIdThunk(lead.ID));
     }
-  };
+  }, [dispatch, lead.ID, currentLeadId]);
+
+  useEffect(() => {
+    if (error) {
+      toast.error("Erreur lors du chargement des discussions");
+    }
+  }, [error]);
 
   const handleDeleteDiscussion = async (id: number) => {
-    setIsLoading(true);
     try {
-      await deleteDiscussion(id);
+      await dispatch(deleteDiscussionThunk(id)).unwrap();
       toast.success("Discussion supprimée avec succès");
-      loadDiscussions();
     } catch (error) {
-      console.error("Error deleting discussion:", error);
       toast.error("Erreur lors de la suppression de la discussion");
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -73,11 +69,11 @@ export const DiscussionsSection = ({ lead }: DiscussionsSectionProps) => {
   };
 
   const handleDiscussionCreated = () => {
-    loadDiscussions();
+    // No need to manually reload, Redux will handle the state update
   };
 
   const handleDiscussionUpdated = () => {
-    loadDiscussions();
+    // No need to manually reload, Redux will handle the state update
   };
 
   return (
@@ -148,6 +144,7 @@ export const DiscussionsSection = ({ lead }: DiscussionsSectionProps) => {
                             variant="ghost"
                             size="sm"
                             className="h-8 w-8 p-0 hover:bg-red-100"
+                            disabled={isDeleting}
                           >
                             <Trash2 className="w-4 h-4 text-red-600" />
                           </Button>
@@ -156,7 +153,7 @@ export const DiscussionsSection = ({ lead }: DiscussionsSectionProps) => {
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <div className="whitespace-pre-wrap text-black font-medium">
+                    <div className="whitespace-pre-wrap text-gray-700">
                       {discussion.contenu}
                     </div>
                   </CardContent>
