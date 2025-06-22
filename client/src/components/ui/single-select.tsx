@@ -30,6 +30,7 @@ interface SingleSelectProps {
   value?: string;
   onChange?: (value: string) => void;
   className?: string;
+  disabled?: boolean;
 }
 
 export function SingleSelect({
@@ -40,6 +41,7 @@ export function SingleSelect({
   value,
   onChange,
   className,
+  disabled = false,
 }: SingleSelectProps) {
   const [open, setOpen] = React.useState(false);
   const [selectedValue, setSelectedValue] = React.useState<string | undefined>(
@@ -65,6 +67,7 @@ export function SingleSelect({
           role="combobox"
           aria-expanded={open}
           className={cn("w-full justify-between", className)}
+          disabled={disabled}
         >
           {selectedValue
             ? options.find((option) => option.value === selectedValue)?.value

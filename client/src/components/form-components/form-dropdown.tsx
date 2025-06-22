@@ -17,6 +17,7 @@ interface FormDropdownProps<T extends FieldValues> {
   hidden?: boolean;
   required?: boolean;
   isLoading?: boolean;
+  disabled?: boolean;
 }
 
 const FormDropdown = <T extends FieldValues>({
@@ -30,6 +31,7 @@ const FormDropdown = <T extends FieldValues>({
   hidden = false,
   required = false,
   isLoading = false,
+  disabled = false,
 }: FormDropdownProps<T>) => {
   if (hidden) return null;
 
@@ -69,6 +71,7 @@ const FormDropdown = <T extends FieldValues>({
               onChange={field.onChange}
               placeholder="Sélectionner"
               className={className}
+              disabled={disabled}
             />
           )}
         />
