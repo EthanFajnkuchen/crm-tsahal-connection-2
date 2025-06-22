@@ -12,4 +12,5 @@ export const tabs: Tab[] = [
   { id: "education", label: "Éducation", icon: "🎓" },
   { id: "integration-israel", label: "Intégration Israël", icon: "🏠" },
   { id: "tsahal", label: "Tsahal", icon: "⚔️" },
+  { id: "discussions", label: "Discussions", icon: "💬" },
 ];

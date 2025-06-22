@@ -11,6 +11,7 @@ interface FormSectionProps {
   onCancel?: () => void;
   isLoading?: boolean;
   saveDisabled?: boolean;
+  notEditable?: boolean;
 }
 
 interface FormSubSectionProps {
@@ -52,6 +53,7 @@ const FormSection: React.FC<FormSectionProps> = ({
   onCancel,
   isLoading = false,
   saveDisabled = false,
+  notEditable = false,
 }) => {
   return (
     <div className="bg-white m-3 p-4 rounded-2xl">
@@ -59,49 +61,51 @@ const FormSection: React.FC<FormSectionProps> = ({
         <h3 className="text-2xl font-semibold font-[Poppins] text-[#601886]">
           {title}
         </h3>
-        <div className="flex gap-2">
-          {mode === "VIEW" ? (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onModeChange}
-              className="h-8 border"
-              type="button"
-            >
-              Modifier
-            </Button>
-          ) : (
-            <>
+        {!notEditable && (
+          <div className="flex gap-2">
+            {mode === "VIEW" ? (
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={onCancel}
+                onClick={onModeChange}
                 className="h-8 border"
                 type="button"
-                disabled={isLoading}
               >
-                Annuler
+                Modifier
               </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onSave}
-                className="h-8 border bg-purple-600 text-white hover:bg-purple-700 hover:text-white"
-                type="submit"
-                disabled={isLoading || saveDisabled}
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Sauvegarde...
-                  </>
-                ) : (
-                  "Sauvegarder"
-                )}
-              </Button>
-            </>
-          )}
-        </div>
+            ) : (
+              <>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={onCancel}
+                  className="h-8 border"
+                  type="button"
+                  disabled={isLoading}
+                >
+                  Annuler
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={onSave}
+                  className="h-8 border bg-purple-600 text-white hover:bg-purple-700 hover:text-white"
+                  type="submit"
+                  disabled={isLoading || saveDisabled}
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Sauvegarde...
+                    </>
+                  ) : (
+                    "Sauvegarder"
+                  )}
+                </Button>
+              </>
+            )}
+          </div>
+        )}
       </div>
       <div className="space-y-6">
         {React.Children.map(children, (child) => {

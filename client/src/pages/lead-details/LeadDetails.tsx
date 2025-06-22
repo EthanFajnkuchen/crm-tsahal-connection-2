@@ -10,6 +10,7 @@ import { EducationSection } from "./components/education-section";
 import { IntegrationIsraelSection } from "./components/integration-israel-section";
 import { TsahalSection } from "./components/tsahal-section";
 import { LeadInfoSection } from "./components/lead-info-section";
+import { DiscussionsSection } from "./components/discussions-section";
 import { useScrollSpy, useScrollToSection } from "./hooks";
 import { tabs } from "./constants/tabs";
 
@@ -72,7 +73,7 @@ const LeadDetailsPage: React.FC = () => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto p-4 space-y-6">
+      <div className=" mx-auto p-4 space-y-6">
         {lead && (
           <>
             <div
@@ -129,6 +130,14 @@ const LeadDetailsPage: React.FC = () => {
               className="scroll-mt-20"
             >
               <TsahalSection lead={lead} />
+            </div>
+
+            <div
+              ref={(el) => (sectionRefs.current["discussions"] = el)}
+              id="discussions"
+              className="scroll-mt-20"
+            >
+              <DiscussionsSection lead={lead} />
             </div>
           </>
         )}
