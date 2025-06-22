@@ -56,6 +56,7 @@ export const LeadInfoSection = ({ lead }: LeadInfoSectionProps) => {
   const mahalPath = watch("mahalPath");
   const currentStatus = watch("currentStatus");
   const serviceType = watch("serviceType");
+  const statutCandidat = watch("statutCandidat");
 
   const mahzorGiyus = useMahzorGiyus(giyusDate);
   const typeGiyus = useTypeGiyus(
@@ -73,6 +74,36 @@ export const LeadInfoSection = ({ lead }: LeadInfoSectionProps) => {
     produitEC4: lead.produitEC4,
     produitEC5: lead.produitEC5,
   });
+
+  // Logic to determine currentStatus options and disabled state
+  const getCurrentStatusConfig = () => {
+    switch (statutCandidat) {
+      case "À traiter":
+      case "En cours de traitement":
+        return {
+          options: CURRENT_STATUS.all_status,
+          disabled: false,
+        };
+      case "Dossier traité":
+        return {
+          options: CURRENT_STATUS.internal_status,
+          disabled: false,
+        };
+      case "Ne répond pas / Ne sait pas":
+      case "Pas de notre ressort":
+        return {
+          options: [],
+          disabled: true,
+        };
+      default:
+        return {
+          options: CURRENT_STATUS.all_status,
+          disabled: false,
+        };
+    }
+  };
+
+  const currentStatusConfig = getCurrentStatusConfig();
 
   useEffect(() => {
     reset({
@@ -110,6 +141,13 @@ export const LeadInfoSection = ({ lead }: LeadInfoSectionProps) => {
         typeGiyus: typeGiyus,
         armyEntryDateStatus: data.giyusDate ? "Oui" : "Non",
       };
+
+      if (
+        data.statutCandidat === "Ne répond pas / Ne sait pas" ||
+        data.statutCandidat === "Pas de notre ressort"
+      ) {
+        formattedData.currentStatus = "";
+      }
 
       await dispatch(
         updateLeadThunk({
@@ -166,10 +204,11 @@ export const LeadInfoSection = ({ lead }: LeadInfoSectionProps) => {
             label="Situation actuelle"
             mode={mode}
             isLoading={localIsLoading}
-            options={CURRENT_STATUS.all_status.map((option) => ({
+            options={currentStatusConfig.options.map((option) => ({
               value: option.value,
               label: option.displayName,
             }))}
+            disabled={currentStatusConfig.disabled}
           />
           <FormInput
             control={control}
