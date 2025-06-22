@@ -198,7 +198,10 @@ export const ExpertConnectionSection = ({
                 mode={mode}
                 options={expertConnectionOptions}
                 required={isFieldRequired("produitEC1")}
-                hidden={mode === "VIEW" && !produitEC1 && !dateProduitEC1}
+                hidden={
+                  expertConnection !== "Oui" ||
+                  (mode === "VIEW" && !produitEC1 && !dateProduitEC1)
+                }
                 isLoading={localIsLoading}
               />
             )}
@@ -227,7 +230,10 @@ export const ExpertConnectionSection = ({
                 label="Date Produit 1"
                 mode={mode}
                 required={isFieldRequired("dateProduitEC1")}
-                hidden={mode === "VIEW" && !produitEC1 && !dateProduitEC1}
+                hidden={
+                  expertConnection !== "Oui" ||
+                  (mode === "VIEW" && !produitEC1 && !dateProduitEC1)
+                }
                 isLoading={localIsLoading}
               />
             )}
@@ -254,9 +260,9 @@ export const ExpertConnectionSection = ({
                 options={expertConnectionOptions}
                 required={isFieldRequired("produitEC2")}
                 hidden={
-                  mode === "VIEW"
-                    ? !produitEC2 && !dateProduitEC2
-                    : !produitEC1 && !dateProduitEC1
+                  expertConnection !== "Oui" ||
+                  (mode === "VIEW" && (!produitEC2 || !dateProduitEC2)) ||
+                  (mode === "EDIT" && (!produitEC1 || !dateProduitEC1))
                 }
                 isLoading={localIsLoading}
               />
@@ -283,9 +289,9 @@ export const ExpertConnectionSection = ({
                 mode={mode}
                 required={isFieldRequired("dateProduitEC2")}
                 hidden={
-                  mode === "VIEW"
-                    ? !produitEC2 && !dateProduitEC2
-                    : !produitEC1 && !dateProduitEC1
+                  expertConnection !== "Oui" ||
+                  (mode === "VIEW" && (!produitEC2 || !dateProduitEC2)) ||
+                  (mode === "EDIT" && (!produitEC1 || !dateProduitEC1))
                 }
                 isLoading={localIsLoading}
               />
@@ -313,9 +319,9 @@ export const ExpertConnectionSection = ({
                 options={expertConnectionOptions}
                 required={isFieldRequired("produitEC3")}
                 hidden={
-                  mode === "VIEW"
-                    ? !produitEC3 && !dateProduitEC3
-                    : !produitEC2 && !dateProduitEC2
+                  expertConnection !== "Oui" ||
+                  (mode === "VIEW" && (!produitEC3 || !dateProduitEC3)) ||
+                  (mode === "EDIT" && (!produitEC2 || !dateProduitEC2))
                 }
                 isLoading={localIsLoading}
               />
@@ -342,9 +348,9 @@ export const ExpertConnectionSection = ({
                 mode={mode}
                 required={isFieldRequired("dateProduitEC3")}
                 hidden={
-                  mode === "VIEW"
-                    ? !produitEC3 && !dateProduitEC3
-                    : !produitEC2 && !dateProduitEC2
+                  expertConnection !== "Oui" ||
+                  (mode === "VIEW" && (!produitEC3 || !dateProduitEC3)) ||
+                  (mode === "EDIT" && (!produitEC2 || !dateProduitEC2))
                 }
                 isLoading={localIsLoading}
               />
@@ -372,9 +378,9 @@ export const ExpertConnectionSection = ({
                 options={expertConnectionOptions}
                 required={isFieldRequired("produitEC4")}
                 hidden={
-                  mode === "VIEW"
-                    ? !produitEC4 && !dateProduitEC4
-                    : !produitEC3 && !dateProduitEC3
+                  expertConnection !== "Oui" ||
+                  (mode === "VIEW" && (!produitEC4 || !dateProduitEC4)) ||
+                  (mode === "EDIT" && (!produitEC3 || !dateProduitEC3))
                 }
                 isLoading={localIsLoading}
               />
@@ -401,9 +407,9 @@ export const ExpertConnectionSection = ({
                 mode={mode}
                 required={isFieldRequired("dateProduitEC4")}
                 hidden={
-                  mode === "VIEW"
-                    ? !produitEC4 && !dateProduitEC4
-                    : !produitEC3 && !dateProduitEC3
+                  expertConnection !== "Oui" ||
+                  (mode === "VIEW" && (!produitEC4 || !dateProduitEC4)) ||
+                  (mode === "EDIT" && (!produitEC3 || !dateProduitEC3))
                 }
                 isLoading={localIsLoading}
               />
@@ -431,9 +437,9 @@ export const ExpertConnectionSection = ({
                 options={expertConnectionOptions}
                 required={isFieldRequired("produitEC5")}
                 hidden={
-                  mode === "VIEW"
-                    ? !produitEC5 && !dateProduitEC5
-                    : !produitEC4 && !dateProduitEC4
+                  expertConnection !== "Oui" ||
+                  (mode === "VIEW" && (!produitEC5 || !dateProduitEC5)) ||
+                  (mode === "EDIT" && (!produitEC4 || !dateProduitEC4))
                 }
                 isLoading={localIsLoading}
               />
@@ -460,9 +466,9 @@ export const ExpertConnectionSection = ({
                 mode={mode}
                 required={isFieldRequired("dateProduitEC5")}
                 hidden={
-                  mode === "VIEW"
-                    ? !produitEC5 && !dateProduitEC5
-                    : !produitEC4 && !dateProduitEC4
+                  expertConnection !== "Oui" ||
+                  (mode === "VIEW" && (!produitEC5 || !dateProduitEC5)) ||
+                  (mode === "EDIT" && (!produitEC4 || !dateProduitEC4))
                 }
                 isLoading={localIsLoading}
               />

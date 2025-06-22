@@ -13,6 +13,8 @@ import { AppDispatch } from "@/store/store";
 import { updateLeadThunk } from "@/store/thunks/lead-details/lead-details.thunk";
 import { toast } from "sonner";
 import { processTsahalData } from "../setters/tsahal-setter";
+import { useMahzorGiyus } from "@/hooks/use-mahzor-giyus";
+import { useTypeGiyus } from "@/hooks/use-type-giyus";
 
 interface TsahalSectionProps {
   lead: Lead;
@@ -25,6 +27,7 @@ export const TsahalSection = ({ lead }: TsahalSectionProps) => {
   const [localIsLoading, setLocalIsLoading] = useState(false);
   const { control, handleSubmit, reset } = useForm<Partial<Lead>>({
     defaultValues: {
+      currentStatus: lead.currentStatus || "",
       soldierAloneStatus: lead.soldierAloneStatus || "",
       serviceType: lead.serviceType || "",
       mahalPath: lead.mahalPath || "",
@@ -43,11 +46,13 @@ export const TsahalSection = ({ lead }: TsahalSectionProps) => {
       armyEntryDateStatus: lead.armyEntryDateStatus || "",
       giyusDate: lead.giyusDate || "",
       michveAlonTraining: lead.michveAlonTraining || "",
+      mahzorGiyus: lead.mahzorGiyus || "",
     },
   });
 
   useEffect(() => {
     reset({
+      currentStatus: lead.currentStatus || "",
       soldierAloneStatus: lead.soldierAloneStatus || "",
       serviceType: lead.serviceType || "",
       mahalPath: lead.mahalPath || "",
@@ -66,6 +71,7 @@ export const TsahalSection = ({ lead }: TsahalSectionProps) => {
       armyEntryDateStatus: lead.armyEntryDateStatus || "",
       giyusDate: lead.giyusDate || "",
       michveAlonTraining: lead.michveAlonTraining || "",
+      mahzorGiyus: lead.mahzorGiyus || "",
     });
   }, [lead, reset]);
 
@@ -98,13 +104,36 @@ export const TsahalSection = ({ lead }: TsahalSectionProps) => {
     control,
     name: "armyEntryDateStatus",
   });
+
+  const giyusDate = useWatch({
+    control,
+    name: "giyusDate",
+  });
+
+  const mahalPath = useWatch({
+    control,
+    name: "mahalPath",
+  });
+  const currentStatus = useWatch({
+    control,
+    name: "currentStatus",
+  });
+
+  const mahzorGiyus = useMahzorGiyus(giyusDate);
+  const typeGiyus = useTypeGiyus(
+    giyusDate,
+    mahalPath,
+    currentStatus,
+    serviceType
+  );
+
   const handleModeChange = () => {
     setMode((prevMode) => (prevMode === "VIEW" ? "EDIT" : "VIEW"));
   };
 
   const handleSave = async (data: Partial<Lead>) => {
     setLocalIsLoading(true);
-    const processedData = processTsahalData(data);
+    const processedData = processTsahalData(data, mahzorGiyus, typeGiyus);
     try {
       await dispatch(
         updateLeadThunk({

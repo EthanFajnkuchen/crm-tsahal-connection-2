@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/dialog";
 import { DataTable } from "@/components/app-components/table/table";
 import MahzorGiyusSkeletonSection from "@/components/app-components/mahzor-giyus-skeleton/mahzor-giyus-skeleton";
+import { useNavigate } from "react-router-dom";
 
 const REQUIRED_MONTHS = ["Mars", "Aout", "Novembre"];
 const MONTH_COLORS: Record<string, { bg: string; text: string }> = {
@@ -28,6 +29,7 @@ const MONTH_COLORS: Record<string, { bg: string; text: string }> = {
 
 const MahzorGiyus: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
 
   const { data, isLoading, error, isPopupOpen, selectedCardKey } = useSelector(
     (state: RootState) => state.mahzorGiyus
@@ -61,6 +63,12 @@ const MahzorGiyus: React.FC = () => {
     );
   }
   if (!data) return <div>No data available.</div>;
+
+  const handleRowClick = (lead: any) => {
+    if (lead.ID) {
+      navigate(`/lead-details/${lead.ID}`);
+    }
+  };
 
   return (
     <div className="space-y-8">
@@ -126,6 +134,7 @@ const MahzorGiyus: React.FC = () => {
               data={selectedLeads}
               isLoading={false}
               error={null}
+              onRowClick={handleRowClick}
             />
           </div>
         </DialogContent>

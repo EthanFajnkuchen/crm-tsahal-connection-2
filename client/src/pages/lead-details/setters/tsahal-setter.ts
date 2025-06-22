@@ -1,6 +1,7 @@
 import { Lead } from "@/types/lead";
 
 export interface TsahalData {
+  currentStatus: string;
   soldierAloneStatus: string;
   serviceType: string;
   mahalPath: string;
@@ -19,12 +20,17 @@ export interface TsahalData {
   armyEntryDateStatus: string;
   giyusDate: string;
   michveAlonTraining: string;
+  mahzorGiyus: string;
+  typeGiyus: string;
 }
 
 export function processTsahalData(
-  leadData: Partial<Lead>
+  leadData: Partial<Lead>,
+  mahzorGiyus: string,
+  typeGiyus: string
 ): Partial<TsahalData> {
   const tsahalData: Partial<TsahalData> = {
+    currentStatus: leadData.currentStatus || "",
     soldierAloneStatus: leadData.soldierAloneStatus || "",
     serviceType: leadData.serviceType || "",
     mahalPath: leadData.mahalPath || "",
@@ -43,6 +49,8 @@ export function processTsahalData(
     armyEntryDateStatus: leadData.armyEntryDateStatus || "",
     giyusDate: leadData.giyusDate || "",
     michveAlonTraining: leadData.michveAlonTraining || "",
+    mahzorGiyus: mahzorGiyus,
+    typeGiyus: typeGiyus,
   };
 
   if (tsahalData.serviceType !== "Mahal") {
@@ -79,6 +87,13 @@ export function processTsahalData(
   if (tsahalData.armyEntryDateStatus === "Non") {
     tsahalData.giyusDate = "";
     tsahalData.michveAlonTraining = "";
+    tsahalData.mahzorGiyus = "";
+    tsahalData.typeGiyus = "";
+  }
+
+  if (tsahalData.giyusDate === "") {
+    tsahalData.mahzorGiyus = "";
+    tsahalData.typeGiyus = "";
   }
 
   return tsahalData;
