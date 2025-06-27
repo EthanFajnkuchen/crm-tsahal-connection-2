@@ -85,6 +85,12 @@ export class LeadController {
     return this.leadService.getMahzorGiyusCounts();
   }
 
+  @Get('tafkidim')
+  @Permissions('read:data')
+  async getTafkidim() {
+    return this.leadService.getTafkidim();
+  }
+
   @Get('download')
   @Permissions('read:data')
   async downloadLeads() {

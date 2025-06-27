@@ -16,6 +16,7 @@ import Logo from "@/assets/pictures/Logo Tsahal Conection.png";
 import "./App.css";
 import FormsRapports from "./pages/forms-rapports/Form-Rapports";
 import LeadDetails from "./pages/lead-details/LeadDetails";
+import TafkidimPage from "./pages/tafkidim/TafkidimPage";
 const ProtectedAppLayout = withAuthenticationRequired(AppLayout, {
   onRedirecting: () => (
     <div className="flex items-center justify-center h-screen bg-white">
@@ -41,6 +42,7 @@ function App() {
           <Route path="mahzor-giyus" element={<MahzorGiyus />} />
           <Route path="forms-rapports" element={<FormsRapports />} />
           <Route path="lead-details/:id" element={<LeadDetails />} />
+          <Route path="tafkidim" element={<TafkidimPage />} />
         </Route>
       </Routes>
     </Router>

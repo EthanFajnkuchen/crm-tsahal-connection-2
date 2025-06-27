@@ -6,7 +6,7 @@ import {
   StreamableFile,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, MoreThan, Brackets, Not, IsNull } from 'typeorm';
+import { Repository, MoreThan, Brackets, Not, IsNull, In } from 'typeorm';
 import { Lead } from './lead.entity';
 import { LeadStatistics } from './type';
 import { LeadFilterDto, UpdateLeadDto } from './lead.dto';
@@ -774,6 +774,47 @@ export class LeadService {
       throw new InternalServerErrorException(
         `Failed to update lead: ${error.message}`,
       );
+    }
+  }
+
+  async getTafkidim(): Promise<{
+    Jobnik: { leads: any[]; total: number };
+    'Tomeh Lehima': { leads: any[]; total: number };
+    Lohem: { leads: any[]; total: number };
+  }> {
+    try {
+      const leads = await this.leadRepository.find({
+        where: {
+          typePoste: In(['Jobnik', 'Tomeh Lehima', 'Lohem']),
+        },
+      });
+
+      const categories = {
+        Jobnik: { leads: [], total: 0 },
+        'Tomeh Lehima': { leads: [], total: 0 },
+        Lohem: { leads: [], total: 0 },
+      };
+
+      for (const lead of leads) {
+        if (categories[lead.typePoste]) {
+          categories[lead.typePoste].leads.push({
+            id: lead.ID,
+            fullName: `${lead.firstName} ${lead.lastName}`,
+            nomPoste: lead.nomPoste,
+          });
+          categories[lead.typePoste].total += 1;
+        }
+      }
+
+      Object.keys(categories).forEach((category) => {
+        categories[category].leads.sort((a, b) =>
+          a.fullName.toLowerCase().localeCompare(b.fullName.toLowerCase()),
+        );
+      });
+
+      return categories;
+    } catch (error) {
+      throw new Error(`Failed to retrieve tafkidim: ${error.message}`);
     }
   }
 }
