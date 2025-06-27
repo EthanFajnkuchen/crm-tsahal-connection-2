@@ -15,6 +15,7 @@ import MahzorGiyusReducer from "./slices/mahzor-giyus/mahzor-giyus.slice";
 import ExcelReducer from "./slices/data/excel.slice";
 import leadDetailsReducer from "./slices/lead-details/lead-details.slice";
 import discussionsReducer from "./slices/discussions/discussions.slice";
+import tafkidimReducer from "./slices/tafkidim/tafkidim.slice";
 
 export const store = configureStore({
   reducer: {
@@ -34,6 +35,7 @@ export const store = configureStore({
     downloadExcel: ExcelReducer,
     leadDetails: leadDetailsReducer,
     discussions: discussionsReducer,
+    tafkidim: tafkidimReducer,
   },
 });
 
