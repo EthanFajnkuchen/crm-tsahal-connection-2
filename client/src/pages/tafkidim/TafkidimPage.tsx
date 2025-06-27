@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
 import { fetchTafkidimThunk } from "@/store/thunks/tafkidim/tafkidim.thunk";
-import TafkidimColumn from "@/components/tafkidim/TafkidimColumn";
+import TafkidimColumn from "@/components/app-components/tafkidim-colum /TafkidimColumn";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 

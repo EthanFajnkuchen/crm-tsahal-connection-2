@@ -1,5 +1,5 @@
 import React from "react";
-import TafkidimCard from "./TafkidimCard";
+import TafkidimCard from "../tafkidim-card/TafkidimCard";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface Props {
