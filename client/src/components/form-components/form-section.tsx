@@ -68,7 +68,7 @@ const FormSection: React.FC<FormSectionProps> = ({
                 variant="ghost"
                 size="sm"
                 onClick={onModeChange}
-                className="h-8 border"
+                className="h-8 border font-[Poppins]"
                 type="button"
               >
                 Modifier
@@ -79,7 +79,7 @@ const FormSection: React.FC<FormSectionProps> = ({
                   variant="ghost"
                   size="sm"
                   onClick={onCancel}
-                  className="h-8 border"
+                  className="h-8 border font-[Poppins]"
                   type="button"
                   disabled={isLoading}
                 >
@@ -89,7 +89,7 @@ const FormSection: React.FC<FormSectionProps> = ({
                   variant="ghost"
                   size="sm"
                   onClick={onSave}
-                  className="h-8 border bg-purple-600 text-white hover:bg-purple-700 hover:text-white"
+                  className="h-8 border bg-purple-600 text-white hover:bg-purple-700 hover:text-white font-[Poppins]"
                   type="submit"
                   disabled={isLoading || saveDisabled}
                 >
