@@ -460,6 +460,17 @@ export class LeadService {
         });
       }
 
+      // Trier les leads par prénom et nom dans chaque groupe
+      Object.keys(results).forEach((yearKey) => {
+        Object.keys(results[yearKey]).forEach((typeKey) => {
+          results[yearKey][typeKey].leads.sort((a, b) => {
+            const nameA = `${a.firstName} ${a.lastName}`.toLowerCase();
+            const nameB = `${b.firstName} ${b.lastName}`.toLowerCase();
+            return nameA.localeCompare(nameB);
+          });
+        });
+      });
+
       const sortedResults = Object.keys(results)
         .sort(
           (a, b) => parseInt(b.split(' ').pop()) - parseInt(a.split(' ').pop()),

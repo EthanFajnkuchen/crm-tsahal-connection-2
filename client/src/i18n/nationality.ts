@@ -37,6 +37,10 @@ export const NATIONALITY = {
   ],
   nationalities: [
     {
+      value: "Israélienne",
+      displayName: "Israélienne",
+    },
+    {
       value: "Française",
       displayName: "Française",
     },
