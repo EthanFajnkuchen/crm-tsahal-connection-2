@@ -5,7 +5,7 @@ export const API_ROUTES = {
   DASHBOARD_CHART_MONTHLY: `${BACKEND_BASE_URL}/api/leads/per-month`,
   DASHBOARD_CHART_YEARLY: `${BACKEND_BASE_URL}/api/leads/per-year`,
   FILTERED_LEADS: `${BACKEND_BASE_URL}/api/leads/filters`,
-  DATA_TABLE_LEADS: `${BACKEND_BASE_URL}/api/leads/`,
+  DATA_TABLE_LEADS: `${BACKEND_BASE_URL}/api/leads`,
   DOWNLOAD_LEADS: `${BACKEND_BASE_URL}/api/leads/download`,
   EXPERT_CO_STATS: `${BACKEND_BASE_URL}/api/leads/expert-co-statistics`,
   EXPERT_CO_CHARTS: `${BACKEND_BASE_URL}/api/leads/expert-co-charts`,
