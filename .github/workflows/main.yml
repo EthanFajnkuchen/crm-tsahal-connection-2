@@ -1,4 +1,4 @@
-name: CI - Build Nest on PR
+name: CI - Build Vite on PR
 
 on:
   pull_request:
@@ -48,10 +48,10 @@ jobs:
       - name: Build the server project
         run: cd server && npm run build
 
-enforce-build:
-  name: Enforce Successful Build
-  runs-on: ubuntu-latest
-  needs: [build-client, build-server]
-  steps:
-    - name: Confirm build success
-      run: echo "✅ Both client and server builds are successful, PR can be merged"
+  enforce-build:
+    name: Enforce Successful Build
+    runs-on: ubuntu-latest
+    needs: [build-client, build-server]
+    steps:
+      - name: Confirm build success
+        run: echo "✅ Both client and server builds are successful, PR can be merged"
