@@ -42,6 +42,7 @@ export const createDiscussion = async (
         Authorization: `Bearer ${M2M_TOKEN}`,
       },
       body: JSON.stringify(discussionData),
+      credentials: "include",
     });
 
     if (!response.ok) {
