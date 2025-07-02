@@ -6,7 +6,9 @@ const M2M_TOKEN = import.meta.env.VITE_API_M2M_TOKEN;
 export const searchLeads = async (query: string): Promise<Lead[]> => {
   try {
     const response = await fetch(
-      `${API_ROUTES.DATA_TABLE_LEADS}search?input=${encodeURIComponent(query)}`,
+      `${API_ROUTES.DATA_TABLE_LEADS}/search?input=${encodeURIComponent(
+        query
+      )}`,
       {
         headers: {
           Authorization: `Bearer ${M2M_TOKEN}`,
