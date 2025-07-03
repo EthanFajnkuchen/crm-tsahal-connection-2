@@ -43,6 +43,7 @@ export const JudaismNationalitySection = ({
       nationality3: lead.nationality3 || "",
       passportNumber3: lead.passportNumber3 || "",
       hasIsraeliID: lead.hasIsraeliID || "",
+      israeliIDNumber: lead.israeliIDNumber || "",
     },
   });
 
@@ -61,6 +62,7 @@ export const JudaismNationalitySection = ({
       nationality3: lead.nationality3 || "",
       passportNumber3: lead.passportNumber3 || "",
       hasIsraeliID: lead.hasIsraeliID || "",
+      israeliIDNumber: lead.israeliIDNumber || "",
     });
   }, [lead, reset]);
 
@@ -74,11 +76,11 @@ export const JudaismNationalitySection = ({
     name: "numberOfNationalities",
   });
 
-  console.log(
-    ["Ole Hadash", "Katin Hozer", "Tochav Hozer"].includes(
-      statutResidentIsrael || ""
-    )
-  );
+  const hasIsraeliID = useWatch({
+    control,
+    name: "hasIsraeliID",
+  });
+
   const handleModeChange = () => {
     setMode((prevMode) => (prevMode === "VIEW" ? "EDIT" : "VIEW"));
   };
@@ -171,10 +173,40 @@ export const JudaismNationalitySection = ({
             label="Année d'Alyah"
             mode={mode}
             hidden={
-              !["Ole Hadash", "Katin Hozer", "Tochav Hozer"].includes(
-                statutResidentIsrael || ""
-              )
+              ![
+                "Ole Hadash",
+                "Katin Hozer",
+                "Tochav Hozer",
+                "Ezrah Olé",
+              ].includes(statutResidentIsrael || "")
             }
+            isLoading={localIsLoading}
+          />
+          <FormDropdown
+            control={control}
+            name="hasIsraeliID"
+            label="ID Israélien"
+            mode={mode}
+            options={NATIONALITY.has_israeli_id.map((option) => ({
+              value: option.value.toString(),
+              label: option.displayName,
+            }))}
+            isLoading={localIsLoading}
+            hidden={
+              ![
+                "Ole Hadash",
+                "Katin Hozer",
+                "Tochav Hozer",
+                "Ben Meager",
+              ].includes(statutResidentIsrael || "")
+            }
+          />
+          <FormInput
+            control={control}
+            name="israeliIDNumber"
+            label="ID"
+            mode={mode}
+            hidden={hasIsraeliID !== "Oui"}
             isLoading={localIsLoading}
           />
           <FormDropdown

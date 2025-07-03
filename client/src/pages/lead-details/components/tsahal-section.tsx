@@ -211,7 +211,7 @@ export const TsahalSection = ({ lead }: TsahalSectionProps) => {
               value: option.value,
               label: option.displayName,
             }))}
-            hidden={serviceType !== "Service complet"}
+            hidden={serviceType !== "Études"}
             isLoading={localIsLoading}
           />
           <FormDropdown
