@@ -7,7 +7,7 @@ const HeaderDesktop: React.FC = () => {
   const pageTitle = useCurrentPageName();
 
   return (
-    <header className="p-4 md:shadow-md bg-white flex flex-row justify-between items-center font-[Poppins] ">
+    <header className="sticky top-0 z-10 p-4 bg-white flex flex-row justify-between items-center font-[Poppins] ">
       <div>
         <h1 className="text-xl font-bold">{pageTitle}</h1>
       </div>

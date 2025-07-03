@@ -11,7 +11,7 @@ const AppLayout = () => {
     <div className="md:flex">
       {!isMobile && <AppSidebar />}
       {isMobile && <HeaderMobile />}
-      <div className="flex flex-col flex-1">
+      <div className="flex flex-col flex-1 bg-[#f3eefb]">
         {!isMobile && <Header />}
         <Outlet />
       </div>
