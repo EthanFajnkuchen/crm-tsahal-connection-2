@@ -175,7 +175,8 @@ export const EducationSection = ({ lead }: EducationSectionProps) => {
               bacObtention === "Non" ||
               bacCountry !== "Israel" ||
               bacType !== "BAC israélien" ||
-              otherSchoolName !== israeliBacSchool
+              (israeliBacSchool !== "Autre" &&
+                otherSchoolName !== israeliBacSchool)
             }
             isLoading={localIsLoading}
           />
