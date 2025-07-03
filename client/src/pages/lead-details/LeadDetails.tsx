@@ -57,7 +57,7 @@ const LeadDetailsPage: React.FC = () => {
                 key={tab.id}
                 onClick={() => scrollToSection(tab.id)}
                 className={`
-                  flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all duration-200 font-[Poppins]
+                  flex items-center space-x-2 px-4 py-2 rounded-lg text-xs font-medium whitespace-nowrap transition-all duration-200 font-[Poppins]
                   ${
                     activeTab === tab.id
                       ? "bg-purple-100 text-purple-700 border border-purple-200 shadow-sm"
