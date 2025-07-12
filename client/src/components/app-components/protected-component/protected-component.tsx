@@ -1,7 +1,6 @@
 import { useAuth0 } from "@auth0/auth0-react";
 import { RoleType } from "@/types/role-types";
 import { ReactNode } from "react";
-import { useUserPermissions } from "@/hooks/use-user-permissions";
 
 interface ProtectedComponentProps {
   children: ReactNode;
