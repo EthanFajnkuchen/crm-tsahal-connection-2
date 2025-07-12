@@ -8,6 +8,7 @@ interface CardLeadsState {
   selectedCardApiKey: string | null;
   isLoading: boolean;
   error: string | null;
+  currentPage: number;
 }
 
 const loadPopupState = () => {
@@ -15,9 +16,9 @@ const loadPopupState = () => {
     const savedState = localStorage.getItem("popupState");
     return savedState
       ? JSON.parse(savedState)
-      : { isPopupOpen: false, selectedCardApiKey: null };
+      : { isPopupOpen: false, selectedCardApiKey: null, currentPage: 0 };
   } catch {
-    return { isPopupOpen: false, selectedCardApiKey: null };
+    return { isPopupOpen: false, selectedCardApiKey: null, currentPage: 0 };
   }
 };
 
@@ -27,6 +28,7 @@ const savePopupState = (state: CardLeadsState) => {
     JSON.stringify({
       isPopupOpen: state.isPopupOpen,
       selectedCardApiKey: state.selectedCardApiKey,
+      currentPage: state.currentPage,
     })
   );
 };
@@ -36,6 +38,7 @@ const initialState: CardLeadsState = {
   status: "idle",
   isLoading: false,
   error: null,
+  currentPage: 0,
   ...loadPopupState(),
 };
 
@@ -46,11 +49,18 @@ const cardLeadsSlice = createSlice({
     openPopup: (state, action: PayloadAction<string>) => {
       state.isPopupOpen = true;
       state.selectedCardApiKey = action.payload;
+      // Réinitialiser la page à 0 lors de l'ouverture d'un nouveau popup
+      state.currentPage = 0;
       savePopupState(state);
     },
     closePopup: (state) => {
       state.isPopupOpen = false;
       state.selectedCardApiKey = null;
+      state.currentPage = 0;
+      savePopupState(state);
+    },
+    setCurrentPage: (state, action: PayloadAction<number>) => {
+      state.currentPage = action.payload;
       savePopupState(state);
     },
   },
@@ -73,5 +83,5 @@ const cardLeadsSlice = createSlice({
   },
 });
 
-export const { openPopup, closePopup } = cardLeadsSlice.actions;
+export const { openPopup, closePopup, setCurrentPage } = cardLeadsSlice.actions;
 export default cardLeadsSlice.reducer;
