@@ -44,11 +44,9 @@ const DashboardCardsSection: React.FC = () => {
     ? DASHBOARD_CARDS_ITEMS.find((card) => card.apiKey === selectedCardApiKey)
     : null;
 
-  const {
-    data: filteredLeads,
-    isLoading: isLoadingFiltered,
-    error: errorFiltered,
-  } = useSelector((state: RootState) => state.filteredLeads);
+  const { data: filteredLeads, isLoading: isLoadingFiltered } = useSelector(
+    (state: RootState) => state.filteredLeads
+  );
 
   const fetchFilteredData = async (apiKey: string) => {
     const selectedCard = DASHBOARD_CARDS_ITEMS.find(
