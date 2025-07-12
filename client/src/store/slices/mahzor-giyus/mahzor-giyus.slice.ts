@@ -9,6 +9,7 @@ interface MahzorGiyusState {
   error: string | null;
   isPopupOpen: boolean;
   selectedCardKey: string | null;
+  currentPage: number;
 }
 
 const loadPopupState = () => {
@@ -16,9 +17,9 @@ const loadPopupState = () => {
     const savedState = localStorage.getItem("mahzorPopupState");
     return savedState
       ? JSON.parse(savedState)
-      : { isPopupOpen: false, selectedCardKey: null };
+      : { isPopupOpen: false, selectedCardKey: null, currentPage: 0 };
   } catch {
-    return { isPopupOpen: false, selectedCardKey: null };
+    return { isPopupOpen: false, selectedCardKey: null, currentPage: 0 };
   }
 };
 
@@ -28,6 +29,7 @@ const savePopupState = (state: MahzorGiyusState) => {
     JSON.stringify({
       isPopupOpen: state.isPopupOpen,
       selectedCardKey: state.selectedCardKey,
+      currentPage: state.currentPage,
     })
   );
 };
@@ -37,6 +39,7 @@ const initialState: MahzorGiyusState = {
   status: "idle",
   isLoading: false,
   error: null,
+  currentPage: 0,
   ...loadPopupState(),
 };
 
@@ -47,11 +50,18 @@ const mahzorGiyusSlice = createSlice({
     openPopup: (state, action: PayloadAction<string>) => {
       state.isPopupOpen = true;
       state.selectedCardKey = action.payload;
+      // Réinitialiser la page à 0 lors de l'ouverture d'un nouveau popup
+      state.currentPage = 0;
       savePopupState(state);
     },
     closePopup: (state) => {
       state.isPopupOpen = false;
       state.selectedCardKey = null;
+      state.currentPage = 0;
+      savePopupState(state);
+    },
+    setCurrentPage: (state, action: PayloadAction<number>) => {
+      state.currentPage = action.payload;
       savePopupState(state);
     },
   },
@@ -76,5 +86,6 @@ const mahzorGiyusSlice = createSlice({
   },
 });
 
-export const { openPopup, closePopup } = mahzorGiyusSlice.actions;
+export const { openPopup, closePopup, setCurrentPage } =
+  mahzorGiyusSlice.actions;
 export default mahzorGiyusSlice.reducer;

@@ -35,6 +35,8 @@ interface DataTableProps<TData, TValue> {
   isLoading?: boolean;
   error?: string | null;
   onRowClick?: (row: TData) => void;
+  initialPage?: number;
+  onPageChange?: (page: number) => void;
 }
 
 export function DataTable<TData, TValue>({
@@ -43,6 +45,8 @@ export function DataTable<TData, TValue>({
   isLoading,
   error,
   onRowClick,
+  initialPage = 0,
+  onPageChange,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
 
@@ -56,12 +60,21 @@ export function DataTable<TData, TValue>({
     initialState: {
       pagination: {
         pageSize: 15,
+        pageIndex: initialPage,
       },
     },
     state: {
       sorting,
     },
   });
+
+  // Notifier les changements de page
+  React.useEffect(() => {
+    const currentPage = table.getState().pagination.pageIndex;
+    if (onPageChange && currentPage !== initialPage) {
+      onPageChange(currentPage);
+    }
+  }, [table.getState().pagination.pageIndex, onPageChange, initialPage]);
 
   const totalPages = table.getPageCount();
   const currentPage = table.getState().pagination.pageIndex + 1;

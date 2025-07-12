@@ -13,6 +13,7 @@ import { LeadInfoSection } from "./components/lead-info-section";
 import { DiscussionsSection } from "./components/discussions-section";
 import { useScrollSpy, useScrollToSection } from "./hooks";
 import { tabs } from "./constants/tabs";
+import { useAuth0 } from "@auth0/auth0-react";
 
 const LeadDetailsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();

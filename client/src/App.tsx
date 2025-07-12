@@ -10,7 +10,7 @@ import Data from "./pages/data/Data";
 import AppLayout from "./AppLayout";
 import ExpertConnection from "./pages/expert-connection/ExpertConnection";
 import MahzorGiyus from "./pages/mahzor-giyus/MahzorGiyus";
-import { withAuthenticationRequired } from "@auth0/auth0-react";
+import { useAuth0, withAuthenticationRequired } from "@auth0/auth0-react";
 import AuthTokenRouteGuard from "./AuthTokenRouteGuard";
 import Logo from "@/assets/pictures/Logo Tsahal Conection.png";
 import "./App.css";

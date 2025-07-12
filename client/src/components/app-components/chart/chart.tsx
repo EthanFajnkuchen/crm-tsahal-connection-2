@@ -52,7 +52,6 @@
       value,
     }));
 
-    console.log(error);
 
     const placeholderData = Array(5).fill({ date: "2025-01-01", value: 3 });
 

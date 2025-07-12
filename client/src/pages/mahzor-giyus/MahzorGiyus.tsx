@@ -8,6 +8,7 @@ import { MahzorGiyusColumns } from "@/table-columns/mahzor-giyus-columns";
 import {
   openPopup,
   closePopup,
+  setCurrentPage,
 } from "@/store/slices/mahzor-giyus/mahzor-giyus.slice";
 import {
   Dialog,
@@ -31,9 +32,8 @@ const MahzorGiyus: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
 
-  const { data, isLoading, error, isPopupOpen, selectedCardKey } = useSelector(
-    (state: RootState) => state.mahzorGiyus
-  );
+  const { data, isLoading, error, isPopupOpen, selectedCardKey, currentPage } =
+    useSelector((state: RootState) => state.mahzorGiyus);
 
   useEffect(() => {
     dispatch(fetchMahzorGiyusCountsThunk());
@@ -51,6 +51,10 @@ const MahzorGiyus: React.FC = () => {
 
   const handleCardClick = (key: string) => {
     dispatch(openPopup(key));
+  };
+
+  const handlePageChange = (page: number) => {
+    dispatch(setCurrentPage(page));
   };
 
   if (isLoading || error) {
@@ -135,6 +139,8 @@ const MahzorGiyus: React.FC = () => {
               isLoading={false}
               error={null}
               onRowClick={handleRowClick}
+              initialPage={currentPage}
+              onPageChange={handlePageChange}
             />
           </div>
         </DialogContent>
