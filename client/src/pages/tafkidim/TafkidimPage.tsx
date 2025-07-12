@@ -5,6 +5,7 @@ import { fetchTafkidimThunk } from "@/store/thunks/tafkidim/tafkidim.thunk";
 import TafkidimColumn from "@/components/app-components/tafkidim-colum /TafkidimColumn";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import ProtectedComponent from "@/components/app-components/protected-component/protected-component";
 
 const CATEGORIES = [
   { key: "Jobnik", label: "Jobnik" },
@@ -44,42 +45,44 @@ const TafkidimPage = () => {
   }, [data, search]);
 
   return (
-    <div className="p-6 font-[Poppins]">
-      <div className="flex justify-center mb-6">
-        <div className="relative w-2/3">
-          <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground text-fuchsia-800 font-bold" />
-          <Input
-            className="w-full p-2 rounded border bg-white "
-            style={{ paddingLeft: "2.5rem" }}
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Rechercher un poste ou un soldat"
-          />
+    <ProtectedComponent showUnauthorizedMessage={true}>
+      <div className="p-6 font-[Poppins]">
+        <div className="flex justify-center mb-6">
+          <div className="relative w-2/3">
+            <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground text-fuchsia-800 font-bold" />
+            <Input
+              className="w-full p-2 rounded border bg-white "
+              style={{ paddingLeft: "2.5rem" }}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Rechercher un poste ou un soldat"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 max-w-7xl mx-auto ">
+          {CATEGORIES.map((cat) => (
+            <TafkidimColumn
+              key={cat.key}
+              title={cat.label}
+              leads={
+                filteredData
+                  ? filteredData[cat.key as keyof typeof filteredData].leads
+                  : []
+              }
+              total={
+                filteredData
+                  ? filteredData[cat.key as keyof typeof filteredData].leads
+                      .length
+                  : 0
+              }
+              isLoading={isLoading}
+              error={error || ""}
+            />
+          ))}
         </div>
       </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 max-w-7xl mx-auto ">
-        {CATEGORIES.map((cat) => (
-          <TafkidimColumn
-            key={cat.key}
-            title={cat.label}
-            leads={
-              filteredData
-                ? filteredData[cat.key as keyof typeof filteredData].leads
-                : []
-            }
-            total={
-              filteredData
-                ? filteredData[cat.key as keyof typeof filteredData].leads
-                    .length
-                : 0
-            }
-            isLoading={isLoading}
-            error={error || ""}
-          />
-        ))}
-      </div>
-    </div>
+    </ProtectedComponent>
   );
 };
 

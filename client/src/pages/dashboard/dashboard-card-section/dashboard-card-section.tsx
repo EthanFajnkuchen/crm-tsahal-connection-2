@@ -20,6 +20,7 @@ import { DataTable } from "@/components/app-components/table/table";
 import {
   openPopup,
   closePopup,
+  setCurrentPage,
 } from "@/store/slices/dashboard/card-leads.slice";
 
 const DashboardCardsSection: React.FC = () => {
@@ -36,19 +37,16 @@ const DashboardCardsSection: React.FC = () => {
     error,
     isPopupOpen,
     selectedCardApiKey,
+    currentPage,
   } = useSelector((state: RootState) => state.cardLeads);
 
   const selectedCard = selectedCardApiKey
     ? DASHBOARD_CARDS_ITEMS.find((card) => card.apiKey === selectedCardApiKey)
     : null;
 
-  const {
-    data: filteredLeads,
-    isLoading: isLoadingFiltered,
-    error: errorFiltered,
-  } = useSelector((state: RootState) => state.filteredLeads);
-
-  console.log(filteredLeads, isLoadingFiltered, errorFiltered);
+  const { data: filteredLeads, isLoading: isLoadingFiltered } = useSelector(
+    (state: RootState) => state.filteredLeads
+  );
 
   const fetchFilteredData = async (apiKey: string) => {
     const selectedCard = DASHBOARD_CARDS_ITEMS.find(
@@ -95,6 +93,10 @@ const DashboardCardsSection: React.FC = () => {
     }
   };
 
+  const handlePageChange = (page: number) => {
+    dispatch(setCurrentPage(page));
+  };
+
   return (
     <Section title={"Statistiques actuelles"}>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 ">
@@ -131,6 +133,8 @@ const DashboardCardsSection: React.FC = () => {
               isLoading={isLoadingFiltered}
               error={null}
               onRowClick={handleRowClick}
+              initialPage={currentPage}
+              onPageChange={handlePageChange}
             />
           </div>
         </DialogContent>

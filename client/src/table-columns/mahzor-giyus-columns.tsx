@@ -72,7 +72,17 @@ export const MahzorGiyusColumns = {
     },
     {
       accessorKey: "expertConnection",
-      header: "Expert Connection",
+      header: ({ column }) => (
+        <Button
+          variant="link"
+          className="p-0 m-0 border-none shadow-none text-inherit hover:no-underline"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Expert Connection
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      ),
+      defaultSortDesc: false,
     },
   ] as ColumnDef<any>[],
   defaultSorting: [

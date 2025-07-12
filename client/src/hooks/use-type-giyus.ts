@@ -9,7 +9,6 @@ export const useTypeGiyus = (
 
   return useMemo(() => {
     let typeGiyus = "";
-    console.log("enter");
 
     if (
       giyusDate &&
