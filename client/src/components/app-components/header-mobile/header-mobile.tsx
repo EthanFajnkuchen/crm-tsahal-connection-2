@@ -10,11 +10,14 @@ import { SIDEBAR_ITEMS } from "@/i18n/sidebar-items";
 import useCurrentPageName from "@/hooks/use-current-page-name";
 import { SearchInput } from "../search-input/search-input";
 import UserProfile from "@/components/app-components/user-profile/user-profile";
+import { useAuth0 } from "@auth0/auth0-react";
+import { RoleType } from "@/types/role-types";
 
 export function HeaderMobile() {
   const [open, setOpen] = useState(false);
   const currentPage = useCurrentPageName();
   const location = window.location;
+  const { user } = useAuth0();
 
   return (
     <header className="!sticky !top-0 !z-50 w-full border-b !bg-white backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -50,6 +53,13 @@ export function HeaderMobile() {
                 <nav className="px-2">
                   {SIDEBAR_ITEMS.map((item) => {
                     const isActive = location.pathname === item.link;
+                    if (
+                      !user?.roleType?.some((role: RoleType) =>
+                        item.roles.includes(role)
+                      )
+                    ) {
+                      return null;
+                    }
                     return (
                       <Link
                         key={item.link}

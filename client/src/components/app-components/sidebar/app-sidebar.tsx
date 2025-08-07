@@ -12,9 +12,12 @@ import {
 import { SIDEBAR_ITEMS } from "@/i18n/sidebar-items";
 import logoTsahalConnection from "@/assets/pictures/Logo Tsahal Conection.png";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useAuth0 } from "@auth0/auth0-react";
+import { RoleType } from "@/types/role-types";
 
 export function AppSidebar() {
   const isMobile = useIsMobile();
+  const { user } = useAuth0();
 
   return (
     <SidebarProvider>
@@ -32,6 +35,13 @@ export function AppSidebar() {
               <SidebarMenu>
                 {!isMobile && <SidebarTrigger></SidebarTrigger>}
                 {SIDEBAR_ITEMS.map((item) => {
+                  if (
+                    !user?.roleType?.some((role: RoleType) =>
+                      item.roles.includes(role)
+                    )
+                  ) {
+                    return null;
+                  }
                   const isActive = location.pathname === item.link;
                   return (
                     <SidebarMenuItem
