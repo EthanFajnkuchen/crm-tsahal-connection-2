@@ -19,6 +19,7 @@ import { PIKOUD } from "@/i18n/pikoud";
 import { useMahzorGiyus } from "@/hooks/use-mahzor-giyus";
 import { useTypeGiyus } from "@/hooks/use-type-giyus";
 import { useExpertCoBadge } from "@/hooks/use-expert-co-badge";
+import { TYPE_POSTE } from "@/i18n/type-poste";
 
 interface LeadInfoSectionProps {
   lead: Lead;
@@ -258,6 +259,17 @@ export const LeadInfoSection = ({ lead }: LeadInfoSectionProps) => {
               label: option.displayName,
             }))}
           />
+          <FormDropdown
+            control={control}
+            name="typePoste"
+            label="Type de poste"
+            mode={mode}
+            isLoading={localIsLoading}
+            options={TYPE_POSTE.map((option) => ({
+              value: option.value,
+              label: option.displayName,
+            }))}
+          />
           <FormInput
             control={control}
             name="nomPoste"
@@ -275,6 +287,13 @@ export const LeadInfoSection = ({ lead }: LeadInfoSectionProps) => {
               value: option.value,
               label: option.displayName,
             }))}
+          />
+          <FormDatePicker
+            control={control}
+            name="dateFinService"
+            label="Date de fin de service"
+            mode={mode}
+            isLoading={localIsLoading}
           />
         </FormSubSection>
       </FormSection>
