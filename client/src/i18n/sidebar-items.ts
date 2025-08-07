@@ -44,7 +44,7 @@ export const SIDEBAR_ITEMS = [
     displayName: "Volontaires",
     link: "/volontaires",
     icon: PersonStanding,
-    roles: [RoleType.VOLONTAIRE],
+    roles: [RoleType.ADMINISTRATEUR],
   },
   {
     displayName: "Forms & Rapports",
