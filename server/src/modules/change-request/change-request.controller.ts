@@ -20,7 +20,7 @@ export class ChangeRequestController {
   constructor(private readonly changeRequestService: ChangeRequestService) {}
 
   @Post()
-  @Permissions('write:data')
+  // @Permissions('write:data')
   async create(
     @Body() createChangeRequestDto: CreateChangeRequestDto,
   ): Promise<ChangeRequest> {
@@ -31,6 +31,14 @@ export class ChangeRequestController {
   @Permissions('read:data')
   async findAll(): Promise<ChangeRequest[]> {
     return this.changeRequestService.findAll();
+  }
+
+  @Get('lead/:leadId')
+  @Permissions('read:data')
+  async findByLeadId(
+    @Param('leadId') leadId: string,
+  ): Promise<ChangeRequest[]> {
+    return this.changeRequestService.findByLeadId(+leadId);
   }
 
   @Get(':id')

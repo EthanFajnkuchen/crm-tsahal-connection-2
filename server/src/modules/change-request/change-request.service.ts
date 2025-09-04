@@ -17,6 +17,7 @@ export class ChangeRequestService {
   async create(
     createChangeRequestDto: CreateChangeRequestDto,
   ): Promise<ChangeRequest> {
+    console.log(createChangeRequestDto);
     const changeRequest = this.changeRequestRepository.create(
       createChangeRequestDto,
     );
@@ -39,6 +40,13 @@ export class ChangeRequestService {
     }
 
     return changeRequest;
+  }
+
+  async findByLeadId(leadId: number): Promise<ChangeRequest[]> {
+    return this.changeRequestRepository.find({
+      where: { leadId },
+      order: { dateModified: 'DESC' },
+    });
   }
 
   async update(

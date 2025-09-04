@@ -1,6 +1,9 @@
-import { IsString, IsOptional, IsDateString } from 'class-validator';
+import { IsString, IsOptional, IsDateString, IsNumber } from 'class-validator';
 
 export class CreateChangeRequestDto {
+  @IsNumber()
+  leadId: number;
+
   @IsString()
   fieldChanged: string;
 
@@ -18,6 +21,10 @@ export class CreateChangeRequestDto {
 }
 
 export class UpdateChangeRequestDto {
+  @IsOptional()
+  @IsNumber()
+  leadId?: number;
+
   @IsOptional()
   @IsString()
   fieldChanged?: string;

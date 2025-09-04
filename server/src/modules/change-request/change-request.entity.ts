@@ -5,6 +5,9 @@ export class ChangeRequest {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Column()
+  leadId: number;
+
   @Column({ length: 255 })
   fieldChanged: string;
 

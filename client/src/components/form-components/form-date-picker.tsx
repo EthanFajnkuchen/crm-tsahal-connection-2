@@ -30,6 +30,11 @@ interface FormDatePickerProps<T extends FieldValues> {
   toYear?: number;
   required?: boolean;
   isLoading?: boolean;
+  pendingChange?: boolean;
+  pendingChangeDetails?: {
+    oldValue: string;
+    newValue: string;
+  };
 }
 
 // Separate component to handle the input logic with hooks
@@ -257,6 +262,8 @@ const FormDatePicker = <T extends FieldValues>({
   toYear = new Date().getFullYear() + 40,
   required = false,
   isLoading = false,
+  pendingChange = false,
+  pendingChangeDetails,
 }: FormDatePickerProps<T>) => {
   if (hidden) return null;
 
@@ -360,6 +367,16 @@ const FormDatePicker = <T extends FieldValues>({
         />
       )}
       {error && <p className="text-sm text-red-500">{error}</p>}
+      {pendingChange && (
+        <p className="text-xs text-orange-600 flex items-center gap-1">
+          ⏳ Modification en attente
+          {pendingChangeDetails && (
+            <span className="ml-1 font-mono">
+              → "{pendingChangeDetails.newValue}"
+            </span>
+          )}
+        </p>
+      )}
     </div>
   );
 };

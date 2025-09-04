@@ -44,12 +44,12 @@ const internal_status = [
     displayName: "Un soldat - unité",
   },
   {
-    value: "Un soldat - sans unité",
-    displayName: "Un soldat - sans unité",
+    value: "Un soldat - Michve Alon",
+    displayName: "Un soldat - Michve Alon",
   },
   {
-    value: "Un soldat - en formation",
-    displayName: "Un soldat - en formation",
+    value: "Un soldat - libéré",
+    displayName: "Un soldat - libéré",
   },
   {
     value: "Abandon avant le service",
