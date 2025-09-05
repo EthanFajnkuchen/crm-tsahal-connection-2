@@ -36,7 +36,7 @@ jobs:
           username: ${{ secrets.FTP_SERVER_USERNAME }}
           password: ${{ secrets.FTP_SERVER_PASSWORD }}
           local-dir: ./server/
-          server-dir: ./crmtc2/
+          server-dir: /crmtc2/
 
   enforce-deploy:
     name: Enforce Successful Deploy
