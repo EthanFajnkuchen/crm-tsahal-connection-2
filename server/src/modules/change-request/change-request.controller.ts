@@ -28,7 +28,7 @@ export class ChangeRequestController {
   }
 
   @Get()
-  // @Permissions('read:data')
+  //@Permissions('read:data')
   async findAll(): Promise<ChangeRequest[]> {
     return this.changeRequestService.findAll();
   }
