@@ -40,8 +40,9 @@ export const useUserPermissions = (): UseUserPermissionsReturn => {
         setError(null);
 
         const token = await getAccessTokenSilently();
+        console.log("token", token);
         const decodedToken = jwtDecode<DecodedToken>(token);
-
+        console.log("decodedToken", decodedToken);
         setPermissions(decodedToken.permissions || []);
         setRoleType(decodedToken.roleType || []);
       } catch (err) {

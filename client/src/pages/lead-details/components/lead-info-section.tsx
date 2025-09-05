@@ -161,6 +161,8 @@ export const LeadInfoSection = ({ lead }: LeadInfoSectionProps) => {
   };
 
   const handleSave = async (data: Partial<Lead>) => {
+    console.log("roleType", roleType);
+
     setLocalIsLoading(true);
     try {
       // Apply the same transformations as before
@@ -198,7 +200,6 @@ export const LeadInfoSection = ({ lead }: LeadInfoSectionProps) => {
       // Check user role and handle accordingly
       const userRole = roleType[0];
       console.log("userRole", userRole);
-      console.log("roleType", roleType);
 
       if (userRole === RoleType.VOLONTAIRE) {
         // For volunteers: create change requests instead of updating directly
