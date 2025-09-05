@@ -8,8 +8,8 @@ import {
 import { FormDropdown } from "@/components/form-components/form-dropdown";
 import { useState, useEffect } from "react";
 import { EDUCATION } from "@/i18n/education";
-import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "@/store/store";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "@/store/store";
 import { updateLeadThunk } from "@/store/thunks/lead-details/lead-details.thunk";
 import {
   createChangeRequestThunk,
@@ -19,20 +19,21 @@ import { toast } from "sonner";
 import { processEducationData } from "../setters/education-setter";
 import { useUserPermissions } from "@/hooks/use-user-permissions";
 import { RoleType } from "@/types/role-types";
-import { CreateChangeRequestDto } from "@/types/change-request";
+import { CreateChangeRequestDto, ChangeRequest } from "@/types/change-request";
 import { useAuth0 } from "@auth0/auth0-react";
 
 interface EducationSectionProps {
   lead: Lead;
+  changeRequestsByLead: ChangeRequest[];
 }
 
-export const EducationSection = ({ lead }: EducationSectionProps) => {
+export const EducationSection = ({
+  lead,
+  changeRequestsByLead,
+}: EducationSectionProps) => {
   const dispatch = useDispatch<AppDispatch>();
   const { user } = useAuth0();
   const { roleType } = useUserPermissions();
-  const { changeRequestsByLead } = useSelector(
-    (state: RootState) => state.changeRequest
-  );
 
   const [mode, setMode] = useState<"EDIT" | "VIEW">("VIEW");
   const [localIsLoading, setLocalIsLoading] = useState(false);
@@ -72,12 +73,7 @@ export const EducationSection = ({ lead }: EducationSectionProps) => {
       universityNameFrench: lead.universityNameFrench || "",
       diplomaNameFrench: lead.diplomaNameFrench || "",
     });
-
-    // Fetch pending change requests for this lead if user is a volunteer
-    if (roleType[0] === RoleType.VOLONTAIRE) {
-      dispatch(getChangeRequestsByLeadIdThunk(lead.ID));
-    }
-  }, [lead, reset, dispatch, roleType]);
+  }, [lead, reset]);
 
   const bacObtention = useWatch({ control, name: "bacObtention" });
   const bacCountry = useWatch({ control, name: "bacCountry" });

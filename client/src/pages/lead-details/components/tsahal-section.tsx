@@ -8,8 +8,8 @@ import { FormDropdown } from "@/components/form-components/form-dropdown";
 import { FormDatePicker } from "@/components/form-components/form-date-picker";
 import { useState, useEffect } from "react";
 import { MILITARY } from "@/i18n/military";
-import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "@/store/store";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "@/store/store";
 import { updateLeadThunk } from "@/store/thunks/lead-details/lead-details.thunk";
 import {
   createChangeRequestThunk,
@@ -21,20 +21,21 @@ import { useMahzorGiyus } from "@/hooks/use-mahzor-giyus";
 import { useTypeGiyus } from "@/hooks/use-type-giyus";
 import { useUserPermissions } from "@/hooks/use-user-permissions";
 import { RoleType } from "@/types/role-types";
-import { CreateChangeRequestDto } from "@/types/change-request";
+import { CreateChangeRequestDto, ChangeRequest } from "@/types/change-request";
 import { useAuth0 } from "@auth0/auth0-react";
 
 interface TsahalSectionProps {
   lead: Lead;
+  changeRequestsByLead: ChangeRequest[];
 }
 
-export const TsahalSection = ({ lead }: TsahalSectionProps) => {
+export const TsahalSection = ({
+  lead,
+  changeRequestsByLead,
+}: TsahalSectionProps) => {
   const dispatch = useDispatch<AppDispatch>();
   const { user } = useAuth0();
   const { roleType } = useUserPermissions();
-  const { changeRequestsByLead } = useSelector(
-    (state: RootState) => state.changeRequest
-  );
 
   const [mode, setMode] = useState<"EDIT" | "VIEW">("VIEW");
   const [localIsLoading, setLocalIsLoading] = useState(false);
@@ -86,12 +87,7 @@ export const TsahalSection = ({ lead }: TsahalSectionProps) => {
       michveAlonTraining: lead.michveAlonTraining || "",
       mahzorGiyus: lead.mahzorGiyus || "",
     });
-
-    // Fetch pending change requests for this lead if user is a volunteer
-    if (roleType[0] === RoleType.VOLONTAIRE) {
-      dispatch(getChangeRequestsByLeadIdThunk(lead.ID));
-    }
-  }, [lead, reset, dispatch, roleType]);
+  }, [lead, reset]);
 
   const serviceType = useWatch({
     control,

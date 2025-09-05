@@ -8,8 +8,8 @@ import {
 import { FormDropdown } from "@/components/form-components/form-dropdown";
 import { FormDatePicker } from "@/components/form-components/form-date-picker";
 import { useState, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "@/store/store";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "@/store/store";
 import { updateLeadThunk } from "@/store/thunks/lead-details/lead-details.thunk";
 import {
   createChangeRequestThunk,
@@ -26,20 +26,23 @@ import { useExpertCoBadge } from "@/hooks/use-expert-co-badge";
 import { useUserPermissions } from "@/hooks/use-user-permissions";
 import { TYPE_POSTE } from "@/i18n/type-poste";
 import { RoleType } from "@/types/role-types";
-import { CreateChangeRequestDto } from "@/types/change-request";
+import { CreateChangeRequestDto, ChangeRequest } from "@/types/change-request";
 import { useAuth0 } from "@auth0/auth0-react";
 
 interface LeadInfoSectionProps {
   lead: Lead;
+  changeRequestsByLead: ChangeRequest[];
 }
 
-export const LeadInfoSection = ({ lead }: LeadInfoSectionProps) => {
+export const LeadInfoSection = ({
+  lead,
+  changeRequestsByLead,
+}: LeadInfoSectionProps) => {
   const dispatch = useDispatch<AppDispatch>();
   const { user } = useAuth0();
   const { roleType } = useUserPermissions();
-  const { changeRequestsByLead } = useSelector(
-    (state: RootState) => state.changeRequest
-  );
+
+  console.log(changeRequestsByLead);
 
   const [mode, setMode] = useState<"EDIT" | "VIEW">("VIEW");
   const [localIsLoading, setLocalIsLoading] = useState(false);
@@ -149,12 +152,7 @@ export const LeadInfoSection = ({ lead }: LeadInfoSectionProps) => {
       serviceType: lead.serviceType,
       armyEntryDateStatus: lead.armyEntryDateStatus,
     });
-
-    // Fetch pending change requests for this lead if user is a volunteer
-    if (roleType[0] === RoleType.VOLONTAIRE) {
-      dispatch(getChangeRequestsByLeadIdThunk(lead.ID));
-    }
-  }, [lead, reset, dispatch, roleType]);
+  }, [lead, reset]);
 
   const handleModeChange = () => {
     setMode((prevMode) => (prevMode === "VIEW" ? "EDIT" : "VIEW"));

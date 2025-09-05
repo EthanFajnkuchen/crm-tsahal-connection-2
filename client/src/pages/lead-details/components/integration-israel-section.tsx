@@ -8,8 +8,8 @@ import { FormDropdown } from "@/components/form-components/form-dropdown";
 import { useState, useEffect } from "react";
 import { INTEGRATION_IN_ISRAEL } from "@/i18n/integration-in-israel";
 import { FormInput } from "@/components/form-components/form-input";
-import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "@/store/store";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "@/store/store";
 import { updateLeadThunk } from "@/store/thunks/lead-details/lead-details.thunk";
 import {
   createChangeRequestThunk,
@@ -18,22 +18,21 @@ import {
 import { toast } from "sonner";
 import { useUserPermissions } from "@/hooks/use-user-permissions";
 import { RoleType } from "@/types/role-types";
-import { CreateChangeRequestDto } from "@/types/change-request";
+import { CreateChangeRequestDto, ChangeRequest } from "@/types/change-request";
 import { useAuth0 } from "@auth0/auth0-react";
 
 interface IntegrationIsraelSectionProps {
   lead: Lead;
+  changeRequestsByLead: ChangeRequest[];
 }
 
 export const IntegrationIsraelSection = ({
   lead,
+  changeRequestsByLead,
 }: IntegrationIsraelSectionProps) => {
   const dispatch = useDispatch<AppDispatch>();
   const { user } = useAuth0();
   const { roleType } = useUserPermissions();
-  const { changeRequestsByLead } = useSelector(
-    (state: RootState) => state.changeRequest
-  );
 
   const [mode, setMode] = useState<"EDIT" | "VIEW">("VIEW");
   const [localIsLoading, setLocalIsLoading] = useState(false);
@@ -57,12 +56,7 @@ export const IntegrationIsraelSection = ({
       armyDeferralProgram: lead.armyDeferralProgram || "",
       programNameHebrewArmyDeferral: lead.programNameHebrewArmyDeferral || "",
     });
-
-    // Fetch pending change requests for this lead if user is a volunteer
-    if (roleType[0] === RoleType.VOLONTAIRE) {
-      dispatch(getChangeRequestsByLeadIdThunk(lead.ID));
-    }
-  }, [lead, reset, dispatch, roleType]);
+  }, [lead, reset]);
 
   const programParticipation = useWatch({
     control,
