@@ -29,21 +29,14 @@ jobs:
       - name: Build the server project
         run: cd server && npm run build
 
-      - name: Debug ports 21/22
-        run: |
-          set -x
-          nc -vz ${{ secrets.FTP_SERVER_TARGET_HOST }} 21 || true
-          nc -vz ${{ secrets.FTP_SERVER_TARGET_HOST }} 22 || true
-
       - name: FTP Deploy server
         uses: SamKirkland/FTP-Deploy-Action@4.1.0
         with:
           server: ${{ secrets.FTP_SERVER_TARGET_HOST }}
           username: ${{ secrets.FTP_SERVER_USERNAME }}
           password: ${{ secrets.FTP_SERVER_PASSWORD }}
-          protocol: sftp
           local-dir: ./server/
-          server-dir: /crmtc2/
+          server-dir: /
 
   enforce-deploy:
     name: Enforce Successful Deploy
