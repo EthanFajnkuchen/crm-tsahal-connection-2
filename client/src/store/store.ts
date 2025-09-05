@@ -16,6 +16,7 @@ import ExcelReducer from "./slices/data/excel.slice";
 import leadDetailsReducer from "./slices/lead-details/lead-details.slice";
 import discussionsReducer from "./slices/discussions/discussions.slice";
 import tafkidimReducer from "./slices/tafkidim/tafkidim.slice";
+import changeRequestReducer from "./slices/change-request/change-request.slice";
 
 export const store = configureStore({
   reducer: {
@@ -36,6 +37,7 @@ export const store = configureStore({
     leadDetails: leadDetailsReducer,
     discussions: discussionsReducer,
     tafkidim: tafkidimReducer,
+    changeRequest: changeRequestReducer,
   },
 });
 

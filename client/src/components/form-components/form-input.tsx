@@ -18,6 +18,11 @@ interface FormInputProps<T extends FieldValues>
   className?: string;
   isLoading?: boolean;
   readOnly?: boolean;
+  pendingChange?: boolean;
+  pendingChangeDetails?: {
+    oldValue: string;
+    newValue: string;
+  };
 }
 
 const FormInput = <T extends FieldValues>({
@@ -30,6 +35,8 @@ const FormInput = <T extends FieldValues>({
   hidden = false,
   isLoading = false,
   readOnly = false,
+  pendingChange = false,
+  pendingChangeDetails,
   ...props
 }: FormInputProps<T>) => {
   if (hidden) return null;
@@ -81,6 +88,16 @@ const FormInput = <T extends FieldValues>({
         />
       )}
       {error && <p className="text-sm text-red-500">{error}</p>}
+      {pendingChange && (
+        <p className="text-xs text-orange-600 flex items-center gap-1">
+          ⏳ Modification en attente
+          {pendingChangeDetails && (
+            <span className="ml-1 font-mono">
+              → "{pendingChangeDetails.newValue}"
+            </span>
+          )}
+        </p>
+      )}
     </div>
   );
 };

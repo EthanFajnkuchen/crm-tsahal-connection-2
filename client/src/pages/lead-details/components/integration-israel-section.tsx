@@ -8,10 +8,18 @@ import { FormDropdown } from "@/components/form-components/form-dropdown";
 import { useState, useEffect } from "react";
 import { INTEGRATION_IN_ISRAEL } from "@/i18n/integration-in-israel";
 import { FormInput } from "@/components/form-components/form-input";
-import { useDispatch } from "react-redux";
-import { AppDispatch } from "@/store/store";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "@/store/store";
 import { updateLeadThunk } from "@/store/thunks/lead-details/lead-details.thunk";
+import {
+  createChangeRequestThunk,
+  getChangeRequestsByLeadIdThunk,
+} from "@/store/thunks/change-request/change-request.thunk";
 import { toast } from "sonner";
+import { useUserPermissions } from "@/hooks/use-user-permissions";
+import { RoleType } from "@/types/role-types";
+import { CreateChangeRequestDto } from "@/types/change-request";
+import { useAuth0 } from "@auth0/auth0-react";
 
 interface IntegrationIsraelSectionProps {
   lead: Lead;
@@ -21,6 +29,11 @@ export const IntegrationIsraelSection = ({
   lead,
 }: IntegrationIsraelSectionProps) => {
   const dispatch = useDispatch<AppDispatch>();
+  const { user } = useAuth0();
+  const { roleType } = useUserPermissions();
+  const { changeRequestsByLead } = useSelector(
+    (state: RootState) => state.changeRequest
+  );
 
   const [mode, setMode] = useState<"EDIT" | "VIEW">("VIEW");
   const [localIsLoading, setLocalIsLoading] = useState(false);
@@ -44,7 +57,12 @@ export const IntegrationIsraelSection = ({
       armyDeferralProgram: lead.armyDeferralProgram || "",
       programNameHebrewArmyDeferral: lead.programNameHebrewArmyDeferral || "",
     });
-  }, [lead, reset]);
+
+    // Fetch pending change requests for this lead if user is a volunteer
+    if (roleType[0] === RoleType.VOLONTAIRE) {
+      dispatch(getChangeRequestsByLeadIdThunk(lead.ID));
+    }
+  }, [lead, reset, dispatch, roleType]);
 
   const programParticipation = useWatch({
     control,
@@ -67,18 +85,42 @@ export const IntegrationIsraelSection = ({
   const handleSave = async (data: Partial<Lead>) => {
     setLocalIsLoading(true);
     try {
-      await dispatch(
-        updateLeadThunk({
-          id: lead.ID.toString(),
-          updateData: data,
-        })
-      ).unwrap();
+      // Detect changes between form data and original lead
+      const changes = detectChanges(data, lead);
 
-      toast.success("Le lead a été modifié avec succès");
-      setMode("VIEW");
+      // Check user role and handle accordingly
+      const userRole = roleType[0];
+
+      if (userRole === RoleType.VOLONTAIRE) {
+        // For volunteers: create change requests instead of updating directly
+        if (changes.length > 0) {
+          await createChangeRequests(changes);
+          // Reset form to original values since changes are only requests, not actual updates
+          reset();
+          toast.success(
+            `${changes.length} demande(s) de modification envoyée(s) pour approbation`
+          );
+        } else {
+          toast.info("Aucun changement détecté");
+        }
+        setMode("VIEW");
+      } else if (userRole === RoleType.ADMINISTRATEUR) {
+        // For administrators: update the lead directly (existing behavior)
+        await dispatch(
+          updateLeadThunk({
+            id: lead.ID.toString(),
+            updateData: data,
+          })
+        ).unwrap();
+
+        toast.success("Le lead a été modifié avec succès");
+        setMode("VIEW");
+      } else {
+        toast.error("Rôle utilisateur non reconnu");
+      }
     } catch (error) {
-      console.error("Failed to update lead:", error);
-      toast.error("Erreur lors de la modification du lead");
+      console.error("Failed to save changes:", error);
+      toast.error("Erreur lors de la sauvegarde");
     } finally {
       setLocalIsLoading(false);
     }
@@ -87,6 +129,95 @@ export const IntegrationIsraelSection = ({
   const handleCancel = () => {
     reset();
     setMode("VIEW");
+  };
+
+  // Check if a field has pending change requests
+  const hasFieldPendingChanges = (fieldName: string): boolean => {
+    if (roleType[0] !== RoleType.VOLONTAIRE) return false;
+    return changeRequestsByLead.some(
+      (request) => request.fieldChanged === fieldName
+    );
+  };
+
+  // Get pending change details for a field
+  const getPendingChangeDetails = (fieldName: string) => {
+    if (roleType[0] !== RoleType.VOLONTAIRE) return null;
+    const pendingChange = changeRequestsByLead.find(
+      (request) => request.fieldChanged === fieldName
+    );
+
+    return pendingChange || null;
+  };
+
+  // Function to detect changes between original lead and form data
+  const detectChanges = (formData: Partial<Lead>, originalLead: Lead) => {
+    const changes: Array<{
+      fieldChanged: string;
+      oldValue: string;
+      newValue: string;
+    }> = [];
+
+    // Helper function to safely convert values to strings
+    const toString = (value: any): string => {
+      if (value === null || value === undefined) return "";
+      return String(value);
+    };
+
+    // Check for changes in each field that can be modified in this section
+    const fieldsToCheck = [
+      "arrivalAge",
+      "programParticipation",
+      "programName",
+      "schoolYears",
+      "armyDeferralProgram",
+      "programNameHebrewArmyDeferral",
+    ];
+
+    fieldsToCheck.forEach((fieldName) => {
+      const formValue = toString(formData[fieldName as keyof Lead]);
+      const originalValue = toString(originalLead[fieldName as keyof Lead]);
+
+      // Only create change request if value changed AND no pending change request exists
+      if (formValue !== originalValue && !hasFieldPendingChanges(fieldName)) {
+        changes.push({
+          fieldChanged: fieldName,
+          oldValue: originalValue,
+          newValue: formValue,
+        });
+      }
+    });
+
+    return changes;
+  };
+
+  // Function to create change requests for detected changes
+  const createChangeRequests = async (
+    changes: Array<{
+      fieldChanged: string;
+      oldValue: string;
+      newValue: string;
+    }>
+  ) => {
+    const changedBy = user?.name || user?.email || "Unknown User";
+    const dateModified = new Date().toISOString();
+
+    const changeRequestPromises = changes.map((change) => {
+      const changeRequestDto: CreateChangeRequestDto = {
+        leadId: lead.ID,
+        fieldChanged: change.fieldChanged,
+        oldValue: change.oldValue,
+        newValue: change.newValue,
+        changedBy,
+        dateModified,
+      };
+
+      return dispatch(createChangeRequestThunk(changeRequestDto));
+    });
+
+    await Promise.all(changeRequestPromises);
+
+    // Refresh the change requests list to show the new pending changes immediately
+    await dispatch(getChangeRequestsByLeadIdThunk(lead.ID));
   };
 
   return (
@@ -110,6 +241,16 @@ export const IntegrationIsraelSection = ({
               label: option.displayName,
             }))}
             isLoading={localIsLoading}
+            disabled={hasFieldPendingChanges("arrivalAge")}
+            pendingChange={hasFieldPendingChanges("arrivalAge")}
+            pendingChangeDetails={
+              getPendingChangeDetails("arrivalAge")
+                ? {
+                    oldValue: getPendingChangeDetails("arrivalAge")!.oldValue,
+                    newValue: getPendingChangeDetails("arrivalAge")!.newValue,
+                  }
+                : undefined
+            }
           />
           <FormDropdown
             control={control}
@@ -124,6 +265,18 @@ export const IntegrationIsraelSection = ({
             )}
             hidden={arrivalAge !== "Après mes 14 ans"}
             isLoading={localIsLoading}
+            disabled={hasFieldPendingChanges("programParticipation")}
+            pendingChange={hasFieldPendingChanges("programParticipation")}
+            pendingChangeDetails={
+              getPendingChangeDetails("programParticipation")
+                ? {
+                    oldValue: getPendingChangeDetails("programParticipation")!
+                      .oldValue,
+                    newValue: getPendingChangeDetails("programParticipation")!
+                      .newValue,
+                  }
+                : undefined
+            }
           />
           <FormDropdown
             control={control}
@@ -148,6 +301,16 @@ export const IntegrationIsraelSection = ({
               arrivalAge !== "Après mes 14 ans"
             }
             isLoading={localIsLoading}
+            disabled={hasFieldPendingChanges("programName")}
+            pendingChange={hasFieldPendingChanges("programName")}
+            pendingChangeDetails={
+              getPendingChangeDetails("programName")
+                ? {
+                    oldValue: getPendingChangeDetails("programName")!.oldValue,
+                    newValue: getPendingChangeDetails("programName")!.newValue,
+                  }
+                : undefined
+            }
           />
           <FormInput
             control={control}
@@ -168,6 +331,16 @@ export const IntegrationIsraelSection = ({
               arrivalAge !== "Après mes 14 ans"
             }
             isLoading={localIsLoading}
+            readOnly={hasFieldPendingChanges("schoolYears")}
+            pendingChange={hasFieldPendingChanges("schoolYears")}
+            pendingChangeDetails={
+              getPendingChangeDetails("schoolYears")
+                ? {
+                    oldValue: getPendingChangeDetails("schoolYears")!.oldValue,
+                    newValue: getPendingChangeDetails("schoolYears")!.newValue,
+                  }
+                : undefined
+            }
           />
           <FormDropdown
             control={control}
@@ -181,6 +354,18 @@ export const IntegrationIsraelSection = ({
               })
             )}
             isLoading={localIsLoading}
+            disabled={hasFieldPendingChanges("armyDeferralProgram")}
+            pendingChange={hasFieldPendingChanges("armyDeferralProgram")}
+            pendingChangeDetails={
+              getPendingChangeDetails("armyDeferralProgram")
+                ? {
+                    oldValue: getPendingChangeDetails("armyDeferralProgram")!
+                      .oldValue,
+                    newValue: getPendingChangeDetails("armyDeferralProgram")!
+                      .newValue,
+                  }
+                : undefined
+            }
           />
           <FormInput
             control={control}
@@ -193,6 +378,22 @@ export const IntegrationIsraelSection = ({
               )
             }
             isLoading={localIsLoading}
+            readOnly={hasFieldPendingChanges("programNameHebrewArmyDeferral")}
+            pendingChange={hasFieldPendingChanges(
+              "programNameHebrewArmyDeferral"
+            )}
+            pendingChangeDetails={
+              getPendingChangeDetails("programNameHebrewArmyDeferral")
+                ? {
+                    oldValue: getPendingChangeDetails(
+                      "programNameHebrewArmyDeferral"
+                    )!.oldValue,
+                    newValue: getPendingChangeDetails(
+                      "programNameHebrewArmyDeferral"
+                    )!.newValue,
+                  }
+                : undefined
+            }
           />
         </FormSubSection>
       </FormSection>

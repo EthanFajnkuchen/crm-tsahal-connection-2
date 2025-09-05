@@ -3,6 +3,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 
+// Updated to support pending changes for volunteer workflow
+
 type Mode = "EDIT" | "VIEW";
 
 interface FormCheckboxProps<T extends FieldValues> {
@@ -14,6 +16,12 @@ interface FormCheckboxProps<T extends FieldValues> {
   className?: string;
   hidden?: boolean;
   isLoading?: boolean;
+  readOnly?: boolean;
+  pendingChange?: boolean;
+  pendingChangeDetails?: {
+    oldValue: string;
+    newValue: string;
+  };
 }
 
 const FormCheckbox = <T extends FieldValues>({
@@ -24,6 +32,9 @@ const FormCheckbox = <T extends FieldValues>({
   mode = "EDIT",
   hidden = false,
   isLoading = false,
+  readOnly = false,
+  pendingChange = false,
+  pendingChangeDetails,
 }: FormCheckboxProps<T>) => {
   if (hidden) return null;
 
@@ -57,6 +68,7 @@ const FormCheckbox = <T extends FieldValues>({
                   id={name}
                   checked={field.value}
                   onCheckedChange={field.onChange}
+                  disabled={readOnly}
                 />
               </div>
             </div>
@@ -82,6 +94,16 @@ const FormCheckbox = <T extends FieldValues>({
         />
       )}
       {error && <p className="text-sm text-red-500">{error}</p>}
+      {pendingChange && (
+        <p className="text-xs text-orange-600 flex items-center gap-1">
+          ⏳ Modification en attente
+          {pendingChangeDetails && (
+            <span className="ml-1 font-mono">
+              → "{pendingChangeDetails.newValue}"
+            </span>
+          )}
+        </p>
+      )}
     </div>
   );
 };

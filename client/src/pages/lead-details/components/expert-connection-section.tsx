@@ -12,6 +12,8 @@ import { AppDispatch } from "@/store/store";
 import { updateLeadThunk } from "@/store/thunks/lead-details/lead-details.thunk";
 import { toast } from "sonner";
 import { processExpertConnectionData } from "../setters/expert-connection-setter";
+import { useUserPermissions } from "@/hooks/use-user-permissions";
+import { RoleType } from "@/types/role-types";
 
 interface ExpertConnectionSectionProps {
   lead: Lead;
@@ -40,9 +42,13 @@ export const ExpertConnectionSection = ({
   lead,
 }: ExpertConnectionSectionProps) => {
   const dispatch = useDispatch<AppDispatch>();
+  const { roleType } = useUserPermissions();
 
   const [mode, setMode] = useState<"EDIT" | "VIEW">("VIEW");
   const [localIsLoading, setLocalIsLoading] = useState(false);
+
+  // Vérifier si l'utilisateur est un volontaire
+  const isVolunteer = roleType.includes(RoleType.VOLONTAIRE);
 
   const {
     control,
@@ -164,6 +170,7 @@ export const ExpertConnectionSection = ({
         onCancel={handleCancel}
         isLoading={localIsLoading}
         saveDisabled={!isValid}
+        notEditable={isVolunteer}
       >
         <FormSubSection>
           <FormDropdown

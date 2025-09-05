@@ -15,4 +15,6 @@ export const API_ROUTES = {
   UPDATE_LEAD: `${BACKEND_BASE_URL}/api/leads`,
   DISCUSSIONS: `${BACKEND_BASE_URL}/api/discussions`,
   DISCUSSIONS_BY_LEAD: `${BACKEND_BASE_URL}/api/discussions/lead`,
+  CHANGE_REQUESTS: `${BACKEND_BASE_URL}/api/change-requests`,
+  CHANGE_REQUESTS_BY_LEAD: `${BACKEND_BASE_URL}/api/change-requests/lead`,
 };

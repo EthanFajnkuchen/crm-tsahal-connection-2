@@ -18,6 +18,11 @@ interface FormDropdownProps<T extends FieldValues> {
   required?: boolean;
   isLoading?: boolean;
   disabled?: boolean;
+  pendingChange?: boolean;
+  pendingChangeDetails?: {
+    oldValue: string;
+    newValue: string;
+  };
 }
 
 const FormDropdown = <T extends FieldValues>({
@@ -32,6 +37,8 @@ const FormDropdown = <T extends FieldValues>({
   required = false,
   isLoading = false,
   disabled = false,
+  pendingChange = false,
+  pendingChangeDetails,
 }: FormDropdownProps<T>) => {
   if (hidden) return null;
 
@@ -61,20 +68,22 @@ const FormDropdown = <T extends FieldValues>({
         </Label>
       )}
       {mode === "EDIT" ? (
-        <Controller
-          control={control}
-          name={name}
-          render={({ field }) => (
-            <SingleSelect
-              options={options}
-              value={field.value}
-              onChange={field.onChange}
-              placeholder="Sélectionner"
-              className={className}
-              disabled={disabled}
-            />
-          )}
-        />
+        <div>
+          <Controller
+            control={control}
+            name={name}
+            render={({ field }) => (
+              <SingleSelect
+                options={options}
+                value={field.value}
+                onChange={field.onChange}
+                placeholder="Sélectionner"
+                className={className}
+                disabled={disabled}
+              />
+            )}
+          />
+        </div>
       ) : (
         <Controller
           control={control}
@@ -87,6 +96,16 @@ const FormDropdown = <T extends FieldValues>({
         />
       )}
       {error && <p className="text-sm text-red-500">{error}</p>}
+      {pendingChange && (
+        <p className="text-xs text-orange-600 flex items-center gap-1">
+          ⏳ Modification en attente
+          {pendingChangeDetails && (
+            <span className="ml-1 font-mono">
+              → {pendingChangeDetails.newValue}
+            </span>
+          )}
+        </p>
+      )}
     </div>
   );
 };
