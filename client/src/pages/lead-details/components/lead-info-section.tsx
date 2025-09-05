@@ -80,6 +80,15 @@ export const LeadInfoSection = ({ lead }: LeadInfoSectionProps) => {
     serviceType
   );
 
+  // Calculate original values for comparison (avoid using hooks in handleSave)
+  const originalMahzorGiyus = useMahzorGiyus(lead.giyusDate);
+  const originalTypeGiyus = useTypeGiyus(
+    lead.giyusDate,
+    lead.mahalPath,
+    lead.currentStatus,
+    lead.serviceType
+  );
+
   const expertCoBadge = useExpertCoBadge({
     expertConnection: lead.expertConnection,
     produitEC1: lead.produitEC1,
@@ -158,8 +167,8 @@ export const LeadInfoSection = ({ lead }: LeadInfoSectionProps) => {
       const formattedData = {
         ...data,
         mahzorGiyus: mahzorGiyus,
-        // Use form value for typeGiyus (user can override the calculated value)
-        typeGiyus: data.typeGiyus,
+        // Use calculated value from hook for typeGiyus
+        typeGiyus: typeGiyus,
         armyEntryDateStatus: data.giyusDate ? "Oui" : "Non",
       };
 
@@ -173,6 +182,8 @@ export const LeadInfoSection = ({ lead }: LeadInfoSectionProps) => {
       // Create originalLead with the same transformations for accurate comparison
       const originalLeadFormatted = {
         ...lead,
+        mahzorGiyus: originalMahzorGiyus,
+        typeGiyus: originalTypeGiyus,
         armyEntryDateStatus: lead.giyusDate ? "Oui" : "Non",
         currentStatus:
           lead.statutCandidat === "Ne répond pas / Ne sait pas" ||
@@ -334,7 +345,8 @@ export const LeadInfoSection = ({ lead }: LeadInfoSectionProps) => {
       "typePoste",
       "soldierAloneStatus",
       "giyusDate",
-      "typeGiyus",
+      // typeGiyus is calculated automatically, only administrators can override it
+      ...(roleType[0] === RoleType.ADMINISTRATEUR ? ["typeGiyus"] : []),
       "nomPoste",
       "pikoud",
       "dateFinService",
@@ -556,7 +568,10 @@ export const LeadInfoSection = ({ lead }: LeadInfoSectionProps) => {
             label="Type Giyus"
             mode={mode}
             isLoading={localIsLoading}
-            disabled={hasFieldPendingChanges("typeGiyus")}
+            disabled={
+              roleType[0] === RoleType.VOLONTAIRE ||
+              hasFieldPendingChanges("typeGiyus")
+            }
             pendingChange={hasFieldPendingChanges("typeGiyus")}
             pendingChangeDetails={
               getPendingChangeDetails("typeGiyus")
