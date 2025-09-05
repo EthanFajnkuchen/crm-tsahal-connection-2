@@ -11,9 +11,9 @@ import { useDispatch } from "react-redux";
 import { AppDispatch } from "@/store/store";
 import { updateLeadThunk } from "@/store/thunks/lead-details/lead-details.thunk";
 import { toast } from "sonner";
-import { processExpertConnectionData } from "../setters/expert-connection-setter";
 import { useUserPermissions } from "@/hooks/use-user-permissions";
 import { RoleType } from "@/types/role-types";
+import { processExpertConnectionData } from "@/utils/form-data-processors";
 
 interface ExpertConnectionSectionProps {
   lead: Lead;

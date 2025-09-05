@@ -7,15 +7,7 @@ import {
 } from "@/components/form-components/form-section";
 import { FormDropdown } from "@/components/form-components/form-dropdown";
 import { FormDatePicker } from "@/components/form-components/form-date-picker";
-import { useState, useEffect } from "react";
-import { useDispatch } from "react-redux";
-import { AppDispatch } from "@/store/store";
-import { updateLeadThunk } from "@/store/thunks/lead-details/lead-details.thunk";
-import {
-  createChangeRequestThunk,
-  getChangeRequestsByLeadIdThunk,
-} from "@/store/thunks/change-request/change-request.thunk";
-import { toast } from "sonner";
+import { useEffect } from "react";
 import { CURRENT_STATUS } from "@/i18n/current-status";
 import { STATUS_CANDIDAT } from "@/i18n/status-candidat";
 import { TYPE_GIYUS } from "@/i18n/type-giyus";
@@ -23,11 +15,12 @@ import { PIKOUD } from "@/i18n/pikoud";
 import { useMahzorGiyus } from "@/hooks/use-mahzor-giyus";
 import { useTypeGiyus } from "@/hooks/use-type-giyus";
 import { useExpertCoBadge } from "@/hooks/use-expert-co-badge";
-import { useUserPermissions } from "@/hooks/use-user-permissions";
 import { TYPE_POSTE } from "@/i18n/type-poste";
 import { RoleType } from "@/types/role-types";
-import { CreateChangeRequestDto, ChangeRequest } from "@/types/change-request";
-import { useAuth0 } from "@auth0/auth0-react";
+import { ChangeRequest } from "@/types/change-request";
+import { useVolunteerForm } from "@/hooks/use-volunteer-form";
+import { useUserPermissions } from "@/hooks/use-user-permissions";
+import { processLeadInfoData } from "@/utils/form-data-processors";
 
 interface LeadInfoSectionProps {
   lead: Lead;
@@ -38,14 +31,33 @@ export const LeadInfoSection = ({
   lead,
   changeRequestsByLead,
 }: LeadInfoSectionProps) => {
-  const dispatch = useDispatch<AppDispatch>();
-  const { user } = useAuth0();
+  // Fields that can be modified in this section
+  const fieldsToCheck = [
+    "firstName",
+    "lastName",
+    "statutCandidat",
+    "currentStatus",
+    "phoneNumber",
+    "whatsappNumber",
+    "email",
+    "mahzorGiyus",
+    "typePoste",
+    "soldierAloneStatus",
+    "giyusDate",
+    "nomPoste",
+    "pikoud",
+    "dateFinService",
+    "mahalPath",
+    "serviceType",
+    "armyEntryDateStatus",
+  ];
+
+  // Date fields for proper formatting
+  const dateFields = ["giyusDate", "dateFinService"];
+
+  // Get user permissions to determine field access
   const { roleType } = useUserPermissions();
 
-  console.log(changeRequestsByLead);
-
-  const [mode, setMode] = useState<"EDIT" | "VIEW">("VIEW");
-  const [localIsLoading, setLocalIsLoading] = useState(false);
   const { control, handleSubmit, reset, watch } = useForm<Partial<Lead>>({
     defaultValues: {
       firstName: lead.firstName,
@@ -83,7 +95,7 @@ export const LeadInfoSection = ({
     serviceType
   );
 
-  // Calculate original values for comparison (avoid using hooks in handleSave)
+  // Calculate original values for comparison
   const originalMahzorGiyus = useMahzorGiyus(lead.giyusDate);
   const originalTypeGiyus = useTypeGiyus(
     lead.giyusDate,
@@ -99,6 +111,44 @@ export const LeadInfoSection = ({
     produitEC3: lead.produitEC3,
     produitEC4: lead.produitEC4,
     produitEC5: lead.produitEC5,
+  });
+
+  // Custom data processor that includes mahzorGiyus and typeGiyus
+  const customDataProcessor = (data: Partial<Lead>) => {
+    return processLeadInfoData(data, mahzorGiyus, typeGiyus);
+  };
+
+  // Custom original data formatter
+  const originalDataFormatted = processLeadInfoData(
+    lead,
+    originalMahzorGiyus,
+    originalTypeGiyus
+  );
+
+  // Add typeGiyus to fields if user is admin
+  const adminFieldsToCheck = [
+    ...fieldsToCheck,
+    // Only administrators can modify typeGiyus directly
+    "typeGiyus",
+  ];
+
+  // Initialize volunteer form hook
+  const {
+    mode,
+    localIsLoading,
+    handleSave,
+    handleModeChange,
+    handleCancel,
+    getFieldProps,
+  } = useVolunteerForm({
+    lead,
+    changeRequestsByLead,
+    fieldsToCheck:
+      roleType[0] === RoleType.ADMINISTRATEUR
+        ? adminFieldsToCheck
+        : fieldsToCheck,
+    dateFields,
+    dataProcessor: customDataProcessor,
   });
 
   // Logic to determine currentStatus options and disabled state
@@ -154,263 +204,18 @@ export const LeadInfoSection = ({
     });
   }, [lead, reset]);
 
-  const handleModeChange = () => {
-    setMode((prevMode) => (prevMode === "VIEW" ? "EDIT" : "VIEW"));
+  // Wrap the handleSave function to pass reset and original data
+  const onSave = (data: Partial<Lead>) => {
+    handleSave(data, reset, originalDataFormatted);
   };
 
-  const handleSave = async (data: Partial<Lead>) => {
-    console.log("roleType", roleType);
-
-    setLocalIsLoading(true);
-    try {
-      // Apply the same transformations as before
-      const formattedData = {
-        ...data,
-        mahzorGiyus: mahzorGiyus,
-        // Use calculated value from hook for typeGiyus
-        typeGiyus: typeGiyus,
-        armyEntryDateStatus: data.giyusDate ? "Oui" : "Non",
-      };
-
-      if (
-        data.statutCandidat === "Ne répond pas / Ne sait pas" ||
-        data.statutCandidat === "Pas de notre ressort"
-      ) {
-        formattedData.currentStatus = "";
-      }
-
-      // Create originalLead with the same transformations for accurate comparison
-      const originalLeadFormatted = {
-        ...lead,
-        mahzorGiyus: originalMahzorGiyus,
-        typeGiyus: originalTypeGiyus,
-        armyEntryDateStatus: lead.giyusDate ? "Oui" : "Non",
-        currentStatus:
-          lead.statutCandidat === "Ne répond pas / Ne sait pas" ||
-          lead.statutCandidat === "Pas de notre ressort"
-            ? ""
-            : lead.currentStatus,
-      };
-
-      // Detect changes between formatted data and original formatted lead
-      const changes = detectChanges(formattedData, originalLeadFormatted);
-
-      // Check user role and handle accordingly
-      const userRole = roleType[0];
-      console.log("userRole", userRole);
-
-      if (userRole === RoleType.VOLONTAIRE) {
-        // For volunteers: create change requests instead of updating directly
-        if (changes.length > 0) {
-          await createChangeRequests(changes);
-          // Reset form to original values since changes are only requests, not actual updates
-          reset();
-          toast.success(
-            `${changes.length} demande(s) de modification envoyée(s) pour approbation`
-          );
-        } else {
-          toast.info("Aucun changement détecté");
-        }
-        setMode("VIEW");
-      } else if (userRole === RoleType.ADMINISTRATEUR) {
-        // For administrators: update the lead directly (existing behavior)
-        await dispatch(
-          updateLeadThunk({
-            id: lead.ID.toString(),
-            updateData: formattedData,
-          })
-        ).unwrap();
-
-        toast.success("Le lead a été modifié avec succès");
-        setMode("VIEW");
-      } else {
-        toast.error("Rôle utilisateur non reconnu");
-      }
-    } catch (error) {
-      console.error("Failed to save changes:", error);
-      toast.error("Erreur lors de la sauvegarde");
-    } finally {
-      setLocalIsLoading(false);
-    }
-  };
-
-  const handleCancel = () => {
-    reset();
-    setMode("VIEW");
-  };
-
-  // Check if a field has pending change requests
-  const hasFieldPendingChanges = (fieldName: string): boolean => {
-    if (roleType[0] !== RoleType.VOLONTAIRE) return false;
-    return changeRequestsByLead.some(
-      (request) => request.fieldChanged === fieldName
-    );
-  };
-
-  // Helper function to format dates for display
-  const formatDateForDisplay = (value: string, fieldName: string): string => {
-    if (!value) return value;
-
-    // Check if it's a date field
-    const dateFields = [
-      "giyusDate",
-      "dateFinService",
-      "birthDate",
-      "dateInscription",
-    ];
-
-    if (dateFields.includes(fieldName)) {
-      const dateValue = new Date(value);
-      if (!isNaN(dateValue.getTime())) {
-        // Format as dd/mm/yyyy
-        return dateValue.toLocaleDateString("fr-FR", {
-          day: "2-digit",
-          month: "2-digit",
-          year: "numeric",
-        });
-      }
-    }
-
-    return value;
-  };
-
-  // Get pending change details for a field
-  const getPendingChangeDetails = (fieldName: string) => {
-    if (roleType[0] !== RoleType.VOLONTAIRE) return null;
-    const pendingChange = changeRequestsByLead.find(
-      (request) => request.fieldChanged === fieldName
-    );
-
-    if (pendingChange) {
-      // Format dates in the pending change details
-      return {
-        ...pendingChange,
-        oldValue: formatDateForDisplay(pendingChange.oldValue, fieldName),
-        newValue: formatDateForDisplay(pendingChange.newValue, fieldName),
-      };
-    }
-
-    return null;
-  };
-
-  // Function to detect changes between original lead and form data
-  const detectChanges = (formData: Partial<Lead>, originalLead: Lead) => {
-    const changes: Array<{
-      fieldChanged: string;
-      oldValue: string;
-      newValue: string;
-    }> = [];
-
-    // Helper function to safely convert values to strings
-    const toString = (value: any): string => {
-      if (value === null || value === undefined) return "";
-      return String(value);
-    };
-
-    // Helper function to format dates for display
-    const formatValueForDisplay = (value: any, fieldName: string): string => {
-      if (value === null || value === undefined) return "";
-
-      // Check if it's a date field
-      const dateFields = [
-        "giyusDate",
-        "dateFinService",
-        "birthDate",
-        "dateInscription",
-      ];
-      if (dateFields.includes(fieldName)) {
-        const dateValue = new Date(value);
-        if (!isNaN(dateValue.getTime())) {
-          // Format as dd/mm/yyyy
-          return dateValue.toLocaleDateString("fr-FR", {
-            day: "2-digit",
-            month: "2-digit",
-            year: "numeric",
-          });
-        }
-      }
-
-      return String(value);
-    };
-
-    // Check for changes in each field
-    const fieldsToCheck = [
-      "firstName",
-      "lastName",
-      "statutCandidat",
-      "currentStatus",
-      "phoneNumber",
-      "whatsappNumber",
-      "email",
-      "mahzorGiyus",
-      "typePoste",
-      "soldierAloneStatus",
-      "giyusDate",
-      // typeGiyus is calculated automatically, only administrators can override it
-      ...(roleType[0] === RoleType.ADMINISTRATEUR ? ["typeGiyus"] : []),
-      "nomPoste",
-      "pikoud",
-      "dateFinService",
-      "mahalPath",
-      "serviceType",
-      "armyEntryDateStatus",
-    ];
-
-    fieldsToCheck.forEach((fieldName) => {
-      const formValue = toString(formData[fieldName as keyof Lead]);
-      const originalValue = toString(originalLead[fieldName as keyof Lead]);
-
-      // Only create change request if value changed AND no pending change request exists
-      if (formValue !== originalValue && !hasFieldPendingChanges(fieldName)) {
-        changes.push({
-          fieldChanged: fieldName,
-          oldValue: formatValueForDisplay(
-            originalLead[fieldName as keyof Lead],
-            fieldName
-          ),
-          newValue: formatValueForDisplay(
-            formData[fieldName as keyof Lead],
-            fieldName
-          ),
-        });
-      }
-    });
-
-    return changes;
-  };
-
-  // Function to create change requests for detected changes
-  const createChangeRequests = async (
-    changes: Array<{
-      fieldChanged: string;
-      oldValue: string;
-      newValue: string;
-    }>
-  ) => {
-    const changedBy = user?.name || user?.email || "Unknown User";
-    const dateModified = new Date().toISOString();
-
-    const changeRequestPromises = changes.map((change) => {
-      const changeRequestDto: CreateChangeRequestDto = {
-        leadId: lead.ID,
-        fieldChanged: change.fieldChanged,
-        oldValue: change.oldValue,
-        newValue: change.newValue,
-        changedBy,
-        dateModified,
-      };
-
-      return dispatch(createChangeRequestThunk(changeRequestDto));
-    });
-
-    await Promise.all(changeRequestPromises);
-
-    // Refresh the change requests list to show the new pending changes immediately
-    await dispatch(getChangeRequestsByLeadIdThunk(lead.ID));
+  // Wrap the handleCancel function to pass reset
+  const onCancel = () => {
+    handleCancel(reset);
   };
 
   return (
-    <form onSubmit={handleSubmit(handleSave)}>
+    <form onSubmit={handleSubmit(onSave)}>
       <FormSection
         title={
           <div className="flex items-center gap-2">
@@ -420,8 +225,8 @@ export const LeadInfoSection = ({
         }
         mode={mode}
         onModeChange={handleModeChange}
-        onSave={handleSubmit(handleSave)}
-        onCancel={handleCancel}
+        onSave={handleSubmit(onSave)}
+        onCancel={onCancel}
         isLoading={localIsLoading}
       >
         <FormSubSection>
@@ -431,22 +236,11 @@ export const LeadInfoSection = ({
             label="Statut candidat"
             mode={mode}
             isLoading={localIsLoading}
-            disabled={hasFieldPendingChanges("statutCandidat")}
-            pendingChange={hasFieldPendingChanges("statutCandidat")}
-            pendingChangeDetails={
-              getPendingChangeDetails("statutCandidat")
-                ? {
-                    oldValue:
-                      getPendingChangeDetails("statutCandidat")!.oldValue,
-                    newValue:
-                      getPendingChangeDetails("statutCandidat")!.newValue,
-                  }
-                : undefined
-            }
             options={STATUS_CANDIDAT.map((option) => ({
               value: option.value,
               label: option.displayName,
             }))}
+            {...getFieldProps("statutCandidat")}
           />
 
           <FormDropdown
@@ -461,18 +255,11 @@ export const LeadInfoSection = ({
             }))}
             disabled={
               currentStatusConfig.disabled ||
-              hasFieldPendingChanges("currentStatus")
+              getFieldProps("currentStatus").disabled
             }
-            pendingChange={hasFieldPendingChanges("currentStatus")}
+            pendingChange={getFieldProps("currentStatus").pendingChange}
             pendingChangeDetails={
-              getPendingChangeDetails("currentStatus")
-                ? {
-                    oldValue:
-                      getPendingChangeDetails("currentStatus")!.oldValue,
-                    newValue:
-                      getPendingChangeDetails("currentStatus")!.newValue,
-                  }
-                : undefined
+              getFieldProps("currentStatus").pendingChangeDetails
             }
           />
 
@@ -482,16 +269,7 @@ export const LeadInfoSection = ({
             label="Téléphone"
             mode={mode}
             isLoading={localIsLoading}
-            readOnly={hasFieldPendingChanges("phoneNumber")}
-            pendingChange={hasFieldPendingChanges("phoneNumber")}
-            pendingChangeDetails={
-              getPendingChangeDetails("phoneNumber")
-                ? {
-                    oldValue: getPendingChangeDetails("phoneNumber")!.oldValue,
-                    newValue: getPendingChangeDetails("phoneNumber")!.newValue,
-                  }
-                : undefined
-            }
+            {...getFieldProps("phoneNumber")}
           />
 
           <FormInput
@@ -500,23 +278,12 @@ export const LeadInfoSection = ({
             label="Whatsapp"
             mode={mode}
             isLoading={localIsLoading}
-            readOnly={hasFieldPendingChanges("whatsappNumber")}
-            pendingChange={hasFieldPendingChanges("whatsappNumber")}
-            pendingChangeDetails={
-              getPendingChangeDetails("whatsappNumber")
-                ? {
-                    oldValue:
-                      getPendingChangeDetails("whatsappNumber")!.oldValue,
-                    newValue:
-                      getPendingChangeDetails("whatsappNumber")!.newValue,
-                  }
-                : undefined
-            }
             hidden={
               mode === "VIEW" &&
               !lead.whatsappNumber &&
-              !hasFieldPendingChanges("whatsappNumber")
+              !getFieldProps("whatsappNumber").pendingChange
             }
+            {...getFieldProps("whatsappNumber")}
           />
 
           <FormInput
@@ -525,17 +292,9 @@ export const LeadInfoSection = ({
             label="Email"
             mode={mode}
             isLoading={localIsLoading}
-            readOnly={hasFieldPendingChanges("email")}
-            pendingChange={hasFieldPendingChanges("email")}
-            pendingChangeDetails={
-              getPendingChangeDetails("email")
-                ? {
-                    oldValue: getPendingChangeDetails("email")!.oldValue,
-                    newValue: getPendingChangeDetails("email")!.newValue,
-                  }
-                : undefined
-            }
+            {...getFieldProps("email")}
           />
+
           <FormInput
             control={control}
             name="mahzorGiyus"
@@ -551,16 +310,7 @@ export const LeadInfoSection = ({
             label="Date Giyus"
             mode={mode}
             isLoading={localIsLoading}
-            readOnly={hasFieldPendingChanges("giyusDate")}
-            pendingChange={hasFieldPendingChanges("giyusDate")}
-            pendingChangeDetails={
-              getPendingChangeDetails("giyusDate")
-                ? {
-                    oldValue: getPendingChangeDetails("giyusDate")!.oldValue,
-                    newValue: getPendingChangeDetails("giyusDate")!.newValue,
-                  }
-                : undefined
-            }
+            {...getFieldProps("giyusDate")}
           />
 
           <FormDropdown
@@ -569,23 +319,18 @@ export const LeadInfoSection = ({
             label="Type Giyus"
             mode={mode}
             isLoading={localIsLoading}
-            disabled={
-              roleType[0] === RoleType.VOLONTAIRE ||
-              hasFieldPendingChanges("typeGiyus")
-            }
-            pendingChange={hasFieldPendingChanges("typeGiyus")}
-            pendingChangeDetails={
-              getPendingChangeDetails("typeGiyus")
-                ? {
-                    oldValue: getPendingChangeDetails("typeGiyus")!.oldValue,
-                    newValue: getPendingChangeDetails("typeGiyus")!.newValue,
-                  }
-                : undefined
-            }
             options={TYPE_GIYUS.map((option) => ({
               value: option.value,
               label: option.displayName,
             }))}
+            disabled={
+              roleType[0] === RoleType.VOLONTAIRE ||
+              getFieldProps("typeGiyus").disabled
+            }
+            pendingChange={getFieldProps("typeGiyus").pendingChange}
+            pendingChangeDetails={
+              getFieldProps("typeGiyus").pendingChangeDetails
+            }
           />
 
           <FormDropdown
@@ -594,20 +339,11 @@ export const LeadInfoSection = ({
             label="Type de poste"
             mode={mode}
             isLoading={localIsLoading}
-            disabled={hasFieldPendingChanges("typePoste")}
-            pendingChange={hasFieldPendingChanges("typePoste")}
-            pendingChangeDetails={
-              getPendingChangeDetails("typePoste")
-                ? {
-                    oldValue: getPendingChangeDetails("typePoste")!.oldValue,
-                    newValue: getPendingChangeDetails("typePoste")!.newValue,
-                  }
-                : undefined
-            }
             options={TYPE_POSTE.map((option) => ({
               value: option.value,
               label: option.displayName,
             }))}
+            {...getFieldProps("typePoste")}
           />
 
           <FormInput
@@ -616,16 +352,7 @@ export const LeadInfoSection = ({
             label="Nom du poste"
             mode={mode}
             isLoading={localIsLoading}
-            readOnly={hasFieldPendingChanges("nomPoste")}
-            pendingChange={hasFieldPendingChanges("nomPoste")}
-            pendingChangeDetails={
-              getPendingChangeDetails("nomPoste")
-                ? {
-                    oldValue: getPendingChangeDetails("nomPoste")!.oldValue,
-                    newValue: getPendingChangeDetails("nomPoste")!.newValue,
-                  }
-                : undefined
-            }
+            {...getFieldProps("nomPoste")}
           />
 
           <FormDropdown
@@ -634,20 +361,11 @@ export const LeadInfoSection = ({
             label="Pikoud"
             mode={mode}
             isLoading={localIsLoading}
-            disabled={hasFieldPendingChanges("pikoud")}
-            pendingChange={hasFieldPendingChanges("pikoud")}
-            pendingChangeDetails={
-              getPendingChangeDetails("pikoud")
-                ? {
-                    oldValue: getPendingChangeDetails("pikoud")!.oldValue,
-                    newValue: getPendingChangeDetails("pikoud")!.newValue,
-                  }
-                : undefined
-            }
             options={PIKOUD.map((option) => ({
               value: option.value,
               label: option.displayName,
             }))}
+            {...getFieldProps("pikoud")}
           />
 
           <FormDatePicker
@@ -656,18 +374,7 @@ export const LeadInfoSection = ({
             label="Date de fin de service"
             mode={mode}
             isLoading={localIsLoading}
-            readOnly={hasFieldPendingChanges("dateFinService")}
-            pendingChange={hasFieldPendingChanges("dateFinService")}
-            pendingChangeDetails={
-              getPendingChangeDetails("dateFinService")
-                ? {
-                    oldValue:
-                      getPendingChangeDetails("dateFinService")!.oldValue,
-                    newValue:
-                      getPendingChangeDetails("dateFinService")!.newValue,
-                  }
-                : undefined
-            }
+            {...getFieldProps("dateFinService")}
           />
         </FormSubSection>
       </FormSection>
