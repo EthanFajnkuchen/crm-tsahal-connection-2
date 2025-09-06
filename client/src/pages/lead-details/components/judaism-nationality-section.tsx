@@ -11,7 +11,7 @@ import { JUDAISM } from "@/i18n/judaism";
 import { useEffect } from "react";
 import { NATIONALITY } from "@/i18n/nationality";
 import { ChangeRequest } from "@/types/change-request";
-import { useVolunteerForm } from "@/hooks/use-volunteer-form";
+import { useForm as useFormLogic } from "@/hooks/use-form";
 import { processJudaismNationalityData } from "@/utils/form-data-processors";
 
 interface JudaismNationalitySectionProps {
@@ -52,7 +52,7 @@ export const JudaismNationalitySection = ({
     handleModeChange,
     handleCancel,
     getFieldProps,
-  } = useVolunteerForm({
+  } = useFormLogic({
     lead,
     changeRequestsByLead,
     fieldsToCheck,

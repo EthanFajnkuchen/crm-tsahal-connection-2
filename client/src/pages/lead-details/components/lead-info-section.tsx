@@ -18,7 +18,7 @@ import { useExpertCoBadge } from "@/hooks/use-expert-co-badge";
 import { TYPE_POSTE } from "@/i18n/type-poste";
 import { RoleType } from "@/types/role-types";
 import { ChangeRequest } from "@/types/change-request";
-import { useVolunteerForm } from "@/hooks/use-volunteer-form";
+import { useForm as useFormLogic } from "@/hooks/use-form";
 import { useUserPermissions } from "@/hooks/use-user-permissions";
 import { processLeadInfoData } from "@/utils/form-data-processors";
 
@@ -140,7 +140,7 @@ export const LeadInfoSection = ({
     handleModeChange,
     handleCancel,
     getFieldProps,
-  } = useVolunteerForm({
+  } = useFormLogic({
     lead,
     changeRequestsByLead,
     fieldsToCheck:

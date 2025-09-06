@@ -9,7 +9,7 @@ import { FormDropdown } from "@/components/form-components/form-dropdown";
 import { useEffect } from "react";
 import { EDUCATION } from "@/i18n/education";
 import { ChangeRequest } from "@/types/change-request";
-import { useVolunteerForm } from "@/hooks/use-volunteer-form";
+import { useForm as useFormLogic } from "@/hooks/use-form";
 import { processEducationData } from "@/utils/form-data-processors";
 
 interface EducationSectionProps {
@@ -47,7 +47,7 @@ export const EducationSection = ({
     handleModeChange,
     handleCancel,
     getFieldProps,
-  } = useVolunteerForm({
+  } = useFormLogic({
     lead,
     changeRequestsByLead,
     fieldsToCheck,

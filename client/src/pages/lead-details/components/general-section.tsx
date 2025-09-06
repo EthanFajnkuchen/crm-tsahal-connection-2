@@ -11,7 +11,7 @@ import { FormDatePicker } from "@/components/form-components/form-date-picker";
 import { RELATION } from "@/i18n/emergency-contact";
 import { useEffect } from "react";
 import { ChangeRequest } from "@/types/change-request";
-import { useVolunteerForm } from "@/hooks/use-volunteer-form";
+import { useForm as useFormLogic } from "@/hooks/use-form";
 import { processGeneralData } from "@/utils/form-data-processors";
 
 interface GeneralSectionProps {
@@ -49,7 +49,7 @@ export const GeneralSection = ({
     handleModeChange,
     handleCancel,
     getFieldProps,
-  } = useVolunteerForm({
+  } = useFormLogic({
     lead,
     changeRequestsByLead,
     fieldsToCheck,

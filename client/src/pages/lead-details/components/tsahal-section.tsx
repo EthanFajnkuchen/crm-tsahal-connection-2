@@ -11,7 +11,7 @@ import { MILITARY } from "@/i18n/military";
 import { useMahzorGiyus } from "@/hooks/use-mahzor-giyus";
 import { useTypeGiyus } from "@/hooks/use-type-giyus";
 import { ChangeRequest } from "@/types/change-request";
-import { useVolunteerForm } from "@/hooks/use-volunteer-form";
+import { useForm as useFormLogic } from "@/hooks/use-form";
 import { processTsahalData } from "@/utils/form-data-processors";
 
 interface TsahalSectionProps {
@@ -180,7 +180,7 @@ export const TsahalSection = ({
     handleModeChange,
     handleCancel,
     getFieldProps,
-  } = useVolunteerForm({
+  } = useFormLogic({
     lead,
     changeRequestsByLead,
     fieldsToCheck,

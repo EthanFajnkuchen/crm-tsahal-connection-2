@@ -9,7 +9,7 @@ import { useEffect } from "react";
 import { INTEGRATION_IN_ISRAEL } from "@/i18n/integration-in-israel";
 import { FormInput } from "@/components/form-components/form-input";
 import { ChangeRequest } from "@/types/change-request";
-import { useVolunteerForm } from "@/hooks/use-volunteer-form";
+import { useForm as useFormLogic } from "@/hooks/use-form";
 import { processIntegrationIsraelData } from "@/utils/form-data-processors";
 
 interface IntegrationIsraelSectionProps {
@@ -39,7 +39,7 @@ export const IntegrationIsraelSection = ({
     handleModeChange,
     handleCancel,
     getFieldProps,
-  } = useVolunteerForm({
+  } = useFormLogic({
     lead,
     changeRequestsByLead,
     fieldsToCheck,
