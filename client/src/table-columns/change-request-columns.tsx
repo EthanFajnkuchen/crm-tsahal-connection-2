@@ -4,17 +4,24 @@ import { ArrowUpDown, Check, X, Loader2 } from "lucide-react";
 import { ChangeRequest } from "@/types/change-request";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface ChangeRequestColumnsProps {
   onAccept: (changeRequest: ChangeRequest) => void;
   onReject: (id: number) => void;
   processingId?: number | null;
+  selectedItems?: Set<number>;
+  onSelectionChange?: (selected: Set<number>) => void;
+  enableSelection?: boolean;
 }
 
 export const createChangeRequestColumns = ({
   onAccept,
   onReject,
   processingId,
+  selectedItems = new Set(),
+  onSelectionChange,
+  enableSelection = false,
 }: ChangeRequestColumnsProps): ColumnDef<ChangeRequest>[] => {
   // Helper function to format dates for display
   const formatDisplayValue = (value: string): string => {
@@ -36,7 +43,59 @@ export const createChangeRequestColumns = ({
     return value;
   };
 
-  return [
+  const baseColumns: ColumnDef<ChangeRequest>[] = [
+    // Selection column (conditional)
+    ...(enableSelection
+      ? [
+          {
+            id: "select",
+            header: ({ table }: any) => (
+              <Checkbox
+                checked={
+                  selectedItems.size === table.getRowModel().rows.length &&
+                  table.getRowModel().rows.length > 0
+                }
+                onCheckedChange={(value) => {
+                  if (!onSelectionChange) return;
+
+                  if (value) {
+                    // Select all
+                    const allIds = new Set<number>(
+                      table
+                        .getRowModel()
+                        .rows.map((row: any) => row.original.id)
+                    );
+                    onSelectionChange(allIds);
+                  } else {
+                    // Deselect all
+                    onSelectionChange(new Set<number>());
+                  }
+                }}
+                aria-label="Select all"
+              />
+            ),
+            cell: ({ row }: any) => (
+              <Checkbox
+                checked={selectedItems.has(row.original.id)}
+                onCheckedChange={(value) => {
+                  if (!onSelectionChange) return;
+
+                  const newSelected = new Set<number>(selectedItems);
+                  if (value) {
+                    newSelected.add(row.original.id);
+                  } else {
+                    newSelected.delete(row.original.id);
+                  }
+                  onSelectionChange(newSelected);
+                }}
+                aria-label="Select row"
+              />
+            ),
+            enableSorting: false,
+            enableHiding: false,
+          },
+        ]
+      : []),
     {
       accessorKey: "lead",
       header: ({ column }) => (
@@ -225,4 +284,6 @@ export const createChangeRequestColumns = ({
       },
     },
   ];
+
+  return baseColumns;
 };

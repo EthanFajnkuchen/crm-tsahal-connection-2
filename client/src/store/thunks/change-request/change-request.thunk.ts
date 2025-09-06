@@ -43,3 +43,26 @@ export const rejectChangeRequestThunk = createAsyncThunk<
 >("changeRequest/reject", async (id: number) => {
   return await changeRequestAdapter.rejectChangeRequest(id);
 });
+
+// Bulk operations
+export const bulkAcceptChangeRequestsThunk = createAsyncThunk<
+  {
+    successful: number[];
+    failed: { id: number; error: string }[];
+    totalCount: number;
+  },
+  ChangeRequest[]
+>("changeRequest/bulkAccept", async (changeRequests: ChangeRequest[]) => {
+  return await changeRequestAdapter.bulkAcceptChangeRequests(changeRequests);
+});
+
+export const bulkRejectChangeRequestsThunk = createAsyncThunk<
+  {
+    successful: number[];
+    failed: { id: number; error: string }[];
+    totalCount: number;
+  },
+  number[]
+>("changeRequest/bulkReject", async (ids: number[]) => {
+  return await changeRequestAdapter.bulkRejectChangeRequests(ids);
+});

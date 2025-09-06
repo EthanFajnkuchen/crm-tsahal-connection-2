@@ -74,30 +74,36 @@ export const changeRequestAdapter = {
   acceptChangeRequest: async (changeRequest: ChangeRequest) => {
     // Update the lead with the new value
     const updateData = {
-      [changeRequest.fieldChanged]: changeRequest.newValue
+      [changeRequest.fieldChanged]: changeRequest.newValue,
     };
-    
-    const updateResponse = await fetch(`${API_ROUTES.UPDATE_LEAD}/${changeRequest.leadId}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${M2M_TOKEN}`,
-      },
-      body: JSON.stringify(updateData),
-    });
+
+    const updateResponse = await fetch(
+      `${API_ROUTES.UPDATE_LEAD}/${changeRequest.leadId}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${M2M_TOKEN}`,
+        },
+        body: JSON.stringify(updateData),
+      }
+    );
 
     if (!updateResponse.ok) {
       throw new Error("Failed to update lead");
     }
 
     // Delete the change request
-    const deleteResponse = await fetch(`${API_ROUTES.CHANGE_REQUESTS}/${changeRequest.id}`, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${M2M_TOKEN}`,
-      },
-    });
+    const deleteResponse = await fetch(
+      `${API_ROUTES.CHANGE_REQUESTS}/${changeRequest.id}`,
+      {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${M2M_TOKEN}`,
+        },
+      }
+    );
 
     if (!deleteResponse.ok) {
       throw new Error("Failed to delete change request after update");
@@ -120,5 +126,138 @@ export const changeRequestAdapter = {
     }
 
     return { id };
+  },
+
+  // Bulk operations
+  bulkAcceptChangeRequests: async (changeRequests: ChangeRequest[]) => {
+    const promises = changeRequests.map(async (changeRequest) => {
+      try {
+        // Update the lead with the new value
+        const updateData = {
+          [changeRequest.fieldChanged]: changeRequest.newValue,
+        };
+
+        const updateResponse = await fetch(
+          `${API_ROUTES.UPDATE_LEAD}/${changeRequest.leadId}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${M2M_TOKEN}`,
+            },
+            body: JSON.stringify(updateData),
+          }
+        );
+
+        if (!updateResponse.ok) {
+          throw new Error(`Failed to update lead ${changeRequest.leadId}`);
+        }
+
+        // Delete the change request
+        const deleteResponse = await fetch(
+          `${API_ROUTES.CHANGE_REQUESTS}/${changeRequest.id}`,
+          {
+            method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${M2M_TOKEN}`,
+            },
+          }
+        );
+
+        if (!deleteResponse.ok) {
+          throw new Error(
+            `Failed to delete change request ${changeRequest.id}`
+          );
+        }
+
+        return { id: changeRequest.id, success: true };
+      } catch (error) {
+        console.error(
+          `Error processing change request ${changeRequest.id}:`,
+          error
+        );
+        return {
+          id: changeRequest.id,
+          success: false,
+          error: error instanceof Error ? error.message : "Unknown error",
+        };
+      }
+    });
+
+    const results = await Promise.allSettled(promises);
+
+    const successful = results
+      .filter(
+        (result): result is PromiseFulfilledResult<any> =>
+          result.status === "fulfilled"
+      )
+      .map((result) => result.value)
+      .filter((value) => value.success);
+
+    const failed = results
+      .filter(
+        (result): result is PromiseFulfilledResult<any> =>
+          result.status === "fulfilled"
+      )
+      .map((result) => result.value)
+      .filter((value) => !value.success);
+
+    return {
+      successful: successful.map((s) => s.id),
+      failed: failed.map((f) => ({ id: f.id, error: f.error })),
+      totalCount: changeRequests.length,
+    };
+  },
+
+  bulkRejectChangeRequests: async (ids: number[]) => {
+    const promises = ids.map(async (id) => {
+      try {
+        const response = await fetch(`${API_ROUTES.CHANGE_REQUESTS}/${id}`, {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${M2M_TOKEN}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to reject change request ${id}`);
+        }
+
+        return { id, success: true };
+      } catch (error) {
+        console.error(`Error rejecting change request ${id}:`, error);
+        return {
+          id,
+          success: false,
+          error: error instanceof Error ? error.message : "Unknown error",
+        };
+      }
+    });
+
+    const results = await Promise.allSettled(promises);
+
+    const successful = results
+      .filter(
+        (result): result is PromiseFulfilledResult<any> =>
+          result.status === "fulfilled"
+      )
+      .map((result) => result.value)
+      .filter((value) => value.success);
+
+    const failed = results
+      .filter(
+        (result): result is PromiseFulfilledResult<any> =>
+          result.status === "fulfilled"
+      )
+      .map((result) => result.value)
+      .filter((value) => !value.success);
+
+    return {
+      successful: successful.map((s) => s.id),
+      failed: failed.map((f) => ({ id: f.id, error: f.error })),
+      totalCount: ids.length,
+    };
   },
 };
