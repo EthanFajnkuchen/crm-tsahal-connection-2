@@ -2,7 +2,10 @@ import React, { useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchLeadDetailsThunk } from "../../store/thunks/lead-details/lead-details.thunk";
+import { getChangeRequestsByLeadIdThunk } from "../../store/thunks/change-request/change-request.thunk";
 import { RootState, AppDispatch } from "../../store/store";
+import { useUserPermissions } from "../../hooks/use-user-permissions";
+import { RoleType } from "../../types/role-types";
 import { GeneralSection } from "./components/general-section";
 import { ExpertConnectionSection } from "./components/expert-connection-section";
 import { JudaismNationalitySection } from "./components/judaism-nationality-section";
@@ -17,11 +20,15 @@ import { tabs } from "./constants/tabs";
 const LeadDetailsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const dispatch = useDispatch<AppDispatch>();
+  const { roleType } = useUserPermissions();
   const {
     data: lead,
     isLoading,
     error,
   } = useSelector((state: RootState) => state.leadDetails);
+  const { changeRequestsByLead } = useSelector(
+    (state: RootState) => state.changeRequest
+  );
 
   const sectionRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   const activeTab = useScrollSpy(tabs, sectionRefs);
@@ -32,6 +39,13 @@ const LeadDetailsPage: React.FC = () => {
       dispatch(fetchLeadDetailsThunk(id));
     }
   }, [dispatch, id]);
+
+  // Fetch pending change requests for this lead if user is a volunteer
+  useEffect(() => {
+    if (lead && roleType[0] === RoleType.VOLONTAIRE) {
+      dispatch(getChangeRequestsByLeadIdThunk(lead.ID));
+    }
+  }, [lead, dispatch, roleType]);
 
   if (isLoading) {
     return (
@@ -81,7 +95,10 @@ const LeadDetailsPage: React.FC = () => {
               id="lead-info"
               className="scroll-mt-20"
             >
-              <LeadInfoSection lead={lead} />
+              <LeadInfoSection
+                lead={lead}
+                changeRequestsByLead={changeRequestsByLead}
+              />
             </div>
 
             <div
@@ -89,7 +106,10 @@ const LeadDetailsPage: React.FC = () => {
               id="general"
               className="scroll-mt-20"
             >
-              <GeneralSection lead={lead} />
+              <GeneralSection
+                lead={lead}
+                changeRequestsByLead={changeRequestsByLead}
+              />
             </div>
 
             <div
@@ -105,7 +125,10 @@ const LeadDetailsPage: React.FC = () => {
               id="judaism-nationality"
               className="scroll-mt-20"
             >
-              <JudaismNationalitySection lead={lead} />
+              <JudaismNationalitySection
+                lead={lead}
+                changeRequestsByLead={changeRequestsByLead}
+              />
             </div>
 
             <div
@@ -113,7 +136,10 @@ const LeadDetailsPage: React.FC = () => {
               id="education"
               className="scroll-mt-20"
             >
-              <EducationSection lead={lead} />
+              <EducationSection
+                lead={lead}
+                changeRequestsByLead={changeRequestsByLead}
+              />
             </div>
 
             <div
@@ -121,7 +147,10 @@ const LeadDetailsPage: React.FC = () => {
               id="integration-israel"
               className="scroll-mt-20"
             >
-              <IntegrationIsraelSection lead={lead} />
+              <IntegrationIsraelSection
+                lead={lead}
+                changeRequestsByLead={changeRequestsByLead}
+              />
             </div>
 
             <div
@@ -129,7 +158,10 @@ const LeadDetailsPage: React.FC = () => {
               id="tsahal"
               className="scroll-mt-20"
             >
-              <TsahalSection lead={lead} />
+              <TsahalSection
+                lead={lead}
+                changeRequestsByLead={changeRequestsByLead}
+              />
             </div>
 
             <div
