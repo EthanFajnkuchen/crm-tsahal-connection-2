@@ -1,3 +1,4 @@
+import React from "react";
 import { Control, Controller, FieldValues, Path } from "react-hook-form";
 import { Label } from "@/components/ui/label";
 import { Calendar } from "@/components/ui/calendar";
@@ -249,136 +250,157 @@ const DatePickerInput = ({
   );
 };
 
-const FormDatePicker = <T extends FieldValues>({
-  control,
-  name,
-  label,
-  error,
-  className,
-  mode = "EDIT",
-  readOnly = false,
-  hidden = false,
-  fromYear = 1900,
-  toYear = new Date().getFullYear() + 40,
-  required = false,
-  isLoading = false,
-  pendingChange = false,
-  pendingChangeDetails,
-}: FormDatePickerProps<T>) => {
-  if (hidden) return null;
+const FormDatePicker = React.forwardRef(
+  <T extends FieldValues>(
+    {
+      control,
+      name,
+      label,
+      error,
+      className,
+      mode = "EDIT",
+      readOnly = false,
+      hidden = false,
+      fromYear = 1900,
+      toYear = new Date().getFullYear() + 40,
+      required = false,
+      isLoading = false,
+      pendingChange = false,
+      pendingChangeDetails,
+    }: FormDatePickerProps<T>,
+    ref: React.Ref<HTMLDivElement>
+  ) => {
+    if (hidden) return null;
 
-  if (isLoading) {
+    if (isLoading) {
+      return (
+        <div className="space-y-2">
+          <Skeleton className="h-4 w-20" />
+          <Skeleton className="h-10 w-full" />
+        </div>
+      );
+    }
+
+    const formatDisplayDate = (dateString: string) => {
+      if (!dateString || typeof dateString !== "string") {
+        return "";
+      }
+
+      try {
+        const parsedDate = parseISO(dateString);
+        if (!isValid(parsedDate)) {
+          return "";
+        }
+        return format(parsedDate, "dd/MM/yyyy", { locale: fr });
+      } catch (error) {
+        console.warn("Error formatting date:", dateString, error);
+        return "";
+      }
+    };
+
+    const formatValueDate = (date: Date) => {
+      return format(date, "yyyy-MM-dd");
+    };
+
+    const parseInputDate = (inputValue: string): Date | null => {
+      // Remove any extra spaces and normalize
+      const cleanValue = inputValue.trim();
+
+      // Try different date formats
+      const formats = [
+        "dd/MM/yyyy",
+        "d/M/yyyy",
+        "dd/MM/yy",
+        "d/M/yy",
+        "dd-MM-yyyy",
+        "d-M-yyyy",
+        "yyyy-MM-dd",
+      ];
+
+      for (const formatStr of formats) {
+        try {
+          const parsedDate = parse(cleanValue, formatStr, new Date());
+          if (isValid(parsedDate)) {
+            // If year is 2-digit and less than 50, assume 20xx, otherwise 19xx
+            if (formatStr.includes("yy") && !formatStr.includes("yyyy")) {
+              const year = parsedDate.getFullYear();
+              if (year < 50) {
+                parsedDate.setFullYear(2000 + year);
+              } else if (year < 100) {
+                parsedDate.setFullYear(1900 + year);
+              }
+            }
+            return parsedDate;
+          }
+        } catch {
+          continue;
+        }
+      }
+
+      return null;
+    };
+
     return (
-      <div className="space-y-2">
-        <Skeleton className="h-4 w-20" />
-        <Skeleton className="h-10 w-full" />
+      <div ref={ref} className="space-y-2">
+        {label && (
+          <Label
+            htmlFor={name}
+            className={cn(
+              "text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 font-[Poppins]",
+              mode === "VIEW" ? "text-muted-foreground" : "text-gray-500"
+            )}
+          >
+            {label}
+            {mode === "EDIT" && required && (
+              <span className="text-red-500 ml-1">*</span>
+            )}
+          </Label>
+        )}
+        {mode === "EDIT" ? (
+          <Controller
+            control={control}
+            name={name}
+            render={({ field }) => (
+              <DatePickerInput
+                field={field}
+                formatDisplayDate={formatDisplayDate}
+                formatValueDate={formatValueDate}
+                parseInputDate={parseInputDate}
+                className={className}
+                readOnly={readOnly}
+                fromYear={fromYear}
+                toYear={toYear}
+              />
+            )}
+          />
+        ) : (
+          <Controller
+            control={control}
+            name={name}
+            render={({ field }) => (
+              <p className="text-sm font-medium font-[Poppins]">
+                {field.value ? formatDisplayDate(field.value) : "-"}
+              </p>
+            )}
+          />
+        )}
+        {error && <p className="text-sm text-red-500">{error}</p>}
+        {pendingChange && (
+          <p className="text-xs text-orange-600 flex items-center gap-1">
+            ⏳ Modification en attente
+            {pendingChangeDetails && (
+              <span className="ml-1 font-mono">
+                → "{pendingChangeDetails.newValue}"
+              </span>
+            )}
+          </p>
+        )}
       </div>
     );
   }
+);
 
-  const formatDisplayDate = (dateString: string) => {
-    return format(parseISO(dateString), "dd/MM/yyyy", { locale: fr });
-  };
-
-  const formatValueDate = (date: Date) => {
-    return format(date, "yyyy-MM-dd");
-  };
-
-  const parseInputDate = (inputValue: string): Date | null => {
-    // Remove any extra spaces and normalize
-    const cleanValue = inputValue.trim();
-
-    // Try different date formats
-    const formats = [
-      "dd/MM/yyyy",
-      "d/M/yyyy",
-      "dd/MM/yy",
-      "d/M/yy",
-      "dd-MM-yyyy",
-      "d-M-yyyy",
-      "yyyy-MM-dd",
-    ];
-
-    for (const formatStr of formats) {
-      try {
-        const parsedDate = parse(cleanValue, formatStr, new Date());
-        if (isValid(parsedDate)) {
-          // If year is 2-digit and less than 50, assume 20xx, otherwise 19xx
-          if (formatStr.includes("yy") && !formatStr.includes("yyyy")) {
-            const year = parsedDate.getFullYear();
-            if (year < 50) {
-              parsedDate.setFullYear(2000 + year);
-            } else if (year < 100) {
-              parsedDate.setFullYear(1900 + year);
-            }
-          }
-          return parsedDate;
-        }
-      } catch {
-        continue;
-      }
-    }
-
-    return null;
-  };
-
-  return (
-    <div className="space-y-2">
-      {label && (
-        <Label
-          htmlFor={name}
-          className={cn(
-            "text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 font-[Poppins]",
-            mode === "VIEW" ? "text-muted-foreground" : "text-gray-500"
-          )}
-        >
-          {label}
-          {mode === "EDIT" && required && (
-            <span className="text-red-500 ml-1">*</span>
-          )}
-        </Label>
-      )}
-      {mode === "EDIT" ? (
-        <Controller
-          control={control}
-          name={name}
-          render={({ field }) => (
-            <DatePickerInput
-              field={field}
-              formatDisplayDate={formatDisplayDate}
-              formatValueDate={formatValueDate}
-              parseInputDate={parseInputDate}
-              className={className}
-              readOnly={readOnly}
-              fromYear={fromYear}
-              toYear={toYear}
-            />
-          )}
-        />
-      ) : (
-        <Controller
-          control={control}
-          name={name}
-          render={({ field }) => (
-            <p className="text-sm font-medium font-[Poppins]">
-              {field.value ? formatDisplayDate(field.value) : "-"}
-            </p>
-          )}
-        />
-      )}
-      {error && <p className="text-sm text-red-500">{error}</p>}
-      {pendingChange && (
-        <p className="text-xs text-orange-600 flex items-center gap-1">
-          ⏳ Modification en attente
-          {pendingChangeDetails && (
-            <span className="ml-1 font-mono">
-              → "{pendingChangeDetails.newValue}"
-            </span>
-          )}
-        </p>
-      )}
-    </div>
-  );
-};
+// Add displayName for better debugging
+FormDatePicker.displayName = "FormDatePicker";
 
 export { FormDatePicker };

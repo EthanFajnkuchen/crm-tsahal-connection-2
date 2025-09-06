@@ -22,3 +22,24 @@ export const getChangeRequestsByLeadIdThunk = createAsyncThunk<
 >("changeRequest/getByLeadId", async (leadId: number) => {
   return await changeRequestAdapter.getChangeRequestsByLeadId(leadId);
 });
+
+export const deleteChangeRequestThunk = createAsyncThunk<
+  { id: number },
+  number
+>("changeRequest/delete", async (id: number) => {
+  return await changeRequestAdapter.deleteChangeRequest(id);
+});
+
+export const acceptChangeRequestThunk = createAsyncThunk<
+  { id: number; updatedLead: any },
+  ChangeRequest
+>("changeRequest/accept", async (changeRequest: ChangeRequest) => {
+  return await changeRequestAdapter.acceptChangeRequest(changeRequest);
+});
+
+export const rejectChangeRequestThunk = createAsyncThunk<
+  { id: number },
+  number
+>("changeRequest/reject", async (id: number) => {
+  return await changeRequestAdapter.rejectChangeRequest(id);
+});

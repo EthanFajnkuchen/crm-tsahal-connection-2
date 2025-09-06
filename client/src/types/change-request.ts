@@ -6,6 +6,11 @@ export interface ChangeRequest {
   newValue: string;
   changedBy: string;
   dateModified: string;
+  lead?: {
+    firstName: string;
+    lastName: string;
+    ID: number;
+  };
 }
 
 export interface CreateChangeRequestDto {
