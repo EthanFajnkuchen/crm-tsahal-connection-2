@@ -61,6 +61,21 @@ export const useFormBase = ({
     return String(value);
   };
 
+  // Helper function to format values for database storage (dates as yyyy-MM-dd)
+  const formatValueForStorage = (value: any, fieldName: string): string => {
+    if (value === null || value === undefined) return "";
+
+    if (dateFields.includes(fieldName)) {
+      const dateValue = new Date(value);
+      if (!isNaN(dateValue.getTime())) {
+        // Format as yyyy-MM-dd for database storage
+        return dateValue.toISOString().split("T")[0];
+      }
+    }
+
+    return String(value);
+  };
+
   // Function to detect changes between original lead and form data
   const detectChanges = (
     formData: Partial<Lead>,
@@ -75,11 +90,11 @@ export const useFormBase = ({
       if (formValue !== originalValue) {
         changes.push({
           fieldChanged: fieldName,
-          oldValue: formatValueForDisplay(
+          oldValue: formatValueForStorage(
             originalLead[fieldName as keyof Lead],
             fieldName
           ),
-          newValue: formatValueForDisplay(
+          newValue: formatValueForStorage(
             formData[fieldName as keyof Lead],
             fieldName
           ),
@@ -107,6 +122,7 @@ export const useFormBase = ({
     toString,
     formatDateForDisplay,
     formatValueForDisplay,
+    formatValueForStorage,
     detectChanges,
     handleModeChange,
     handleCancel,

@@ -1,4 +1,5 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { Lead } from '../lead/lead.entity';
 
 @Entity('change_requests')
 export class ChangeRequest {
@@ -7,6 +8,10 @@ export class ChangeRequest {
 
   @Column()
   leadId: number;
+
+  @ManyToOne(() => Lead)
+  @JoinColumn({ name: 'leadId' })
+  lead: Lead;
 
   @Column({ length: 255 })
   fieldChanged: string;
