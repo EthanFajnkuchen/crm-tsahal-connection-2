@@ -17,11 +17,17 @@ import { processJudaismNationalityData } from "@/utils/form-data-processors";
 interface JudaismNationalitySectionProps {
   lead: Lead;
   changeRequestsByLead: ChangeRequest[];
+  isAdmin?: boolean;
+  onApproveChangeRequest?: (changeRequestId: number) => void;
+  onRejectChangeRequest?: (changeRequestId: number) => void;
 }
 
 export const JudaismNationalitySection = ({
   lead,
   changeRequestsByLead,
+  isAdmin = false,
+  onApproveChangeRequest,
+  onRejectChangeRequest,
 }: JudaismNationalitySectionProps) => {
   // Fields that can be modified in this section
   const fieldsToCheck = [
@@ -144,6 +150,10 @@ export const JudaismNationalitySection = ({
               label: option.displayName,
             }))}
             isLoading={localIsLoading}
+            changeRequests={changeRequestsByLead}
+            onApproveChangeRequest={onApproveChangeRequest}
+            onRejectChangeRequest={onRejectChangeRequest}
+            isAdmin={isAdmin}
             {...getFieldProps("StatutLoiRetour")}
           />
 
@@ -154,6 +164,10 @@ export const JudaismNationalitySection = ({
             mode={mode}
             hidden={statutLoiRetour !== "Juif converti"}
             isLoading={localIsLoading}
+            changeRequests={changeRequestsByLead}
+            onApproveChangeRequest={onApproveChangeRequest}
+            onRejectChangeRequest={onRejectChangeRequest}
+            isAdmin={isAdmin}
             {...getFieldProps("conversionDate")}
           />
 
@@ -168,6 +182,10 @@ export const JudaismNationalitySection = ({
             }))}
             hidden={statutLoiRetour !== "Juif converti"}
             isLoading={localIsLoading}
+            changeRequests={changeRequestsByLead}
+            onApproveChangeRequest={onApproveChangeRequest}
+            onRejectChangeRequest={onRejectChangeRequest}
+            isAdmin={isAdmin}
             {...getFieldProps("conversionAgency")}
           />
         </FormSubSection>
@@ -183,6 +201,10 @@ export const JudaismNationalitySection = ({
               label: option.displayName,
             }))}
             isLoading={localIsLoading}
+            changeRequests={changeRequestsByLead}
+            onApproveChangeRequest={onApproveChangeRequest}
+            onRejectChangeRequest={onRejectChangeRequest}
+            isAdmin={isAdmin}
             {...getFieldProps("statutResidentIsrael")}
           />
 
@@ -200,6 +222,10 @@ export const JudaismNationalitySection = ({
               ].includes(statutResidentIsrael || "")
             }
             isLoading={localIsLoading}
+            changeRequests={changeRequestsByLead}
+            onApproveChangeRequest={onApproveChangeRequest}
+            onRejectChangeRequest={onRejectChangeRequest}
+            isAdmin={isAdmin}
             {...getFieldProps("anneeAlyah")}
           />
 
@@ -221,6 +247,10 @@ export const JudaismNationalitySection = ({
                 "Ben Meager",
               ].includes(statutResidentIsrael || "")
             }
+            changeRequests={changeRequestsByLead}
+            onApproveChangeRequest={onApproveChangeRequest}
+            onRejectChangeRequest={onRejectChangeRequest}
+            isAdmin={isAdmin}
             {...getFieldProps("hasIsraeliID")}
           />
 
@@ -231,6 +261,10 @@ export const JudaismNationalitySection = ({
             mode={mode}
             hidden={hasIsraeliID !== "Oui"}
             isLoading={localIsLoading}
+            changeRequests={changeRequestsByLead}
+            onApproveChangeRequest={onApproveChangeRequest}
+            onRejectChangeRequest={onRejectChangeRequest}
+            isAdmin={isAdmin}
             {...getFieldProps("israeliIDNumber")}
           />
 
@@ -244,6 +278,10 @@ export const JudaismNationalitySection = ({
               label: option.displayName,
             }))}
             isLoading={localIsLoading}
+            changeRequests={changeRequestsByLead}
+            onApproveChangeRequest={onApproveChangeRequest}
+            onRejectChangeRequest={onRejectChangeRequest}
+            isAdmin={isAdmin}
             {...getFieldProps("numberOfNationalities")}
           />
 
@@ -257,6 +295,10 @@ export const JudaismNationalitySection = ({
               label: option.displayName,
             }))}
             isLoading={localIsLoading}
+            changeRequests={changeRequestsByLead}
+            onApproveChangeRequest={onApproveChangeRequest}
+            onRejectChangeRequest={onRejectChangeRequest}
+            isAdmin={isAdmin}
             {...getFieldProps("nationality1")}
           />
 
@@ -266,6 +308,10 @@ export const JudaismNationalitySection = ({
             label="Numéro de passeport 1"
             mode={mode}
             isLoading={localIsLoading}
+            changeRequests={changeRequestsByLead}
+            onApproveChangeRequest={onApproveChangeRequest}
+            onRejectChangeRequest={onRejectChangeRequest}
+            isAdmin={isAdmin}
             {...getFieldProps("passportNumber1")}
           />
 
@@ -280,6 +326,10 @@ export const JudaismNationalitySection = ({
             }))}
             hidden={numberOfNationalities === "1"}
             isLoading={localIsLoading}
+            changeRequests={changeRequestsByLead}
+            onApproveChangeRequest={onApproveChangeRequest}
+            onRejectChangeRequest={onRejectChangeRequest}
+            isAdmin={isAdmin}
             {...getFieldProps("nationality2")}
           />
 
@@ -290,6 +340,10 @@ export const JudaismNationalitySection = ({
             mode={mode}
             hidden={numberOfNationalities === "1"}
             isLoading={localIsLoading}
+            changeRequests={changeRequestsByLead}
+            onApproveChangeRequest={onApproveChangeRequest}
+            onRejectChangeRequest={onRejectChangeRequest}
+            isAdmin={isAdmin}
             {...getFieldProps("passportNumber2")}
           />
 
@@ -306,6 +360,10 @@ export const JudaismNationalitySection = ({
               numberOfNationalities === "1" || numberOfNationalities === "2"
             }
             isLoading={localIsLoading}
+            changeRequests={changeRequestsByLead}
+            onApproveChangeRequest={onApproveChangeRequest}
+            onRejectChangeRequest={onRejectChangeRequest}
+            isAdmin={isAdmin}
             {...getFieldProps("nationality3")}
           />
 
@@ -318,6 +376,10 @@ export const JudaismNationalitySection = ({
               numberOfNationalities === "1" || numberOfNationalities === "2"
             }
             isLoading={localIsLoading}
+            changeRequests={changeRequestsByLead}
+            onApproveChangeRequest={onApproveChangeRequest}
+            onRejectChangeRequest={onRejectChangeRequest}
+            isAdmin={isAdmin}
             {...getFieldProps("passportNumber3")}
           />
         </FormSubSection>

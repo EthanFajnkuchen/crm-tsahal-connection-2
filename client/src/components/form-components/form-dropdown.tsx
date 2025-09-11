@@ -3,6 +3,8 @@ import { Label } from "@/components/ui/label";
 import { SingleSelect } from "@/components/ui/single-select";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ChangeRequestIndicator } from "@/components/app-components/change-request-indicator/change-request-indicator";
+import { ChangeRequest } from "@/types/change-request";
 
 type Mode = "EDIT" | "VIEW";
 
@@ -18,6 +20,12 @@ interface FormDropdownProps<T extends FieldValues> {
   required?: boolean;
   isLoading?: boolean;
   disabled?: boolean;
+  // Admin change request functionality
+  changeRequests?: ChangeRequest[];
+  onApproveChangeRequest?: (changeRequestId: number) => void;
+  onRejectChangeRequest?: (changeRequestId: number) => void;
+  isAdmin?: boolean;
+  // Legacy pending change (for volunteers)
   pendingChange?: boolean;
   pendingChangeDetails?: {
     oldValue: string;
@@ -37,6 +45,12 @@ const FormDropdown = <T extends FieldValues>({
   required = false,
   isLoading = false,
   disabled = false,
+  // Admin change request props
+  changeRequests = [],
+  onApproveChangeRequest,
+  onRejectChangeRequest,
+  isAdmin = false,
+  // Legacy pending change props
   pendingChange = false,
   pendingChangeDetails,
 }: FormDropdownProps<T>) => {
@@ -57,14 +71,28 @@ const FormDropdown = <T extends FieldValues>({
         <Label
           htmlFor={name}
           className={cn(
-            "text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 font-[Poppins]",
+            "text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 font-[Poppins] flex items-center gap-2",
             mode === "VIEW" ? "text-muted-foreground" : "text-gray-500"
           )}
         >
-          {label}
-          {mode === "EDIT" && required && (
-            <span className="text-red-500 ml-1">*</span>
-          )}
+          <span>
+            {label}
+            {mode === "EDIT" && required && (
+              <span className="text-red-500 ml-1">*</span>
+            )}
+          </span>
+          {isAdmin &&
+            changeRequests.length > 0 &&
+            onApproveChangeRequest &&
+            onRejectChangeRequest && (
+              <ChangeRequestIndicator
+                changeRequests={changeRequests}
+                fieldName={name}
+                onApprove={onApproveChangeRequest}
+                onReject={onRejectChangeRequest}
+                label={label}
+              />
+            )}
         </Label>
       )}
       {mode === "EDIT" ? (
@@ -79,7 +107,7 @@ const FormDropdown = <T extends FieldValues>({
                 onChange={field.onChange}
                 placeholder="Sélectionner"
                 className={className}
-                disabled={disabled}
+                disabled={disabled || (changeRequests.length > 0 && isAdmin)}
               />
             )}
           />

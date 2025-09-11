@@ -15,11 +15,17 @@ import { processEducationData } from "@/utils/form-data-processors";
 interface EducationSectionProps {
   lead: Lead;
   changeRequestsByLead: ChangeRequest[];
+  isAdmin?: boolean;
+  onApproveChangeRequest?: (changeRequestId: number) => void;
+  onRejectChangeRequest?: (changeRequestId: number) => void;
 }
 
 export const EducationSection = ({
   lead,
   changeRequestsByLead,
+  isAdmin = false,
+  onApproveChangeRequest,
+  onRejectChangeRequest,
 }: EducationSectionProps) => {
   // Fields that can be modified in this section
   const fieldsToCheck = [
@@ -136,6 +142,10 @@ export const EducationSection = ({
               label: option.displayName,
             }))}
             isLoading={localIsLoading}
+            changeRequests={changeRequestsByLead}
+            onApproveChangeRequest={onApproveChangeRequest}
+            onRejectChangeRequest={onRejectChangeRequest}
+            isAdmin={isAdmin}
             {...getFieldProps("bacObtention")}
           />
 
@@ -150,6 +160,10 @@ export const EducationSection = ({
             }))}
             hidden={bacObtention === "Non"}
             isLoading={localIsLoading}
+            changeRequests={changeRequestsByLead}
+            onApproveChangeRequest={onApproveChangeRequest}
+            onRejectChangeRequest={onRejectChangeRequest}
+            isAdmin={isAdmin}
             {...getFieldProps("bacCountry")}
           />
 
@@ -164,6 +178,10 @@ export const EducationSection = ({
             }))}
             hidden={bacObtention === "Non" || bacCountry !== "Israel"}
             isLoading={localIsLoading}
+            changeRequests={changeRequestsByLead}
+            onApproveChangeRequest={onApproveChangeRequest}
+            onRejectChangeRequest={onRejectChangeRequest}
+            isAdmin={isAdmin}
             {...getFieldProps("bacType")}
           />
 
@@ -182,6 +200,10 @@ export const EducationSection = ({
               bacType !== "BAC israélien"
             }
             isLoading={localIsLoading}
+            changeRequests={changeRequestsByLead}
+            onApproveChangeRequest={onApproveChangeRequest}
+            onRejectChangeRequest={onRejectChangeRequest}
+            isAdmin={isAdmin}
             {...getFieldProps("israeliBacSchool")}
           />
 
@@ -198,6 +220,10 @@ export const EducationSection = ({
                 otherSchoolName !== israeliBacSchool)
             }
             isLoading={localIsLoading}
+            changeRequests={changeRequestsByLead}
+            onApproveChangeRequest={onApproveChangeRequest}
+            onRejectChangeRequest={onRejectChangeRequest}
+            isAdmin={isAdmin}
             {...getFieldProps("otherSchoolName")}
           />
 
@@ -216,6 +242,10 @@ export const EducationSection = ({
               bacType !== "BAC étranger"
             }
             isLoading={localIsLoading}
+            changeRequests={changeRequestsByLead}
+            onApproveChangeRequest={onApproveChangeRequest}
+            onRejectChangeRequest={onRejectChangeRequest}
+            isAdmin={isAdmin}
             {...getFieldProps("frenchBacSchoolIsrael")}
           />
 
@@ -230,6 +260,10 @@ export const EducationSection = ({
             }))}
             hidden={bacObtention === "Non" || bacCountry !== "Étranger"}
             isLoading={localIsLoading}
+            changeRequests={changeRequestsByLead}
+            onApproveChangeRequest={onApproveChangeRequest}
+            onRejectChangeRequest={onRejectChangeRequest}
+            isAdmin={isAdmin}
             {...getFieldProps("jewishSchool")}
           />
 
@@ -244,6 +278,10 @@ export const EducationSection = ({
               jewishSchool !== "Oui"
             }
             isLoading={localIsLoading}
+            changeRequests={changeRequestsByLead}
+            onApproveChangeRequest={onApproveChangeRequest}
+            onRejectChangeRequest={onRejectChangeRequest}
+            isAdmin={isAdmin}
             {...getFieldProps("frenchBacSchoolFrance")}
           />
         </FormSubSection>
@@ -259,6 +297,10 @@ export const EducationSection = ({
               label: option.displayName,
             }))}
             isLoading={localIsLoading}
+            changeRequests={changeRequestsByLead}
+            onApproveChangeRequest={onApproveChangeRequest}
+            onRejectChangeRequest={onRejectChangeRequest}
+            isAdmin={isAdmin}
             {...getFieldProps("academicDiploma")}
           />
 
@@ -273,6 +315,10 @@ export const EducationSection = ({
             }))}
             hidden={academicDiploma === "Non"}
             isLoading={localIsLoading}
+            changeRequests={changeRequestsByLead}
+            onApproveChangeRequest={onApproveChangeRequest}
+            onRejectChangeRequest={onRejectChangeRequest}
+            isAdmin={isAdmin}
             {...getFieldProps("higherEducationCountry")}
           />
 
@@ -285,6 +331,10 @@ export const EducationSection = ({
               academicDiploma === "Non" || higherEducationCountry !== "Israël"
             }
             isLoading={localIsLoading}
+            changeRequests={changeRequestsByLead}
+            onApproveChangeRequest={onApproveChangeRequest}
+            onRejectChangeRequest={onRejectChangeRequest}
+            isAdmin={isAdmin}
             {...getFieldProps("universityNameHebrew")}
           />
 
@@ -297,6 +347,10 @@ export const EducationSection = ({
               academicDiploma === "Non" || higherEducationCountry !== "Israël"
             }
             isLoading={localIsLoading}
+            changeRequests={changeRequestsByLead}
+            onApproveChangeRequest={onApproveChangeRequest}
+            onRejectChangeRequest={onRejectChangeRequest}
+            isAdmin={isAdmin}
             {...getFieldProps("diplomaNameHebrew")}
           />
 
@@ -310,6 +364,10 @@ export const EducationSection = ({
               higherEducationCountry !== "À l'étranger"
             }
             isLoading={localIsLoading}
+            changeRequests={changeRequestsByLead}
+            onApproveChangeRequest={onApproveChangeRequest}
+            onRejectChangeRequest={onRejectChangeRequest}
+            isAdmin={isAdmin}
             {...getFieldProps("universityNameFrench")}
           />
 
@@ -323,6 +381,10 @@ export const EducationSection = ({
               higherEducationCountry !== "À l'étranger"
             }
             isLoading={localIsLoading}
+            changeRequests={changeRequestsByLead}
+            onApproveChangeRequest={onApproveChangeRequest}
+            onRejectChangeRequest={onRejectChangeRequest}
+            isAdmin={isAdmin}
             {...getFieldProps("diplomaNameFrench")}
           />
         </FormSubSection>

@@ -15,6 +15,8 @@ import { fr } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ChangeRequestIndicator } from "@/components/app-components/change-request-indicator/change-request-indicator";
+import { ChangeRequest } from "@/types/change-request";
 
 type Mode = "EDIT" | "VIEW";
 
@@ -31,6 +33,12 @@ interface FormDatePickerProps<T extends FieldValues> {
   toYear?: number;
   required?: boolean;
   isLoading?: boolean;
+  // Admin change request functionality
+  changeRequests?: ChangeRequest[];
+  onApproveChangeRequest?: (changeRequestId: number) => void;
+  onRejectChangeRequest?: (changeRequestId: number) => void;
+  isAdmin?: boolean;
+  // Legacy pending change (for volunteers)
   pendingChange?: boolean;
   pendingChangeDetails?: {
     oldValue: string;
@@ -43,118 +51,57 @@ const DatePickerInput = ({
   field,
   formatDisplayDate,
   formatValueDate,
+  parseInputDate,
   className,
-  readOnly,
-  fromYear,
-  toYear,
+  readOnly = false,
+  fromYear = 1900,
+  toYear = new Date().getFullYear() + 40,
 }: {
   field: any;
   formatDisplayDate: (dateString: string) => string;
   formatValueDate: (date: Date) => string;
-  parseInputDate: (inputValue: string) => Date | null;
+  parseInputDate: (input: string) => Date | null;
   className?: string;
-  readOnly: boolean;
-  fromYear: number;
-  toYear: number;
+  readOnly?: boolean;
+  fromYear?: number;
+  toYear?: number;
 }) => {
-  const [inputValue, setInputValue] = useState(
-    field.value ? formatDisplayDate(field.value) : ""
-  );
+  const [inputValue, setInputValue] = useState("");
   const [isOpen, setIsOpen] = useState(false);
 
-  // Update input when field value changes externally (e.g., form reset)
+  // Update input when field value changes
   useEffect(() => {
-    if (field.value && field.value !== "") {
+    if (field.value) {
       setInputValue(formatDisplayDate(field.value));
     } else {
       setInputValue("");
     }
   }, [field.value, formatDisplayDate]);
 
-  const formatInputWithMask = (value: string): string => {
-    // Remove all non-numeric characters
-    const numbers = value.replace(/\D/g, "");
-
-    // Apply mask: dd/mm/yyyy
-    let formatted = "";
-    for (let i = 0; i < numbers.length && i < 8; i++) {
-      if (i === 2 || i === 4) {
-        formatted += "/";
-      }
-      formatted += numbers[i];
-    }
-
-    return formatted;
-  };
-
-  const parseFormattedDate = (formattedValue: string): Date | null => {
-    // Only try to parse if we have a complete date (dd/mm/yyyy format)
-    if (formattedValue.length !== 10 || !formattedValue.includes("/")) {
-      return null;
-    }
-
-    const parts = formattedValue.split("/");
-    if (parts.length !== 3) return null;
-
-    const day = parseInt(parts[0], 10);
-    const month = parseInt(parts[1], 10);
-    const year = parseInt(parts[2], 10);
-
-    // Basic validation
-    if (day < 1 || day > 31 || month < 1 || month > 12 || year < 1000) {
-      return null;
-    }
-
-    // Create date and validate it exists (handles February 29, etc.)
-    const date = new Date(year, month - 1, day);
-    if (
-      date.getFullYear() !== year ||
-      date.getMonth() !== month - 1 ||
-      date.getDate() !== day
-    ) {
-      return null;
-    }
-
-    return date;
-  };
-
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const rawValue = e.target.value;
+    const value = e.target.value;
+    setInputValue(value);
 
-    // If user is deleting, allow it
-    if (rawValue.length < inputValue.length) {
-      setInputValue(rawValue);
-
-      // If the input becomes invalid after deletion, clear the field
-      const parsedDate = parseFormattedDate(rawValue);
-      if (!parsedDate && rawValue.length === 0) {
-        field.onChange("");
-      }
-      return;
-    }
-
-    // Apply the mask
-    const maskedValue = formatInputWithMask(rawValue);
-    setInputValue(maskedValue);
-
-    // Try to parse and update the field value
-    const parsedDate = parseFormattedDate(maskedValue);
-    if (parsedDate && isValid(parsedDate)) {
-      const formattedDate = formatValueDate(parsedDate);
-      field.onChange(formattedDate);
-    }
+    // Don't validate while typing, only on blur
   };
 
   const handleInputBlur = () => {
-    // On blur, validate the complete date
-    const parsedDate = parseFormattedDate(inputValue);
-    if (parsedDate && isValid(parsedDate)) {
-      const formattedDate = formatValueDate(parsedDate);
-      field.onChange(formattedDate);
-      // Keep the masked format for display
-      setInputValue(formatInputWithMask(inputValue));
-    } else if (inputValue.trim() === "") {
+    if (!inputValue.trim()) {
       // If input is empty, clear the field
+      field.onChange("");
+      setInputValue("");
+      return;
+    }
+
+    const parsedDate = parseInputDate(inputValue);
+
+    if (parsedDate) {
+      // Valid date parsed
+      const formattedValue = formatValueDate(parsedDate);
+      field.onChange(formattedValue);
+      setInputValue(formatDisplayDate(formattedValue));
+    } else if (!field.value) {
+      // Invalid input and no existing value, clear
       field.onChange("");
       setInputValue("");
     } else {
@@ -180,69 +127,68 @@ const DatePickerInput = ({
       "Home",
       "End",
       "Tab",
-      "Enter",
-      "Escape",
     ];
 
-    // Allow numbers
-    const isNumber = /^[0-9]$/.test(e.key);
+    if (allowedKeys.includes(e.key)) {
+      return;
+    }
 
-    if (!isNumber && !allowedKeys.includes(e.key) && !e.ctrlKey && !e.metaKey) {
+    // Allow numbers and common date separators
+    if (!/[0-9\/\-\.]/.test(e.key)) {
       e.preventDefault();
     }
   };
 
-  const handleCalendarSelect = (date: Date | undefined) => {
+  const handleDateSelect = (date: Date | undefined) => {
     if (date) {
-      const selectedDateString = formatValueDate(date);
-      // If the same date is clicked again, clear the field
-      if (field.value === selectedDateString) {
-        field.onChange("");
-        setInputValue("");
-      } else {
-        field.onChange(selectedDateString);
-        setInputValue(formatDisplayDate(selectedDateString));
-      }
-    } else {
-      field.onChange("");
-      setInputValue("");
+      const formattedValue = formatValueDate(date);
+      field.onChange(formattedValue);
+      setInputValue(formatDisplayDate(formattedValue));
     }
     setIsOpen(false);
   };
 
+  const currentDate = field.value ? parseISO(field.value) : undefined;
+
   return (
     <div className="relative">
-      <Input
-        value={inputValue}
-        onChange={handleInputChange}
-        onBlur={handleInputBlur}
-        onKeyDown={handleKeyDown}
-        placeholder="jj/mm/aaaa"
-        maxLength={10}
-        className={cn("pr-10", className)}
-        disabled={readOnly}
-      />
       <Popover open={isOpen} onOpenChange={setIsOpen}>
         <PopoverTrigger asChild>
           <Button
-            variant="ghost"
-            size="sm"
-            className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 p-0"
+            variant="outline"
+            className={cn(
+              "w-full justify-start text-left font-normal",
+              !field.value && "text-muted-foreground",
+              className
+            )}
             disabled={readOnly}
-            type="button"
           >
-            <CalendarIcon className="h-4 w-4" />
+            <CalendarIcon className="mr-2 h-4 w-4" />
+            <Input
+              value={inputValue}
+              onChange={handleInputChange}
+              onBlur={handleInputBlur}
+              onKeyDown={handleKeyDown}
+              onFocus={() => !readOnly && setIsOpen(true)}
+              placeholder="jj/mm/aaaa"
+              className="border-0 bg-transparent p-0 h-auto shadow-none focus-visible:ring-0"
+              readOnly={readOnly}
+            />
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="start">
           <Calendar
             mode="single"
-            selected={field.value ? new Date(field.value) : undefined}
-            defaultMonth={field.value ? new Date(field.value) : undefined}
+            selected={currentDate}
+            onSelect={handleDateSelect}
+            disabled={(date) =>
+              date > new Date() || date < new Date(`${fromYear}-01-01`)
+            }
             fromYear={fromYear}
             toYear={toYear}
-            onSelect={handleCalendarSelect}
+            locale={fr}
             initialFocus
+            captionLayout="dropdown-buttons"
           />
         </PopoverContent>
       </Popover>
@@ -265,6 +211,12 @@ const FormDatePicker = React.forwardRef(
       toYear = new Date().getFullYear() + 40,
       required = false,
       isLoading = false,
+      // Admin change request props
+      changeRequests = [],
+      onApproveChangeRequest,
+      onRejectChangeRequest,
+      isAdmin = false,
+      // Legacy pending change props
       pendingChange = false,
       pendingChangeDetails,
     }: FormDatePickerProps<T>,
@@ -282,29 +234,31 @@ const FormDatePicker = React.forwardRef(
     }
 
     const formatDisplayDate = (dateString: string) => {
-      if (!dateString || typeof dateString !== "string") {
-        return "";
-      }
-
       try {
-        const parsedDate = parseISO(dateString);
-        if (!isValid(parsedDate)) {
-          return "";
-        }
-        return format(parsedDate, "dd/MM/yyyy", { locale: fr });
-      } catch (error) {
-        console.warn("Error formatting date:", dateString, error);
+        if (!dateString) return "";
+        const date = parseISO(dateString);
+        if (!isValid(date)) return "";
+        return format(date, "dd/MM/yyyy");
+      } catch {
         return "";
       }
     };
 
     const formatValueDate = (date: Date) => {
-      return format(date, "yyyy-MM-dd");
+      try {
+        if (!isValid(date)) return "";
+        return format(date, "yyyy-MM-dd");
+      } catch {
+        return "";
+      }
     };
 
-    const parseInputDate = (inputValue: string): Date | null => {
-      // Remove any extra spaces and normalize
-      const cleanValue = inputValue.trim();
+    const parseInputDate = (input: string): Date | null => {
+      if (!input || input.trim() === "") {
+        return null;
+      }
+
+      const cleanValue = input.trim();
 
       // Try different date formats
       const formats = [
@@ -346,14 +300,28 @@ const FormDatePicker = React.forwardRef(
           <Label
             htmlFor={name}
             className={cn(
-              "text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 font-[Poppins]",
+              "text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 font-[Poppins] flex items-center gap-2",
               mode === "VIEW" ? "text-muted-foreground" : "text-gray-500"
             )}
           >
-            {label}
-            {mode === "EDIT" && required && (
-              <span className="text-red-500 ml-1">*</span>
-            )}
+            <span>
+              {label}
+              {mode === "EDIT" && required && (
+                <span className="text-red-500 ml-1">*</span>
+              )}
+            </span>
+            {isAdmin &&
+              changeRequests.length > 0 &&
+              onApproveChangeRequest &&
+              onRejectChangeRequest && (
+                <ChangeRequestIndicator
+                  changeRequests={changeRequests}
+                  fieldName={name}
+                  label={label || name}
+                  onApprove={onApproveChangeRequest}
+                  onReject={onRejectChangeRequest}
+                />
+              )}
           </Label>
         )}
         {mode === "EDIT" ? (
@@ -400,7 +368,6 @@ const FormDatePicker = React.forwardRef(
   }
 );
 
-// Add displayName for better debugging
 FormDatePicker.displayName = "FormDatePicker";
 
 export { FormDatePicker };

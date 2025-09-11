@@ -2,7 +2,11 @@ import React, { useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchLeadDetailsThunk } from "../../store/thunks/lead-details/lead-details.thunk";
-import { getChangeRequestsByLeadIdThunk } from "../../store/thunks/change-request/change-request.thunk";
+import {
+  getChangeRequestsByLeadIdThunk,
+  acceptChangeRequestThunk,
+  rejectChangeRequestThunk,
+} from "../../store/thunks/change-request/change-request.thunk";
 import { RootState, AppDispatch } from "../../store/store";
 import { useUserPermissions } from "../../hooks/use-user-permissions";
 import { RoleType } from "../../types/role-types";
@@ -30,6 +34,33 @@ const LeadDetailsPage: React.FC = () => {
     (state: RootState) => state.changeRequest
   );
 
+  const isAdmin = roleType[0] === RoleType.ADMINISTRATEUR;
+
+  console.log("LeadDetails render", {
+    isAdmin,
+    roleType,
+    changeRequestsByLead,
+    leadId: lead?.ID,
+  });
+
+  // Functions to handle change request approval/rejection for admins
+  const handleApproveChangeRequest = async (changeRequestId: number) => {
+    const changeRequest = changeRequestsByLead.find(
+      (cr) => cr.id === changeRequestId
+    );
+    if (changeRequest) {
+      await dispatch(acceptChangeRequestThunk(changeRequest));
+      // Refresh lead data to show updated values
+      if (id) {
+        dispatch(fetchLeadDetailsThunk(id));
+      }
+    }
+  };
+
+  const handleRejectChangeRequest = async (changeRequestId: number) => {
+    await dispatch(rejectChangeRequestThunk(changeRequestId));
+  };
+
   const sectionRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   const activeTab = useScrollSpy(tabs, sectionRefs);
   const scrollToSection = useScrollToSection(sectionRefs);
@@ -40,9 +71,13 @@ const LeadDetailsPage: React.FC = () => {
     }
   }, [dispatch, id]);
 
-  // Fetch pending change requests for this lead if user is a volunteer
+  // Fetch pending change requests for this lead if user is a volunteer or admin
   useEffect(() => {
-    if (lead && roleType[0] === RoleType.VOLONTAIRE) {
+    if (
+      lead &&
+      (roleType[0] === RoleType.VOLONTAIRE ||
+        roleType[0] === RoleType.ADMINISTRATEUR)
+    ) {
       dispatch(getChangeRequestsByLeadIdThunk(lead.ID));
     }
   }, [lead, dispatch, roleType]);
@@ -98,6 +133,9 @@ const LeadDetailsPage: React.FC = () => {
               <LeadInfoSection
                 lead={lead}
                 changeRequestsByLead={changeRequestsByLead}
+                isAdmin={isAdmin}
+                onApproveChangeRequest={handleApproveChangeRequest}
+                onRejectChangeRequest={handleRejectChangeRequest}
               />
             </div>
 
@@ -109,6 +147,9 @@ const LeadDetailsPage: React.FC = () => {
               <GeneralSection
                 lead={lead}
                 changeRequestsByLead={changeRequestsByLead}
+                isAdmin={isAdmin}
+                onApproveChangeRequest={handleApproveChangeRequest}
+                onRejectChangeRequest={handleRejectChangeRequest}
               />
             </div>
 
@@ -128,6 +169,9 @@ const LeadDetailsPage: React.FC = () => {
               <JudaismNationalitySection
                 lead={lead}
                 changeRequestsByLead={changeRequestsByLead}
+                isAdmin={isAdmin}
+                onApproveChangeRequest={handleApproveChangeRequest}
+                onRejectChangeRequest={handleRejectChangeRequest}
               />
             </div>
 
@@ -139,6 +183,9 @@ const LeadDetailsPage: React.FC = () => {
               <EducationSection
                 lead={lead}
                 changeRequestsByLead={changeRequestsByLead}
+                isAdmin={isAdmin}
+                onApproveChangeRequest={handleApproveChangeRequest}
+                onRejectChangeRequest={handleRejectChangeRequest}
               />
             </div>
 
@@ -150,6 +197,9 @@ const LeadDetailsPage: React.FC = () => {
               <IntegrationIsraelSection
                 lead={lead}
                 changeRequestsByLead={changeRequestsByLead}
+                isAdmin={isAdmin}
+                onApproveChangeRequest={handleApproveChangeRequest}
+                onRejectChangeRequest={handleRejectChangeRequest}
               />
             </div>
 
@@ -161,6 +211,9 @@ const LeadDetailsPage: React.FC = () => {
               <TsahalSection
                 lead={lead}
                 changeRequestsByLead={changeRequestsByLead}
+                isAdmin={isAdmin}
+                onApproveChangeRequest={handleApproveChangeRequest}
+                onRejectChangeRequest={handleRejectChangeRequest}
               />
             </div>
 
