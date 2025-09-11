@@ -22,6 +22,7 @@ import {
   createDiscussionThunk,
   updateDiscussionThunk,
 } from "@/store/thunks/discussions/discussions.thunk";
+import { useAuth0 } from "@auth0/auth0-react";
 
 interface CreateDiscussionDrawerProps {
   isOpen: boolean;
@@ -44,6 +45,7 @@ export const CreateDiscussionDrawer: React.FC<CreateDiscussionDrawerProps> = ({
   lead,
   onDiscussionCreated,
 }) => {
+  const { user } = useAuth0();
   const dispatch = useDispatch<AppDispatch>();
   const { isCreating } = useSelector((state: RootState) => state.discussions);
   const [formData, setFormData] = useState({
@@ -64,6 +66,7 @@ export const CreateDiscussionDrawer: React.FC<CreateDiscussionDrawerProps> = ({
         id_lead: lead.ID,
         date_discussion: formData.date_discussion,
         contenu: formData.contenu,
+        created_by: user?.name || "",
       };
 
       await dispatch(createDiscussionThunk(discussionData)).unwrap();

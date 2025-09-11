@@ -24,4 +24,7 @@ export class Discussion {
   @ManyToOne(() => Lead)
   @JoinColumn({ name: 'id_lead' })
   lead: Lead;
+
+  @Column('text')
+  created_by: string;
 }

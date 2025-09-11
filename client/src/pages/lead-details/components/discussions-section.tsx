@@ -9,7 +9,14 @@ import {
   CreateDiscussionDrawer,
   EditDiscussionDrawer,
 } from "./create-discussion-drawer";
-import { Calendar, MessageSquare, Edit, Trash2, Plus } from "lucide-react";
+import {
+  Calendar,
+  MessageSquare,
+  Edit,
+  Trash2,
+  Plus,
+  User,
+} from "lucide-react";
 import { toast } from "sonner";
 import { AppDispatch, RootState } from "@/store/store";
 import {
@@ -117,9 +124,15 @@ export const DiscussionsSection = ({ lead }: DiscussionsSectionProps) => {
                 <Card key={discussion.ID} className="border-gray-200">
                   <CardHeader className="pb-3">
                     <div className="flex justify-between items-start">
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
-                        <Calendar className="w-4 h-4" />
-                        <span>{formatDate(discussion.date_discussion)}</span>
+                      <div className="flex flex-col  gap-2">
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                          <Calendar className="w-4 h-4" />
+                          <span>{formatDate(discussion.date_discussion)}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                          <User className="w-4 h-4" />
+                          <span>{discussion.created_by}</span>
+                        </div>
                       </div>
                       <div className="flex gap-1">
                         <Button
