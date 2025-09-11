@@ -10,8 +10,6 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ChangeRequest } from "@/types/change-request";
-import { useDispatch } from "react-redux";
-import { AppDispatch } from "@/store/store";
 import { Badge } from "@/components/ui/badge";
 
 interface ChangeRequestIndicatorProps {
@@ -29,7 +27,6 @@ export const ChangeRequestIndicator: React.FC<ChangeRequestIndicatorProps> = ({
   label,
   onApprove,
   onReject,
-  isLoading,
 }) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<ChangeRequest | null>(
@@ -43,13 +40,6 @@ export const ChangeRequestIndicator: React.FC<ChangeRequestIndicatorProps> = ({
   const fieldChangeRequests = changeRequests.filter(
     (request) => request.fieldChanged === fieldName
   );
-
-  // console.log("ChangeRequestIndicator render", {
-  //   fieldName,
-  //   changeRequests,
-  //   fieldChangeRequests,
-  //   isDialogOpen,
-  // });
 
   if (fieldChangeRequests.length === 0) {
     return null;
