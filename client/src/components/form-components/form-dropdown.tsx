@@ -55,7 +55,10 @@ const FormDropdown = <T extends FieldValues>({
   pendingChangeDetails,
 }: FormDropdownProps<T>) => {
   if (hidden) return null;
-
+  // Filter change requests for this specific field
+  const fieldChangeRequests = changeRequests.filter(
+    (request) => request.fieldChanged === name
+  );
   if (isLoading) {
     return (
       <div className="space-y-2">
@@ -107,7 +110,9 @@ const FormDropdown = <T extends FieldValues>({
                 onChange={field.onChange}
                 placeholder="Sélectionner"
                 className={className}
-                disabled={disabled || (changeRequests.length > 0 && isAdmin)}
+                disabled={
+                  disabled || (fieldChangeRequests.length > 0 && isAdmin)
+                }
               />
             )}
           />

@@ -55,6 +55,10 @@ const FormInput = <T extends FieldValues>({
 }: FormInputProps<T>) => {
   if (hidden) return null;
 
+  const fieldChangeRequests = changeRequests.filter(
+    (request) => request.fieldChanged === name
+  );
+
   if (isLoading) {
     return (
       <div className="space-y-2">
@@ -98,7 +102,7 @@ const FormInput = <T extends FieldValues>({
                 error && "border-red-500 focus-visible:ring-red-500",
                 className
               )}
-              disabled={readOnly}
+              disabled={readOnly || (fieldChangeRequests.length > 0 && isAdmin)}
             />
           )}
         />

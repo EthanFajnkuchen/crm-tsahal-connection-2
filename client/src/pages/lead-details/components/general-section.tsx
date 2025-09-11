@@ -5,7 +5,6 @@ import {
   FormSection,
   FormSubSection,
 } from "@/components/form-components/form-section";
-import { FormCheckbox } from "@/components/form-components/form-checkbox";
 import { FormDropdown } from "@/components/form-components/form-dropdown";
 import { FormDatePicker } from "@/components/form-components/form-date-picker";
 import { RELATION } from "@/i18n/emergency-contact";
@@ -78,7 +77,7 @@ export const GeneralSection = ({
       birthDate: lead.birthDate,
       city: lead.city,
       gender: lead.gender || "",
-      isOnlyChild: lead.isOnlyChild === "Oui" ? true : false,
+      isOnlyChild: lead.isOnlyChild || "",
       contactUrgenceFirstName: lead.contactUrgenceFirstName || "",
       contactUrgenceLastName: lead.contactUrgenceLastName || "",
       contactUrgencePhoneNumber: lead.contactUrgencePhoneNumber || "",
@@ -95,7 +94,7 @@ export const GeneralSection = ({
       birthDate: lead.birthDate,
       city: lead.city,
       gender: lead.gender || "",
-      isOnlyChild: lead.isOnlyChild === "Oui" ? true : false,
+      isOnlyChild: lead.isOnlyChild || "",
       contactUrgenceFirstName: lead.contactUrgenceFirstName || "",
       contactUrgenceLastName: lead.contactUrgenceLastName || "",
       contactUrgencePhoneNumber: lead.contactUrgencePhoneNumber || "",
@@ -203,11 +202,15 @@ export const GeneralSection = ({
             {...getFieldProps("birthDate")}
           />
 
-          <FormCheckbox
+          <FormDropdown
             control={control}
             name="isOnlyChild"
             label="Enfant unique"
             mode={mode}
+            options={[
+              { value: "Oui", label: "Oui" },
+              { value: "Non", label: "Non" },
+            ]}
             isLoading={localIsLoading}
             changeRequests={changeRequestsByLead}
             onApproveChangeRequest={onApproveChangeRequest}

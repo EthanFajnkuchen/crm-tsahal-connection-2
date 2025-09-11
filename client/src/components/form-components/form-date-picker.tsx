@@ -28,6 +28,7 @@ interface FormDatePickerProps<T extends FieldValues> {
   mode?: Mode;
   className?: string;
   readOnly?: boolean;
+  disabled?: boolean;
   hidden?: boolean;
   fromYear?: number;
   toYear?: number;
@@ -54,6 +55,7 @@ const DatePickerInput = ({
   parseInputDate,
   className,
   readOnly = false,
+  disabled = false,
   fromYear = 1900,
   toYear = new Date().getFullYear() + 40,
 }: {
@@ -63,6 +65,7 @@ const DatePickerInput = ({
   parseInputDate: (input: string) => Date | null;
   className?: string;
   readOnly?: boolean;
+  disabled?: boolean;
   fromYear?: number;
   toYear?: number;
 }) => {
@@ -161,7 +164,7 @@ const DatePickerInput = ({
               !field.value && "text-muted-foreground",
               className
             )}
-            disabled={readOnly}
+            disabled={readOnly || disabled}
           >
             <CalendarIcon className="mr-2 h-4 w-4" />
             <Input
@@ -169,10 +172,11 @@ const DatePickerInput = ({
               onChange={handleInputChange}
               onBlur={handleInputBlur}
               onKeyDown={handleKeyDown}
-              onFocus={() => !readOnly && setIsOpen(true)}
+              onFocus={() => !readOnly && !disabled && setIsOpen(true)}
               placeholder="jj/mm/aaaa"
               className="border-0 bg-transparent p-0 h-auto shadow-none focus-visible:ring-0"
               readOnly={readOnly}
+              disabled={disabled}
             />
           </Button>
         </PopoverTrigger>
@@ -206,6 +210,7 @@ const FormDatePicker = React.forwardRef(
       className,
       mode = "EDIT",
       readOnly = false,
+      disabled = false,
       hidden = false,
       fromYear = 1900,
       toYear = new Date().getFullYear() + 40,
@@ -223,6 +228,9 @@ const FormDatePicker = React.forwardRef(
     ref: React.Ref<HTMLDivElement>
   ) => {
     if (hidden) return null;
+    const fieldChangeRequests = changeRequests.filter(
+      (request) => request.fieldChanged === name
+    );
 
     if (isLoading) {
       return (
@@ -338,6 +346,9 @@ const FormDatePicker = React.forwardRef(
                 readOnly={readOnly}
                 fromYear={fromYear}
                 toYear={toYear}
+                disabled={
+                  disabled || (fieldChangeRequests.length > 0 && isAdmin)
+                }
               />
             )}
           />

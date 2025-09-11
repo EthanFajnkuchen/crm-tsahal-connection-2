@@ -44,12 +44,12 @@ export const ChangeRequestIndicator: React.FC<ChangeRequestIndicatorProps> = ({
     (request) => request.fieldChanged === fieldName
   );
 
-  console.log("ChangeRequestIndicator render", {
-    fieldName,
-    changeRequests,
-    fieldChangeRequests,
-    isDialogOpen,
-  });
+  // console.log("ChangeRequestIndicator render", {
+  //   fieldName,
+  //   changeRequests,
+  //   fieldChangeRequests,
+  //   isDialogOpen,
+  // });
 
   if (fieldChangeRequests.length === 0) {
     return null;
