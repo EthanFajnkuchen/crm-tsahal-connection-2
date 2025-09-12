@@ -6,6 +6,7 @@ import {
   BriefcaseBusiness,
   PersonStanding,
   BookCopy,
+  Activity,
 } from "lucide-react";
 import { RoleType } from "@/types/role-types";
 
@@ -50,6 +51,12 @@ export const SIDEBAR_ITEMS = [
     displayName: "Forms",
     link: "/forms",
     icon: BookCopy,
+    roles: [RoleType.ADMINISTRATEUR],
+  },
+  {
+    displayName: "Activités",
+    link: "/activitees",
+    icon: Activity,
     roles: [RoleType.ADMINISTRATEUR],
   },
 ];
