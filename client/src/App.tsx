@@ -41,7 +41,7 @@ function App() {
           <Route path="data" element={<Data />} />
           <Route path="expert-connection" element={<ExpertConnection />} />
           <Route path="mahzor-giyus" element={<MahzorGiyus />} />
-          <Route path="forms-rapports" element={<FormsRapports />} />
+          <Route path="forms" element={<FormsRapports />} />
           <Route path="lead-details/:id" element={<LeadDetails />} />
           <Route path="tafkidim" element={<TafkidimPage />} />
           <Route path="volontaires" element={<Volunteers />} />

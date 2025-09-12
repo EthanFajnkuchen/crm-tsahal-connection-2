@@ -3,7 +3,7 @@ import { useForm, useWatch } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
 import { fetchAllLeadsThunk } from "@/store/thunks/data/all-leads.thunk";
-import { bulkUpdateTsavRishonGradesThunk } from "@/store/thunks/bulk-operations/bulk-tsav-rishon.thunk";
+import { bulkUpdateTsavRishonDateThunk } from "@/store/thunks/bulk-operations/bulk-tsav-rishon.thunk";
 import {
   Form,
   FormField,
@@ -12,19 +12,22 @@ import {
   FormControl,
   FormMessage,
 } from "@/components/ui/form";
-import { MILITARY } from "@/i18n/military";
 import {
   SideDrawerFooter,
   SideDrawerAction,
 } from "@/components/ui/side-drawer";
-import type { FormValues } from "./types";
-import { SingleSelect } from "../ui/single-select";
+import type { TsavRishonDateFormValues } from "./types";
 import { FormMultiSelect } from "../form-components/form-multi-select";
+import { FormDatePicker } from "../form-components/form-date-picker";
+import { SingleSelect } from "../ui/single-select";
+import { MILITARY } from "@/i18n/military";
 import { toast } from "sonner";
 import { useUserPermissions } from "@/hooks/use-user-permissions";
 import { RoleType } from "@/types/role-types";
 
-const TsavRishonDrawerContent = (closeDrawer: () => void): React.ReactNode => {
+const TsavRishonDateDrawerContent = (
+  closeDrawer: () => void
+): React.ReactNode => {
   const dispatch = useDispatch<AppDispatch>();
   const { roleType, isLoading: isPermissionsLoading } = useUserPermissions();
   const [localIsLoading, setLocalIsLoading] = React.useState(false);
@@ -35,7 +38,7 @@ const TsavRishonDrawerContent = (closeDrawer: () => void): React.ReactNode => {
   );
 
   // Get bulk operation state
-  const { isGradesLoading: isBulkLoading } = useSelector(
+  const { isDateLoading: isBulkLoading } = useSelector(
     (state: RootState) => state.bulkTsavRishon
   );
 
@@ -46,12 +49,11 @@ const TsavRishonDrawerContent = (closeDrawer: () => void): React.ReactNode => {
     }
   }, [dispatch]); // Only depend on dispatch to avoid unnecessary re-fetches
 
-  const form = useForm<FormValues>({
+  const form = useForm<TsavRishonDateFormValues>({
     defaultValues: {
       leads: [],
-      noteDapar: "",
-      simoulIvrit: "",
-      profileMedical: "",
+      tsavRishonDate: "",
+      recruitmentCenter: "",
     },
   });
 
@@ -85,6 +87,32 @@ const TsavRishonDrawerContent = (closeDrawer: () => void): React.ReactNode => {
     });
   }, [uniqueLeads]);
 
+  // Recruitment center options
+  const recruitmentCenterOptions = MILITARY.recruitment_center_tsav_rishon.map(
+    ({ value, displayName }) => ({
+      value: String(value),
+      label: displayName,
+    })
+  );
+
+  // Watch form values to determine if submit button should be disabled
+  const watchedValues = useWatch({
+    control: form.control,
+    name: ["leads", "tsavRishonDate", "recruitmentCenter"],
+  });
+
+  const [selectedLeads, tsavRishonDate, recruitmentCenter] = watchedValues;
+
+  // Check if form is valid for submission
+  const isFormValid = useMemo(() => {
+    const hasLeads = Array.isArray(selectedLeads) && selectedLeads.length > 0;
+    const hasDate = tsavRishonDate && tsavRishonDate.trim() !== "";
+    const hasRecruitmentCenter =
+      recruitmentCenter && recruitmentCenter.trim() !== "";
+
+    return hasLeads && hasDate && hasRecruitmentCenter;
+  }, [selectedLeads, tsavRishonDate, recruitmentCenter]);
+
   // Helper function to get lead IDs from selected names
   const getLeadIdsFromNames = (selectedNames: string[]): number[] => {
     if (!uniqueLeads) return [];
@@ -100,7 +128,7 @@ const TsavRishonDrawerContent = (closeDrawer: () => void): React.ReactNode => {
   };
 
   // Real submit handler
-  const onSubmit = async (values: FormValues) => {
+  const onSubmit = async (values: TsavRishonDateFormValues) => {
     if (!isVolunteer && !isAdmin) {
       toast.error("Accès non autorisé pour cette action");
       return;
@@ -108,6 +136,16 @@ const TsavRishonDrawerContent = (closeDrawer: () => void): React.ReactNode => {
 
     if (!values.leads || values.leads.length === 0) {
       toast.error("Veuillez sélectionner au moins un lead");
+      return;
+    }
+
+    if (!values.tsavRishonDate) {
+      toast.error("Veuillez sélectionner une date de Tsav Rishon");
+      return;
+    }
+
+    if (!values.recruitmentCenter.trim()) {
+      toast.error("Veuillez saisir le lieu de recrutement");
       return;
     }
 
@@ -123,14 +161,12 @@ const TsavRishonDrawerContent = (closeDrawer: () => void): React.ReactNode => {
       // Prepare bulk update data
       const bulkData = {
         leadIds,
-        daparNote: values.noteDapar || undefined,
-        medicalProfile: values.profileMedical || undefined,
-        hebrewScore: values.simoulIvrit || undefined,
-        // Add other fields as needed
+        tsavRishonDate: values.tsavRishonDate,
+        recruitmentCenter: values.recruitmentCenter,
       };
 
       const result = await dispatch(
-        bulkUpdateTsavRishonGradesThunk(bulkData)
+        bulkUpdateTsavRishonDateThunk(bulkData)
       ).unwrap();
 
       if (result.failed > 0) {
@@ -142,7 +178,7 @@ const TsavRishonDrawerContent = (closeDrawer: () => void): React.ReactNode => {
         }
       } else {
         toast.success(
-          `Formulaire de Tsav Rishon soumis avec succès pour ${result.updated} lead(s)`
+          `Date et lieu Tsav Rishon mis à jour avec succès pour ${result.updated} lead(s).`
         );
       }
 
@@ -155,49 +191,12 @@ const TsavRishonDrawerContent = (closeDrawer: () => void): React.ReactNode => {
     }
   };
 
-  // Conversion des options pour le format attendu par DeselectableSelect
-  const daparOptions = MILITARY.dapar_grades.map(({ value, displayName }) => ({
-    value: String(value),
-    label: displayName,
-  }));
-
-  const hebrewOptions = MILITARY.hebrew_grade.map(({ value, displayName }) => ({
-    value: String(value),
-    label: displayName,
-  }));
-
-  const medicalOptions = MILITARY.medical_profile.map(
-    ({ value, displayName }) => ({
-      value: String(value),
-      label: displayName,
-    })
-  );
-
-  // Watch form values to determine if submit button should be disabled
-  const watchedValues = useWatch({
-    control: form.control,
-    name: ["leads", "noteDapar", "simoulIvrit", "profileMedical"],
-  });
-
-  const [selectedLeads, noteDapar, simoulIvrit, profileMedical] = watchedValues;
-
-  // Check if form is valid for submission
-  const isFormValid = useMemo(() => {
-    const hasLeads = Array.isArray(selectedLeads) && selectedLeads.length > 0;
-    const hasAnyGradeField =
-      (noteDapar && noteDapar.trim() !== "") ||
-      (simoulIvrit && simoulIvrit.trim() !== "") ||
-      (profileMedical && profileMedical.trim() !== "");
-
-    return hasLeads && hasAnyGradeField;
-  }, [selectedLeads, noteDapar, simoulIvrit, profileMedical]);
-
   return (
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
         className="flex flex-col gap-4 px-4"
-        id="tsav-rishon-form"
+        id="tsav-rishon-date-form"
       >
         {/* Multi-select Leads avec composant générique */}
         <FormMultiSelect
@@ -212,58 +211,31 @@ const TsavRishonDrawerContent = (closeDrawer: () => void): React.ReactNode => {
           isLoading={isLeadsLoading}
         />
 
-        <FormField
-          control={form.control}
-          name="noteDapar"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Note Dapar</FormLabel>
-              <FormControl>
-                <SingleSelect
-                  options={daparOptions}
-                  value={field.value}
-                  onChange={field.onChange}
-                  placeholder="Sélectionner une note"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+        {/* Date du Tsav Rishon */}
+        <FormDatePicker
+          control={form.control as any}
+          name="tsavRishonDate"
+          label="Date du Tsav Rishon"
+          mode="EDIT"
+          isLoading={localIsLoading}
+          allowFuture={true}
+          maxFutureYears={3}
         />
 
-        {/* Simoul Ivrit avec DeselectableSelect */}
+        {/* Lieu de recrutement */}
         <FormField
           control={form.control}
-          name="simoulIvrit"
+          name="recruitmentCenter"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Simoul Ivrit</FormLabel>
+              <FormLabel>Lieu de recrutement</FormLabel>
               <FormControl>
                 <SingleSelect
-                  options={hebrewOptions}
+                  options={recruitmentCenterOptions}
                   value={field.value}
                   onChange={field.onChange}
-                  placeholder="Sélectionner une note"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* Profil Médical avec DeselectableSelect */}
-        <FormField
-          control={form.control}
-          name="profileMedical"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Profil médical</FormLabel>
-              <FormControl>
-                <SingleSelect
-                  options={medicalOptions}
-                  value={field.value}
-                  onChange={field.onChange}
-                  placeholder="Sélectionner un profil"
+                  placeholder="Sélectionner un lieu"
+                  disabled={localIsLoading}
                 />
               </FormControl>
               <FormMessage />
@@ -276,7 +248,7 @@ const TsavRishonDrawerContent = (closeDrawer: () => void): React.ReactNode => {
             onSave={() => console.log(form.getValues())}
             buttonContent={localIsLoading ? "Enregistrement..." : "Enregistrer"}
             type="submit"
-            formId="tsav-rishon-form"
+            formId="tsav-rishon-date-form"
             disabled={
               localIsLoading ||
               isPermissionsLoading ||
@@ -290,4 +262,4 @@ const TsavRishonDrawerContent = (closeDrawer: () => void): React.ReactNode => {
   );
 };
 
-export default TsavRishonDrawerContent;
+export default TsavRishonDateDrawerContent;

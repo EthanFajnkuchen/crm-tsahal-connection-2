@@ -1,17 +1,26 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { bulkUpdateTsavRishonThunk } from "../../thunks/bulk-operations/bulk-tsav-rishon.thunk";
+import {
+  bulkUpdateTsavRishonGradesThunk,
+  bulkUpdateTsavRishonDateThunk,
+} from "../../thunks/bulk-operations/bulk-tsav-rishon.thunk";
 import { BulkTsavRishonResponse } from "../../adapters/bulk-operations/bulk-tsav-rishon.adapter";
 
 interface BulkTsavRishonState {
-  data: BulkTsavRishonResponse | null;
-  isLoading: boolean;
-  error: string | null;
+  gradesData: BulkTsavRishonResponse | null;
+  dateData: BulkTsavRishonResponse | null;
+  isGradesLoading: boolean;
+  isDateLoading: boolean;
+  gradesError: string | null;
+  dateError: string | null;
 }
 
 const initialState: BulkTsavRishonState = {
-  data: null,
-  isLoading: false,
-  error: null,
+  gradesData: null,
+  dateData: null,
+  isGradesLoading: false,
+  isDateLoading: false,
+  gradesError: null,
+  dateError: null,
 };
 
 const bulkTsavRishonSlice = createSlice({
@@ -19,28 +28,49 @@ const bulkTsavRishonSlice = createSlice({
   initialState,
   reducers: {
     clearBulkTsavRishonState: (state) => {
-      state.data = null;
-      state.error = null;
+      state.gradesData = null;
+      state.dateData = null;
+      state.gradesError = null;
+      state.dateError = null;
     },
   },
   extraReducers: (builder) => {
     builder
-      .addCase(bulkUpdateTsavRishonThunk.pending, (state) => {
-        state.isLoading = true;
-        state.error = null;
+      // Grades operations
+      .addCase(bulkUpdateTsavRishonGradesThunk.pending, (state) => {
+        state.isGradesLoading = true;
+        state.gradesError = null;
       })
       .addCase(
-        bulkUpdateTsavRishonThunk.fulfilled,
+        bulkUpdateTsavRishonGradesThunk.fulfilled,
         (state, action: PayloadAction<BulkTsavRishonResponse>) => {
-          state.isLoading = false;
-          state.data = action.payload;
-          state.error = null;
+          state.isGradesLoading = false;
+          state.gradesData = action.payload;
+          state.gradesError = null;
         }
       )
-      .addCase(bulkUpdateTsavRishonThunk.rejected, (state, action) => {
-        state.isLoading = false;
-        state.error =
-          action.error.message || "Failed to update Tsav Rishon data";
+      .addCase(bulkUpdateTsavRishonGradesThunk.rejected, (state, action) => {
+        state.isGradesLoading = false;
+        state.gradesError =
+          action.error.message || "Failed to update Tsav Rishon grades";
+      })
+      // Date operations
+      .addCase(bulkUpdateTsavRishonDateThunk.pending, (state) => {
+        state.isDateLoading = true;
+        state.dateError = null;
+      })
+      .addCase(
+        bulkUpdateTsavRishonDateThunk.fulfilled,
+        (state, action: PayloadAction<BulkTsavRishonResponse>) => {
+          state.isDateLoading = false;
+          state.dateData = action.payload;
+          state.dateError = null;
+        }
+      )
+      .addCase(bulkUpdateTsavRishonDateThunk.rejected, (state, action) => {
+        state.isDateLoading = false;
+        state.dateError =
+          action.error.message || "Failed to update Tsav Rishon date";
       });
   },
 });

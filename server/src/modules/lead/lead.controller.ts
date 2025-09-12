@@ -16,7 +16,8 @@ import { Permissions } from './../../shared/decorators/permissions.decorator';
 import {
   LeadFilterDto,
   UpdateLeadDto,
-  BulkTsavRishonUpdateDto,
+  BulkTsavRishonGradesUpdateDto,
+  BulkTsavRishonDateUpdateDto,
 } from './lead.dto';
 
 @Controller('api/leads')
@@ -116,15 +117,27 @@ export class LeadController {
     return this.leadService.updateLead(id, updateData);
   }
 
-  @Post('bulk-tsav-rishon')
+  @Post('bulk-tsav-rishon-grades')
   @Permissions('write:data')
-  async bulkUpdateTsavRishon(
-    @Body() bulkData: BulkTsavRishonUpdateDto,
+  async bulkUpdateTsavRishonGrades(
+    @Body() bulkData: BulkTsavRishonGradesUpdateDto,
   ): Promise<{
     updated: number;
     failed: number;
     errors: string[];
   }> {
-    return this.leadService.bulkUpdateTsavRishon(bulkData);
+    return this.leadService.bulkUpdateTsavRishonGrades(bulkData);
+  }
+
+  @Post('bulk-tsav-rishon-date')
+  @Permissions('write:data')
+  async bulkUpdateTsavRishonDate(
+    @Body() bulkData: BulkTsavRishonDateUpdateDto,
+  ): Promise<{
+    updated: number;
+    failed: number;
+    errors: string[];
+  }> {
+    return this.leadService.bulkUpdateTsavRishonDate(bulkData);
   }
 }

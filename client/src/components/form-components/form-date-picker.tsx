@@ -34,6 +34,8 @@ interface FormDatePickerProps<T extends FieldValues> {
   toYear?: number;
   required?: boolean;
   isLoading?: boolean;
+  allowFuture?: boolean;
+  maxFutureYears?: number;
   // Admin change request functionality
   changeRequests?: ChangeRequest[];
   onApproveChangeRequest?: (changeRequestId: number) => void;
@@ -58,6 +60,8 @@ const DatePickerInput = ({
   disabled = false,
   fromYear = 1900,
   toYear = new Date().getFullYear() + 40,
+  allowFuture = false,
+  maxFutureYears = 0,
 }: {
   field: any;
   formatDisplayDate: (dateString: string) => string;
@@ -68,9 +72,14 @@ const DatePickerInput = ({
   disabled?: boolean;
   fromYear?: number;
   toYear?: number;
+  allowFuture?: boolean;
+  maxFutureYears?: number;
 }) => {
   const [inputValue, setInputValue] = useState("");
   const [isOpen, setIsOpen] = useState(false);
+  const [isInputFocused, setIsInputFocused] = useState(false);
+  const [calendarKey, setCalendarKey] = useState(0);
+  const [displayMonth, setDisplayMonth] = useState<Date>(new Date());
 
   // Update input when field value changes
   useEffect(() => {
@@ -79,13 +88,56 @@ const DatePickerInput = ({
     } else {
       setInputValue("");
     }
+    // Force calendar to update when field value changes externally
+    setCalendarKey((prev) => prev + 1);
   }, [field.value, formatDisplayDate]);
+
+  // Function to auto-format date input with slashes
+  const autoFormatDateInput = (value: string): string => {
+    // Remove all non-numeric characters
+    const numbersOnly = value.replace(/\D/g, "");
+
+    // Apply formatting based on length
+    if (numbersOnly.length <= 2) {
+      return numbersOnly;
+    } else if (numbersOnly.length <= 4) {
+      return `${numbersOnly.slice(0, 2)}/${numbersOnly.slice(2)}`;
+    } else if (numbersOnly.length <= 8) {
+      return `${numbersOnly.slice(0, 2)}/${numbersOnly.slice(
+        2,
+        4
+      )}/${numbersOnly.slice(4, 8)}`;
+    } else {
+      // Limit to 8 digits max (ddmmyyyy)
+      return `${numbersOnly.slice(0, 2)}/${numbersOnly.slice(
+        2,
+        4
+      )}/${numbersOnly.slice(4, 8)}`;
+    }
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    setInputValue(value);
 
-    // Don't validate while typing, only on blur
+    // Auto-format the input with slashes
+    const formattedValue = autoFormatDateInput(value);
+    setInputValue(formattedValue);
+
+    // If we have a complete date (dd/mm/yyyy format), try to validate and update immediately
+    if (formattedValue.length === 10 && formattedValue.includes("/")) {
+      const parsedDate = parseInputDate(formattedValue);
+      if (parsedDate) {
+        const formattedDateValue = formatValueDate(parsedDate);
+        field.onChange(formattedDateValue);
+        // Force calendar to re-render with new date
+        setCalendarKey((prev) => prev + 1);
+      }
+    } else if (formattedValue === "") {
+      // If input is cleared, clear the field value
+      field.onChange("");
+      // Force calendar to re-render
+      setCalendarKey((prev) => prev + 1);
+    }
   };
 
   const handleInputBlur = () => {
@@ -118,6 +170,28 @@ const DatePickerInput = ({
     }
   };
 
+  const handleInputFocus = () => {
+    if (!readOnly && !disabled) {
+      setIsInputFocused(true);
+      // Small delay to avoid immediate close
+      setTimeout(() => {
+        if (!isOpen) {
+          setIsOpen(true);
+        }
+      }, 100);
+    }
+  };
+
+  const handleInputBlurDelayed = () => {
+    setIsInputFocused(false);
+    // Delay the blur handling to allow calendar interactions
+    setTimeout(() => {
+      if (!isInputFocused) {
+        handleInputBlur();
+      }
+    }, 150);
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     // Allow navigation keys, backspace, delete, etc.
     const allowedKeys = [
@@ -130,14 +204,20 @@ const DatePickerInput = ({
       "Home",
       "End",
       "Tab",
+      "Enter",
     ];
 
     if (allowedKeys.includes(e.key)) {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        handleInputBlur();
+        setIsOpen(false);
+      }
       return;
     }
 
-    // Allow numbers and common date separators
-    if (!/[0-9\/\-\.]/.test(e.key)) {
+    // Allow only numbers for date input
+    if (!/[0-9]/.test(e.key)) {
       e.preventDefault();
     }
   };
@@ -153,6 +233,24 @@ const DatePickerInput = ({
 
   const currentDate = field.value ? parseISO(field.value) : undefined;
 
+  // Update display month when current date changes
+  useEffect(() => {
+    if (currentDate) {
+      setDisplayMonth(currentDate);
+    }
+  }, [currentDate]);
+
+  // Calculate date limits
+  const today = new Date();
+  const minDate = new Date(`${fromYear}-01-01`);
+  const maxDate = allowFuture
+    ? new Date(
+        today.getFullYear() + maxFutureYears,
+        today.getMonth(),
+        today.getDate()
+      )
+    : today;
+
   return (
     <div className="relative">
       <Popover open={isOpen} onOpenChange={setIsOpen}>
@@ -165,14 +263,24 @@ const DatePickerInput = ({
               className
             )}
             disabled={readOnly || disabled}
+            onClick={(e) => {
+              e.preventDefault();
+              if (!readOnly && !disabled) {
+                setIsOpen(!isOpen);
+              }
+            }}
           >
             <CalendarIcon className="mr-2 h-4 w-4" />
             <Input
               value={inputValue}
               onChange={handleInputChange}
-              onBlur={handleInputBlur}
+              onBlur={handleInputBlurDelayed}
               onKeyDown={handleKeyDown}
-              onFocus={() => !readOnly && !disabled && setIsOpen(true)}
+              onFocus={handleInputFocus}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleInputFocus();
+              }}
               placeholder="jj/mm/aaaa"
               className="border-0 bg-transparent p-0 h-auto shadow-none focus-visible:ring-0"
               readOnly={readOnly}
@@ -180,19 +288,30 @@ const DatePickerInput = ({
             />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="start">
+        <PopoverContent
+          className="w-auto p-0"
+          align="start"
+          onPointerDownOutside={(e) => {
+            // Don't close if clicking on the input
+            const target = e.target as HTMLElement;
+            if (target.closest("input")) {
+              e.preventDefault();
+            }
+          }}
+        >
           <Calendar
             mode="single"
             selected={currentDate}
             onSelect={handleDateSelect}
-            disabled={(date) =>
-              date > new Date() || date < new Date(`${fromYear}-01-01`)
-            }
+            disabled={(date) => date > maxDate || date < minDate}
             fromYear={fromYear}
             toYear={toYear}
             locale={fr}
             initialFocus
             captionLayout="dropdown-buttons"
+            month={displayMonth}
+            onMonthChange={setDisplayMonth}
+            key={`${field.value || "empty"}-${calendarKey}`}
           />
         </PopoverContent>
       </Popover>
@@ -216,6 +335,8 @@ const FormDatePicker = React.forwardRef(
       toYear = new Date().getFullYear() + 40,
       required = false,
       isLoading = false,
+      allowFuture = false,
+      maxFutureYears = 0,
       // Admin change request props
       changeRequests = [],
       onApproveChangeRequest,
@@ -346,6 +467,8 @@ const FormDatePicker = React.forwardRef(
                 readOnly={readOnly}
                 fromYear={fromYear}
                 toYear={toYear}
+                allowFuture={allowFuture}
+                maxFutureYears={maxFutureYears}
                 disabled={
                   disabled || (fieldChangeRequests.length > 0 && isAdmin)
                 }

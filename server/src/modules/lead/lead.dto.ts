@@ -374,7 +374,7 @@ export class UpdateLeadDto {
   summary?: string;
 }
 
-export class BulkTsavRishonUpdateDto {
+export class BulkTsavRishonGradesUpdateDto {
   @IsArray()
   @IsInt({ each: true })
   leadIds: number[];
@@ -393,17 +393,20 @@ export class BulkTsavRishonUpdateDto {
 
   @IsOptional()
   @IsString()
-  tsavRishonStatus?: string;
-
-  @IsOptional()
-  @IsString()
-  recruitmentCenter?: string;
-
-  @IsOptional()
-  @IsDateString()
-  tsavRishonDate?: string;
-
-  @IsOptional()
-  @IsString()
   tsavRishonGradesReceived?: string;
+}
+
+export class BulkTsavRishonDateUpdateDto {
+  @IsArray()
+  @IsInt({ each: true })
+  leadIds: number[];
+
+  @IsDateString()
+  tsavRishonDate: string;
+
+  @IsString()
+  recruitmentCenter: string;
+
+  // Automatically set tsavRishonStatus to "Oui"
+  tsavRishonStatus: string = 'Oui';
 }

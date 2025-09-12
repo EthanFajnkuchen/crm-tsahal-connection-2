@@ -47,8 +47,8 @@ export const SIDEBAR_ITEMS = [
     roles: [RoleType.ADMINISTRATEUR],
   },
   {
-    displayName: "Forms & Rapports",
-    link: "/forms-rapports",
+    displayName: "Forms",
+    link: "/forms",
     icon: BookCopy,
     roles: [RoleType.ADMINISTRATEUR],
   },

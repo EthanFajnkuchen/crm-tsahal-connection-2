@@ -12,7 +12,8 @@ import { LeadStatistics } from './type';
 import {
   LeadFilterDto,
   UpdateLeadDto,
-  BulkTsavRishonUpdateDto,
+  BulkTsavRishonGradesUpdateDto,
+  BulkTsavRishonDateUpdateDto,
 } from './lead.dto';
 import { PassThrough } from 'stream';
 import { Workbook } from 'exceljs';
@@ -781,12 +782,46 @@ export class LeadService {
     }
   }
 
-  async bulkUpdateTsavRishon(bulkData: BulkTsavRishonUpdateDto): Promise<{
+  async bulkUpdateTsavRishonGrades(
+    bulkData: BulkTsavRishonGradesUpdateDto,
+  ): Promise<{
     updated: number;
     failed: number;
     errors: string[];
   }> {
-    const { leadIds, ...tsavRishonData } = bulkData;
+    return this.performBulkUpdate(bulkData, 'Tsav Rishon grades');
+  }
+
+  async bulkUpdateTsavRishonDate(
+    bulkData: BulkTsavRishonDateUpdateDto,
+  ): Promise<{
+    updated: number;
+    failed: number;
+    errors: string[];
+  }> {
+    // Ensure tsavRishonStatus is set to "Oui"
+    const dataWithStatus = {
+      ...bulkData,
+      tsavRishonStatus: 'Oui',
+    };
+
+    return this.performBulkUpdate(
+      dataWithStatus,
+      'Tsav Rishon date and location',
+    );
+  }
+
+  private async performBulkUpdate(
+    bulkData:
+      | BulkTsavRishonGradesUpdateDto
+      | (BulkTsavRishonDateUpdateDto & { tsavRishonStatus: string }),
+    operationType: string,
+  ): Promise<{
+    updated: number;
+    failed: number;
+    errors: string[];
+  }> {
+    const { leadIds, ...updateData } = bulkData;
 
     if (!leadIds || leadIds.length === 0) {
       throw new BadRequestException('Lead IDs are required');
@@ -818,14 +853,10 @@ export class LeadService {
             failedCount += notFoundIds.length;
           }
 
-          // Update each lead with the Tsav Rishon data
+          // Update each lead with the data
           for (const lead of leadsToUpdate) {
             try {
-              Object.assign(lead, {
-                ...tsavRishonData,
-                tsavRishonStatus: 'Oui',
-                tsavRishonGradesReceived: 'Oui',
-              });
+              Object.assign(lead, updateData);
               await transactionalEntityManager.save(lead);
               updatedCount++;
             } catch (error) {
@@ -839,7 +870,7 @@ export class LeadService {
       );
 
       console.log(
-        `Bulk Tsav Rishon update completed: ${updatedCount} updated, ${failedCount} failed`,
+        `Bulk ${operationType} update completed: ${updatedCount} updated, ${failedCount} failed`,
       );
 
       return {
@@ -855,7 +886,7 @@ export class LeadService {
         throw error;
       }
       throw new InternalServerErrorException(
-        `Failed to perform bulk Tsav Rishon update: ${error.message}`,
+        `Failed to perform bulk ${operationType} update: ${error.message}`,
       );
     }
   }

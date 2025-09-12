@@ -2,6 +2,7 @@ import React from "react";
 import useCurrentPageName from "@/hooks/use-current-page-name";
 import { SearchInput } from "@/components/app-components/search-input/search-input";
 import UserProfile from "@/components/app-components/user-profile/user-profile";
+import ProtectedComponent from "../protected-component/protected-component";
 
 const HeaderDesktop: React.FC = () => {
   const pageTitle = useCurrentPageName();
@@ -12,11 +13,13 @@ const HeaderDesktop: React.FC = () => {
         <h1 className="text-xl font-bold">{pageTitle}</h1>
       </div>
       <div className="flex flex-row gap-4 items-center">
-        <SearchInput
-          type="text"
-          placeholder="Search"
-          className="w-48 lg:w-96"
-        />
+        <ProtectedComponent>
+          <SearchInput
+            type="text"
+            placeholder="Search"
+            className="w-48 lg:w-96"
+          />
+        </ProtectedComponent>
         <UserProfile />
       </div>
     </header>
