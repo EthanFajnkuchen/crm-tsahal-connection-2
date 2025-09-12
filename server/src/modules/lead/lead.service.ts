@@ -789,7 +789,12 @@ export class LeadService {
     failed: number;
     errors: string[];
   }> {
-    return this.performBulkUpdate(bulkData, 'Tsav Rishon grades');
+    const dataWithStatuses = {
+      ...bulkData,
+      tsavRishonStatus: 'Oui',
+      tsavRishonGradesReceived: 'Oui',
+    };
+    return this.performBulkUpdate(dataWithStatuses, 'Tsav Rishon grades');
   }
 
   async bulkUpdateTsavRishonDate(
