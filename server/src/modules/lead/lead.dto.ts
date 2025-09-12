@@ -5,6 +5,7 @@ import {
   IsString,
   IsEmail,
   IsDateString,
+  IsInt,
 } from 'class-validator';
 
 export class LeadFilterDto {
@@ -371,4 +372,38 @@ export class UpdateLeadDto {
   @IsOptional()
   @IsString()
   summary?: string;
+}
+
+export class BulkTsavRishonUpdateDto {
+  @IsArray()
+  @IsInt({ each: true })
+  leadIds: number[];
+
+  @IsOptional()
+  @IsString()
+  daparNote?: string;
+
+  @IsOptional()
+  @IsString()
+  medicalProfile?: string;
+
+  @IsOptional()
+  @IsString()
+  hebrewScore?: string;
+
+  @IsOptional()
+  @IsString()
+  tsavRishonStatus?: string;
+
+  @IsOptional()
+  @IsString()
+  recruitmentCenter?: string;
+
+  @IsOptional()
+  @IsDateString()
+  tsavRishonDate?: string;
+
+  @IsOptional()
+  @IsString()
+  tsavRishonGradesReceived?: string;
 }

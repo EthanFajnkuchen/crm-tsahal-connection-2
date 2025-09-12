@@ -9,7 +9,11 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, MoreThan, Brackets, Not, IsNull, In } from 'typeorm';
 import { Lead } from './lead.entity';
 import { LeadStatistics } from './type';
-import { LeadFilterDto, UpdateLeadDto } from './lead.dto';
+import {
+  LeadFilterDto,
+  UpdateLeadDto,
+  BulkTsavRishonUpdateDto,
+} from './lead.dto';
 import { PassThrough } from 'stream';
 import { Workbook } from 'exceljs';
 @Injectable()
@@ -773,6 +777,85 @@ export class LeadService {
       }
       throw new InternalServerErrorException(
         `Failed to update lead: ${error.message}`,
+      );
+    }
+  }
+
+  async bulkUpdateTsavRishon(bulkData: BulkTsavRishonUpdateDto): Promise<{
+    updated: number;
+    failed: number;
+    errors: string[];
+  }> {
+    const { leadIds, ...tsavRishonData } = bulkData;
+
+    if (!leadIds || leadIds.length === 0) {
+      throw new BadRequestException('Lead IDs are required');
+    }
+
+    const errors: string[] = [];
+    let updatedCount = 0;
+    let failedCount = 0;
+
+    try {
+      // Use a transaction to ensure atomicity
+      await this.leadRepository.manager.transaction(
+        async (transactionalEntityManager) => {
+          // Find all leads to update
+          const leadsToUpdate = await transactionalEntityManager.find(Lead, {
+            where: { ID: In(leadIds) },
+          });
+
+          if (leadsToUpdate.length === 0) {
+            throw new NotFoundException('No leads found with provided IDs');
+          }
+
+          // Check if some IDs were not found
+          const foundIds = leadsToUpdate.map((lead) => lead.ID);
+          const notFoundIds = leadIds.filter((id) => !foundIds.includes(id));
+
+          if (notFoundIds.length > 0) {
+            errors.push(`Lead IDs not found: ${notFoundIds.join(', ')}`);
+            failedCount += notFoundIds.length;
+          }
+
+          // Update each lead with the Tsav Rishon data
+          for (const lead of leadsToUpdate) {
+            try {
+              Object.assign(lead, {
+                ...tsavRishonData,
+                tsavRishonStatus: 'Oui',
+                tsavRishonGradesReceived: 'Oui',
+              });
+              await transactionalEntityManager.save(lead);
+              updatedCount++;
+            } catch (error) {
+              errors.push(
+                `Failed to update lead ID ${lead.ID}: ${error.message}`,
+              );
+              failedCount++;
+            }
+          }
+        },
+      );
+
+      console.log(
+        `Bulk Tsav Rishon update completed: ${updatedCount} updated, ${failedCount} failed`,
+      );
+
+      return {
+        updated: updatedCount,
+        failed: failedCount,
+        errors,
+      };
+    } catch (error) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof BadRequestException
+      ) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        `Failed to perform bulk Tsav Rishon update: ${error.message}`,
       );
     }
   }

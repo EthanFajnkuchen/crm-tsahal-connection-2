@@ -1,11 +1,15 @@
-import React from "react";
+import React, { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "@/store/store";
+import { fetchAllLeadsThunk } from "@/store/thunks/data/all-leads.thunk";
+import { bulkUpdateTsavRishonThunk } from "@/store/thunks/bulk-operations/bulk-tsav-rishon.thunk";
 import {
   Form,
-  FormControl,
   FormField,
   FormItem,
   FormLabel,
+  FormControl,
   FormMessage,
 } from "@/components/ui/form";
 import { MILITARY } from "@/i18n/military";
@@ -14,30 +18,34 @@ import {
   SideDrawerAction,
 } from "@/components/ui/side-drawer";
 import type { FormValues } from "./types";
-import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
-import { Button } from "../ui/button";
-import { Checkbox } from "../ui/checkbox";
 import { SingleSelect } from "../ui/single-select";
-import { ChevronsUpDown } from "lucide-react";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
-
-const ALL_LEADS = [
-  "Lea Levi",
-  "David Ben Haim",
-  "Sarah Cohen",
-  "Jonathan Mizrahi",
-  "Noa Azoulay",
-];
+import { FormMultiSelect } from "../form-components/form-multi-select";
+import { toast } from "sonner";
+import { useUserPermissions } from "@/hooks/use-user-permissions";
+import { RoleType } from "@/types/role-types";
 
 const TsavRishonDrawerContent = (closeDrawer: () => void): React.ReactNode => {
-  const [search, setSearch] = React.useState("");
+  const dispatch = useDispatch<AppDispatch>();
+  const { roleType, isLoading: isPermissionsLoading } = useUserPermissions();
+  const [localIsLoading, setLocalIsLoading] = React.useState(false);
+
+  // Get leads from Redux store
+  const { data: leads, isLoading: isLeadsLoading } = useSelector(
+    (state: RootState) => state.allLeads
+  );
+
+  // Get bulk operation state
+  const { isLoading: isBulkLoading } = useSelector(
+    (state: RootState) => state.bulkTsavRishon
+  );
+
+  // Fetch leads on component mount (only once)
+  useEffect(() => {
+    if (!leads || leads.length === 0) {
+      dispatch(fetchAllLeadsThunk());
+    }
+  }, [dispatch]); // Only depend on dispatch to avoid unnecessary re-fetches
+
   const form = useForm<FormValues>({
     defaultValues: {
       leads: [],
@@ -47,9 +55,118 @@ const TsavRishonDrawerContent = (closeDrawer: () => void): React.ReactNode => {
     },
   });
 
-  const onSubmit = (values: FormValues) => {
-    console.log("Formulaire soumis :", values);
-    closeDrawer();
+  // Check user permissions
+  const userRole = roleType[0];
+  const isVolunteer = userRole === RoleType.VOLONTAIRE;
+  const isAdmin = userRole === RoleType.ADMINISTRATEUR;
+
+  // Memoized deduplicated leads
+  const uniqueLeads = useMemo(() => {
+    if (!leads || leads.length === 0) return [];
+
+    // Deduplicate leads based on firstName + lastName combination
+    return leads.filter((lead, index, arr) => {
+      const leadName = `${lead.firstName} ${lead.lastName}`;
+      return (
+        arr.findIndex((l) => `${l.firstName} ${l.lastName}` === leadName) ===
+        index
+      );
+    });
+  }, [leads]);
+
+  // Memoized leads options for FormMultiSelect
+  const leadsOptions = useMemo(() => {
+    return uniqueLeads.map((lead) => {
+      const fullName = `${lead.firstName} ${lead.lastName}`;
+      return {
+        value: fullName,
+        label: fullName,
+      };
+    });
+  }, [uniqueLeads]);
+
+  // Helper function to get lead IDs from selected names
+  const getLeadIdsFromNames = (selectedNames: string[]): number[] => {
+    if (!uniqueLeads) {
+      console.log("No unique leads available");
+      return [];
+    }
+
+    console.log("Selected names:", selectedNames);
+    console.log("Available unique leads:", uniqueLeads.slice(0, 3)); // Log first 3 leads for debugging
+
+    return selectedNames
+      .map((name) => {
+        const lead = uniqueLeads.find(
+          (l) => `${l.firstName} ${l.lastName}` === name
+        );
+        console.log(
+          `Looking for: "${name}", Found:`,
+          lead
+            ? `${lead.firstName} ${lead.lastName} (ID: ${lead.ID})`
+            : "NOT FOUND"
+        );
+        return lead ? lead.ID : null;
+      })
+      .filter((id): id is number => id !== null && !isNaN(id));
+  };
+
+  // Real submit handler
+  const onSubmit = async (values: FormValues) => {
+    if (!isVolunteer && !isAdmin) {
+      toast.error("Accès non autorisé pour cette action");
+      return;
+    }
+
+    if (!values.leads || values.leads.length === 0) {
+      toast.error("Veuillez sélectionner au moins un lead");
+      return;
+    }
+
+    setLocalIsLoading(true);
+    try {
+      const leadIds = getLeadIdsFromNames(values.leads);
+
+      if (leadIds.length === 0) {
+        toast.error("Aucun lead valide trouvé");
+        return;
+      }
+
+      // Prepare bulk update data
+      const bulkData = {
+        leadIds,
+        daparNote: values.noteDapar || undefined,
+        medicalProfile: values.profileMedical || undefined,
+        hebrewScore: values.simoulIvrit || undefined,
+        // Add other fields as needed
+      };
+
+      console.log("Submitting bulk Tsav Rishon update:", bulkData);
+
+      const result = await dispatch(
+        bulkUpdateTsavRishonThunk(bulkData)
+      ).unwrap();
+
+      if (result.failed > 0) {
+        toast.warning(
+          `Mise à jour partielle: ${result.updated} réussies, ${result.failed} échouées`
+        );
+        if (result.errors.length > 0) {
+          console.error("Errors:", result.errors);
+        }
+      } else {
+        toast.success(
+          `Formulaire de Tsav Rishon soumis avec succès pour ${result.updated} lead(s)`
+        );
+      }
+
+      closeDrawer();
+    } catch (error) {
+      console.error("Failed to submit form:", error);
+      toast.error("Erreur lors de la soumission du formulaire");
+    } finally {
+      setLocalIsLoading(false);
+    }
   };
 
   // Conversion des options pour le format attendu par DeselectableSelect
@@ -77,77 +194,17 @@ const TsavRishonDrawerContent = (closeDrawer: () => void): React.ReactNode => {
         className="flex flex-col gap-4 px-4"
         id="tsav-rishon-form"
       >
-        {/* Multi-select Leads avec style harmonisé */}
-        <FormField
+        {/* Multi-select Leads avec composant générique */}
+        <FormMultiSelect
           control={form.control}
           name="leads"
-          render={({ field }) => {
-            const leadsValue = Array.isArray(field.value) ? field.value : [];
-
-            const filteredLeads = ALL_LEADS.filter((lead) =>
-              lead.toLowerCase().includes(search.toLowerCase())
-            );
-
-            const toggleLead = (lead: string) => {
-              if (leadsValue.includes(lead)) {
-                field.onChange(leadsValue.filter((l) => l !== lead));
-              } else {
-                field.onChange([...leadsValue, lead]);
-              }
-            };
-
-            return (
-              <FormItem>
-                <FormLabel>Futur(e)s soldat(e)s</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        variant="outline"
-                        role="combobox"
-                        className="w-full justify-between text-left font-medium"
-                      >
-                        {leadsValue.length > 0
-                          ? `${leadsValue.length} sélectionné(s)`
-                          : "Sélectionner des leads"}
-                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
-                    <Command>
-                      <CommandInput
-                        placeholder="Rechercher un lead..."
-                        value={search}
-                        onValueChange={setSearch}
-                      />
-                      <CommandList>
-                        <CommandEmpty>Aucun lead trouvé</CommandEmpty>
-                        <CommandGroup>
-                          {filteredLeads.map((lead) => (
-                            <CommandItem
-                              key={lead}
-                              onSelect={() => toggleLead(lead)}
-                              className="flex items-center gap-2"
-                            >
-                              <div className="flex items-center gap-2 flex-1">
-                                <Checkbox
-                                  checked={leadsValue.includes(lead)}
-                                  className="data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground"
-                                />
-                                {lead}
-                              </div>
-                            </CommandItem>
-                          ))}
-                        </CommandGroup>
-                      </CommandList>
-                    </Command>
-                  </PopoverContent>
-                </Popover>
-                <FormMessage />
-              </FormItem>
-            );
-          }}
+          label="Futur(e)s soldat(e)s"
+          options={leadsOptions}
+          placeholder="Sélectionner des leads"
+          searchPlaceholder={`Rechercher parmi ${leadsOptions.length} leads...`}
+          loadingText="Chargement des leads..."
+          emptyText="Aucun lead trouvé"
+          isLoading={isLeadsLoading}
         />
 
         <FormField
@@ -212,9 +269,10 @@ const TsavRishonDrawerContent = (closeDrawer: () => void): React.ReactNode => {
         <SideDrawerFooter>
           <SideDrawerAction
             onSave={() => console.log(form.getValues())}
-            buttonContent="Enregistrer"
+            buttonContent={localIsLoading ? "Enregistrement..." : "Enregistrer"}
             type="submit"
             formId="tsav-rishon-form"
+            disabled={localIsLoading || isPermissionsLoading || isBulkLoading}
           />
         </SideDrawerFooter>
       </form>

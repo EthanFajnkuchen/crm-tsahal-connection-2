@@ -3,9 +3,9 @@ import { API_ROUTES } from "@/constants/api-routes";
 const M2M_TOKEN = import.meta.env.VITE_API_M2M_TOKEN;
 
 export interface Lead {
-  id: string;
+  ID: number;
   dateInscription: string;
-  email: string;
+  email?: string;
   firstName: string;
   lastName: string;
   statutCandidat: string;

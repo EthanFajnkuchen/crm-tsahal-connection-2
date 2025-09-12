@@ -13,7 +13,11 @@ import { Lead } from './lead.entity';
 import { LeadStatistics } from './type';
 import { parseLimitParam } from 'src/shared/utils/util';
 import { Permissions } from './../../shared/decorators/permissions.decorator';
-import { LeadFilterDto, UpdateLeadDto } from './lead.dto';
+import {
+  LeadFilterDto,
+  UpdateLeadDto,
+  BulkTsavRishonUpdateDto,
+} from './lead.dto';
 
 @Controller('api/leads')
 export class LeadController {
@@ -110,5 +114,17 @@ export class LeadController {
     @Body() updateData: UpdateLeadDto,
   ): Promise<Lead> {
     return this.leadService.updateLead(id, updateData);
+  }
+
+  @Post('bulk-tsav-rishon')
+  @Permissions('write:data')
+  async bulkUpdateTsavRishon(
+    @Body() bulkData: BulkTsavRishonUpdateDto,
+  ): Promise<{
+    updated: number;
+    failed: number;
+    errors: string[];
+  }> {
+    return this.leadService.bulkUpdateTsavRishon(bulkData);
   }
 }

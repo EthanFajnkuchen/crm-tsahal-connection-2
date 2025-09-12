@@ -17,4 +17,5 @@ export const API_ROUTES = {
   DISCUSSIONS_BY_LEAD: `${BACKEND_BASE_URL}/api/discussions/lead`,
   CHANGE_REQUESTS: `${BACKEND_BASE_URL}/api/change-requests`,
   CHANGE_REQUESTS_BY_LEAD: `${BACKEND_BASE_URL}/api/change-requests/lead`,
+  BULK_TSAV_RISHON: `${BACKEND_BASE_URL}/api/leads/bulk-tsav-rishon`,
 };
