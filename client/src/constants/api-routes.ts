@@ -19,4 +19,5 @@ export const API_ROUTES = {
   CHANGE_REQUESTS_BY_LEAD: `${BACKEND_BASE_URL}/api/change-requests/lead`,
   BULK_TSAV_RISHON_GRADES: `${BACKEND_BASE_URL}/api/leads/bulk-tsav-rishon-grades`,
   BULK_TSAV_RISHON_DATE: `${BACKEND_BASE_URL}/api/leads/bulk-tsav-rishon-date`,
+  BULK_GIYUS: `${BACKEND_BASE_URL}/api/leads/bulk-giyus`,
 };

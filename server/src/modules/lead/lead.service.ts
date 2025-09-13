@@ -14,6 +14,7 @@ import {
   UpdateLeadDto,
   BulkTsavRishonGradesUpdateDto,
   BulkTsavRishonDateUpdateDto,
+  BulkGiyusUpdateDto,
 } from './lead.dto';
 import { PassThrough } from 'stream';
 import { Workbook } from 'exceljs';
@@ -816,10 +817,25 @@ export class LeadService {
     );
   }
 
+  async bulkUpdateGiyus(bulkData: BulkGiyusUpdateDto): Promise<{
+    updated: number;
+    failed: number;
+    errors: string[];
+  }> {
+    // Ensure armyEntryDateStatus is set to "Oui"
+    const dataWithStatus = {
+      ...bulkData,
+      armyEntryDateStatus: 'Oui',
+    };
+
+    return this.performBulkUpdate(dataWithStatus, 'Giyus');
+  }
+
   private async performBulkUpdate(
     bulkData:
       | BulkTsavRishonGradesUpdateDto
-      | (BulkTsavRishonDateUpdateDto & { tsavRishonStatus: string }),
+      | (BulkTsavRishonDateUpdateDto & { tsavRishonStatus: string })
+      | (BulkGiyusUpdateDto & { armyEntryDateStatus: string }),
     operationType: string,
   ): Promise<{
     updated: number;
@@ -858,10 +874,13 @@ export class LeadService {
             failedCount += notFoundIds.length;
           }
 
+          // Filter out empty values from updateData
+          const filteredUpdateData = this.filterEmptyValues(updateData);
+
           // Update each lead with the data
           for (const lead of leadsToUpdate) {
             try {
-              Object.assign(lead, updateData);
+              Object.assign(lead, filteredUpdateData);
               await transactionalEntityManager.save(lead);
               updatedCount++;
             } catch (error) {
@@ -894,6 +913,23 @@ export class LeadService {
         `Failed to perform bulk ${operationType} update: ${error.message}`,
       );
     }
+  }
+
+  /**
+   * Filters out empty values (null, undefined, empty strings) from the update data
+   * to prevent overwriting existing values with empty ones
+   */
+  private filterEmptyValues(data: any): any {
+    const filtered = {};
+
+    for (const [key, value] of Object.entries(data)) {
+      // Skip if value is null, undefined, or empty string
+      if (value !== null && value !== undefined && value !== '') {
+        filtered[key] = value;
+      }
+    }
+
+    return filtered;
   }
 
   async getTafkidim(): Promise<{

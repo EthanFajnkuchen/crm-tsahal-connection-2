@@ -13,6 +13,12 @@ export type TsavRishonDateFormValues = {
   recruitmentCenter: string;
 };
 
+export type GiyusFormValues = {
+  leads: string[];
+  giyusDate: string;
+  michveAlonTraining: string;
+};
+
 // Configuration générique pour les formulaires bulk
 export interface BulkFormField {
   name: string;

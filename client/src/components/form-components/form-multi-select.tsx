@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Skeleton } from "@/components/ui/skeleton";
 import { ChevronsUpDown } from "lucide-react";
 import {
   Command,
@@ -105,12 +106,21 @@ export function FormMultiSelect<TFieldValues extends FieldValues>({
         };
 
         const getDisplayText = () => {
-          if (isLoading) return loadingText;
           if (selectedValues.length > 0) {
             return `${selectedValues.length} sélectionné(s)`;
           }
           return placeholder;
         };
+
+        if (isLoading) {
+          return (
+            <FormItem className={className}>
+              <FormLabel>{label}</FormLabel>
+              <Skeleton className="h-9 w-full" />
+              <FormMessage />
+            </FormItem>
+          );
+        }
 
         return (
           <FormItem className={className}>
@@ -122,7 +132,7 @@ export function FormMultiSelect<TFieldValues extends FieldValues>({
                     variant="outline"
                     role="combobox"
                     className="w-full justify-between text-left font-medium"
-                    disabled={disabled || isLoading}
+                    disabled={disabled}
                   >
                     {getDisplayText()}
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />

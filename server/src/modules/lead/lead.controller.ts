@@ -18,6 +18,7 @@ import {
   UpdateLeadDto,
   BulkTsavRishonGradesUpdateDto,
   BulkTsavRishonDateUpdateDto,
+  BulkGiyusUpdateDto,
 } from './lead.dto';
 
 @Controller('api/leads')
@@ -139,5 +140,15 @@ export class LeadController {
     errors: string[];
   }> {
     return this.leadService.bulkUpdateTsavRishonDate(bulkData);
+  }
+
+  @Post('bulk-giyus')
+  @Permissions('write:data')
+  async bulkUpdateGiyus(@Body() bulkData: BulkGiyusUpdateDto): Promise<{
+    updated: number;
+    failed: number;
+    errors: string[];
+  }> {
+    return this.leadService.bulkUpdateGiyus(bulkData);
   }
 }

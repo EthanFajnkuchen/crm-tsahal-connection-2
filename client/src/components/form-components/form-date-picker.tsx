@@ -78,7 +78,7 @@ const DatePickerInput = ({
   const [inputValue, setInputValue] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [isInputFocused, setIsInputFocused] = useState(false);
-  const [calendarKey, setCalendarKey] = useState(0);
+  const [calendarKey, _setCalendarKey] = useState(0);
   const [displayMonth, setDisplayMonth] = useState<Date>(new Date());
 
   // Update input when field value changes
@@ -88,9 +88,7 @@ const DatePickerInput = ({
     } else {
       setInputValue("");
     }
-    // Force calendar to update when field value changes externally
-    setCalendarKey((prev) => prev + 1);
-  }, [field.value, formatDisplayDate]);
+  }, [field.value]);
 
   // Function to auto-format date input with slashes
   const autoFormatDateInput = (value: string): string => {
@@ -119,6 +117,9 @@ const DatePickerInput = ({
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
 
+    // Close the calendar popup when user starts typing
+    setIsOpen(false);
+
     // Auto-format the input with slashes
     const formattedValue = autoFormatDateInput(value);
     setInputValue(formattedValue);
@@ -129,14 +130,10 @@ const DatePickerInput = ({
       if (parsedDate) {
         const formattedDateValue = formatValueDate(parsedDate);
         field.onChange(formattedDateValue);
-        // Force calendar to re-render with new date
-        setCalendarKey((prev) => prev + 1);
       }
     } else if (formattedValue === "") {
       // If input is cleared, clear the field value
       field.onChange("");
-      // Force calendar to re-render
-      setCalendarKey((prev) => prev + 1);
     }
   };
 
@@ -232,13 +229,6 @@ const DatePickerInput = ({
   };
 
   const currentDate = field.value ? parseISO(field.value) : undefined;
-
-  // Update display month when current date changes
-  useEffect(() => {
-    if (currentDate) {
-      setDisplayMonth(currentDate);
-    }
-  }, [currentDate]);
 
   // Calculate date limits
   const today = new Date();

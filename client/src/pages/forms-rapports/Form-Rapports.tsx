@@ -2,6 +2,7 @@ import CardForm from "@/components/app-components/card-form/card-form";
 import Section from "@/components/app-components/section/section";
 import TsavRishonDrawerContent from "@/components/forms-drawer-content/tsav-rishon-grade-form";
 import TsavRishonDateDrawerContent from "@/components/forms-drawer-content/tsav-rishon-date-form";
+import GiyusDrawerContent from "@/components/forms-drawer-content/giyus-form";
 
 const FormsRapports: React.FC = () => {
   return (
@@ -22,6 +23,14 @@ const FormsRapports: React.FC = () => {
             className="max-w-md"
             drawerTitle="Date & Lieu Tsav Rishon"
             drawerContent={TsavRishonDateDrawerContent}
+          />
+
+          <CardForm
+            title="Formulaire Giyus"
+            description="Enregistrer la date de Giyus et le programme Michve Alon pour les futurs soldats."
+            className="max-w-md"
+            drawerTitle="Giyus"
+            drawerContent={GiyusDrawerContent}
           />
         </div>
       </Section>

@@ -62,6 +62,16 @@ const TsavRishonDateDrawerContent = (
   const isVolunteer = userRole === RoleType.VOLONTAIRE;
   const isAdmin = userRole === RoleType.ADMINISTRATEUR;
 
+  // Watch selected leads to enable/disable submit button
+  const selectedLeads = useWatch({
+    control: form.control,
+    name: "leads",
+  });
+
+  const hasSelectedLeads = useMemo(() => {
+    return Array.isArray(selectedLeads) && selectedLeads.length > 0;
+  }, [selectedLeads]);
+
   // Memoized deduplicated leads
   const uniqueLeads = useMemo(() => {
     if (!leads || leads.length === 0) return [];
@@ -95,24 +105,6 @@ const TsavRishonDateDrawerContent = (
     })
   );
 
-  // Watch form values to determine if submit button should be disabled
-  const watchedValues = useWatch({
-    control: form.control,
-    name: ["leads", "tsavRishonDate", "recruitmentCenter"],
-  });
-
-  const [selectedLeads, tsavRishonDate, recruitmentCenter] = watchedValues;
-
-  // Check if form is valid for submission
-  const isFormValid = useMemo(() => {
-    const hasLeads = Array.isArray(selectedLeads) && selectedLeads.length > 0;
-    const hasDate = tsavRishonDate && tsavRishonDate.trim() !== "";
-    const hasRecruitmentCenter =
-      recruitmentCenter && recruitmentCenter.trim() !== "";
-
-    return hasLeads && hasDate && hasRecruitmentCenter;
-  }, [selectedLeads, tsavRishonDate, recruitmentCenter]);
-
   // Helper function to get lead IDs from selected names
   const getLeadIdsFromNames = (selectedNames: string[]): number[] => {
     if (!uniqueLeads) return [];
@@ -139,16 +131,6 @@ const TsavRishonDateDrawerContent = (
       return;
     }
 
-    if (!values.tsavRishonDate) {
-      toast.error("Veuillez sélectionner une date de Tsav Rishon");
-      return;
-    }
-
-    if (!values.recruitmentCenter.trim()) {
-      toast.error("Veuillez saisir le lieu de recrutement");
-      return;
-    }
-
     setLocalIsLoading(true);
     try {
       const leadIds = getLeadIdsFromNames(values.leads);
@@ -159,11 +141,17 @@ const TsavRishonDateDrawerContent = (
       }
 
       // Prepare bulk update data
-      const bulkData = {
+      const bulkData: any = {
         leadIds,
-        tsavRishonDate: values.tsavRishonDate,
-        recruitmentCenter: values.recruitmentCenter,
       };
+
+      if (values.tsavRishonDate) {
+        bulkData.tsavRishonDate = values.tsavRishonDate;
+      }
+
+      if (values.recruitmentCenter) {
+        bulkData.recruitmentCenter = values.recruitmentCenter;
+      }
 
       const result = await dispatch(
         bulkUpdateTsavRishonDateThunk(bulkData)
@@ -208,7 +196,7 @@ const TsavRishonDateDrawerContent = (
           searchPlaceholder={`Rechercher parmi ${leadsOptions.length} leads...`}
           loadingText="Chargement des leads..."
           emptyText="Aucun lead trouvé"
-          isLoading={isLeadsLoading}
+          isLoading={isLeadsLoading || localIsLoading}
         />
 
         {/* Date du Tsav Rishon */}
@@ -236,6 +224,7 @@ const TsavRishonDateDrawerContent = (
                   onChange={field.onChange}
                   placeholder="Sélectionner un lieu"
                   disabled={localIsLoading}
+                  isLoading={localIsLoading}
                 />
               </FormControl>
               <FormMessage />
@@ -253,7 +242,7 @@ const TsavRishonDateDrawerContent = (
               localIsLoading ||
               isPermissionsLoading ||
               isBulkLoading ||
-              !isFormValid
+              !hasSelectedLeads
             }
           />
         </SideDrawerFooter>

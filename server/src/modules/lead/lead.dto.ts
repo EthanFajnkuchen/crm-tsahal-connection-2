@@ -410,3 +410,19 @@ export class BulkTsavRishonDateUpdateDto {
   // Automatically set tsavRishonStatus to "Oui"
   tsavRishonStatus: string = 'Oui';
 }
+
+export class BulkGiyusUpdateDto {
+  @IsArray()
+  @IsInt({ each: true })
+  leadIds: number[];
+
+  @IsDateString()
+  giyusDate: string;
+
+  @IsOptional()
+  @IsString()
+  michveAlonTraining?: string;
+
+  // Automatically set armyEntryDateStatus to "Oui"
+  armyEntryDateStatus: string = 'Oui';
+}
