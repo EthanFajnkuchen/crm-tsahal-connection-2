@@ -186,6 +186,23 @@ export const processLeadInfoData = (
     formattedData.currentStatus = "";
   }
 
+  // Si currentStatus passe en abandon ou exemption, vider armyEntryDateStatus et giyusDate
+  if (
+    formattedData.currentStatus === "Abandon avant le service" ||
+    formattedData.currentStatus === "Exemption medical" ||
+    formattedData.currentStatus === "Exemption religieuse" ||
+    formattedData.currentStatus === "Exemption (autre)"
+  ) {
+    formattedData.armyEntryDateStatus = "";
+    formattedData.giyusDate = "";
+  }
+
+  // Si giyusDate est vide, vider aussi mahzorGiyus et typeGiyus
+  if (formattedData.giyusDate === "") {
+    formattedData.mahzorGiyus = "";
+    formattedData.typeGiyus = "";
+  }
+
   return formattedData;
 };
 

@@ -17,11 +17,17 @@ import { processTsahalData } from "@/utils/form-data-processors";
 interface TsahalSectionProps {
   lead: Lead;
   changeRequestsByLead: ChangeRequest[];
+  isAdmin?: boolean;
+  onApproveChangeRequest?: (changeRequestId: number) => void;
+  onRejectChangeRequest?: (changeRequestId: number) => void;
 }
 
 export const TsahalSection = ({
   lead,
   changeRequestsByLead,
+  isAdmin = false,
+  onApproveChangeRequest,
+  onRejectChangeRequest,
 }: TsahalSectionProps) => {
   // Fields that can be modified in this section
   const fieldsToCheck = [
@@ -219,6 +225,10 @@ export const TsahalSection = ({
               label: option.displayName,
             }))}
             isLoading={localIsLoading}
+            changeRequests={changeRequestsByLead}
+            onApproveChangeRequest={onApproveChangeRequest}
+            onRejectChangeRequest={onRejectChangeRequest}
+            isAdmin={isAdmin}
             {...getFieldProps("soldierAloneStatus")}
           />
 
@@ -232,6 +242,10 @@ export const TsahalSection = ({
               label: option.displayName,
             }))}
             isLoading={localIsLoading}
+            changeRequests={changeRequestsByLead}
+            onApproveChangeRequest={onApproveChangeRequest}
+            onRejectChangeRequest={onRejectChangeRequest}
+            isAdmin={isAdmin}
             {...getFieldProps("serviceType")}
           />
 
@@ -246,6 +260,10 @@ export const TsahalSection = ({
             }))}
             hidden={serviceType !== "Mahal"}
             isLoading={localIsLoading}
+            changeRequests={changeRequestsByLead}
+            onApproveChangeRequest={onApproveChangeRequest}
+            onRejectChangeRequest={onRejectChangeRequest}
+            isAdmin={isAdmin}
             {...getFieldProps("mahalPath")}
           />
 
@@ -260,6 +278,10 @@ export const TsahalSection = ({
             }))}
             hidden={serviceType !== "Études"}
             isLoading={localIsLoading}
+            changeRequests={changeRequestsByLead}
+            onApproveChangeRequest={onApproveChangeRequest}
+            onRejectChangeRequest={onRejectChangeRequest}
+            isAdmin={isAdmin}
             {...getFieldProps("studyPath")}
           />
 
@@ -273,6 +295,10 @@ export const TsahalSection = ({
               label: option.displayName,
             }))}
             isLoading={localIsLoading}
+            changeRequests={changeRequestsByLead}
+            onApproveChangeRequest={onApproveChangeRequest}
+            onRejectChangeRequest={onRejectChangeRequest}
+            isAdmin={isAdmin}
             {...getFieldProps("tsavRishonStatus")}
           />
 
@@ -287,6 +313,10 @@ export const TsahalSection = ({
             }))}
             hidden={tsavRishonStatus !== "Oui"}
             isLoading={localIsLoading}
+            changeRequests={changeRequestsByLead}
+            onApproveChangeRequest={onApproveChangeRequest}
+            onRejectChangeRequest={onRejectChangeRequest}
+            isAdmin={isAdmin}
             {...getFieldProps("recruitmentCenter")}
           />
 
@@ -297,6 +327,10 @@ export const TsahalSection = ({
             mode={mode}
             hidden={tsavRishonStatus !== "Oui"}
             isLoading={localIsLoading}
+            changeRequests={changeRequestsByLead}
+            onApproveChangeRequest={onApproveChangeRequest}
+            onRejectChangeRequest={onRejectChangeRequest}
+            isAdmin={isAdmin}
             {...getFieldProps("tsavRishonDate")}
           />
 
@@ -311,6 +345,10 @@ export const TsahalSection = ({
             }))}
             hidden={tsavRishonStatus !== "Oui"}
             isLoading={localIsLoading}
+            changeRequests={changeRequestsByLead}
+            onApproveChangeRequest={onApproveChangeRequest}
+            onRejectChangeRequest={onRejectChangeRequest}
+            isAdmin={isAdmin}
             {...getFieldProps("tsavRishonGradesReceived")}
           />
 
@@ -325,6 +363,10 @@ export const TsahalSection = ({
             }))}
             hidden={tsavRishonGradesReceived !== "Oui"}
             isLoading={localIsLoading}
+            changeRequests={changeRequestsByLead}
+            onApproveChangeRequest={onApproveChangeRequest}
+            onRejectChangeRequest={onRejectChangeRequest}
+            isAdmin={isAdmin}
             {...getFieldProps("daparNote")}
           />
 
@@ -339,6 +381,10 @@ export const TsahalSection = ({
             }))}
             hidden={tsavRishonGradesReceived !== "Oui"}
             isLoading={localIsLoading}
+            changeRequests={changeRequestsByLead}
+            onApproveChangeRequest={onApproveChangeRequest}
+            onRejectChangeRequest={onRejectChangeRequest}
+            isAdmin={isAdmin}
             {...getFieldProps("medicalProfile")}
           />
 
@@ -353,6 +399,10 @@ export const TsahalSection = ({
             }))}
             hidden={tsavRishonGradesReceived !== "Oui"}
             isLoading={localIsLoading}
+            changeRequests={changeRequestsByLead}
+            onApproveChangeRequest={onApproveChangeRequest}
+            onRejectChangeRequest={onRejectChangeRequest}
+            isAdmin={isAdmin}
             {...getFieldProps("hebrewScore")}
           />
 
@@ -366,6 +416,10 @@ export const TsahalSection = ({
               label: option.displayName,
             }))}
             isLoading={localIsLoading}
+            changeRequests={changeRequestsByLead}
+            onApproveChangeRequest={onApproveChangeRequest}
+            onRejectChangeRequest={onRejectChangeRequest}
+            isAdmin={isAdmin}
             {...getFieldProps("yomHameaStatus")}
           />
 
@@ -376,6 +430,10 @@ export const TsahalSection = ({
             mode={mode}
             hidden={yomHameaStatus !== "Oui"}
             isLoading={localIsLoading}
+            changeRequests={changeRequestsByLead}
+            onApproveChangeRequest={onApproveChangeRequest}
+            onRejectChangeRequest={onRejectChangeRequest}
+            isAdmin={isAdmin}
             {...getFieldProps("yomHameaDate")}
           />
 
@@ -389,6 +447,10 @@ export const TsahalSection = ({
               label: option.displayName,
             }))}
             isLoading={localIsLoading}
+            changeRequests={changeRequestsByLead}
+            onApproveChangeRequest={onApproveChangeRequest}
+            onRejectChangeRequest={onRejectChangeRequest}
+            isAdmin={isAdmin}
             {...getFieldProps("yomSayerotStatus")}
           />
 
@@ -399,6 +461,10 @@ export const TsahalSection = ({
             mode={mode}
             hidden={yomSayerotStatus !== "Oui"}
             isLoading={localIsLoading}
+            changeRequests={changeRequestsByLead}
+            onApproveChangeRequest={onApproveChangeRequest}
+            onRejectChangeRequest={onRejectChangeRequest}
+            isAdmin={isAdmin}
             {...getFieldProps("yomSayerotDate")}
           />
 
@@ -412,6 +478,10 @@ export const TsahalSection = ({
               label: option.displayName,
             }))}
             isLoading={localIsLoading}
+            changeRequests={changeRequestsByLead}
+            onApproveChangeRequest={onApproveChangeRequest}
+            onRejectChangeRequest={onRejectChangeRequest}
+            isAdmin={isAdmin}
             {...getFieldProps("armyEntryDateStatus")}
           />
 
@@ -422,6 +492,10 @@ export const TsahalSection = ({
             mode={mode}
             hidden={armyEntryDateStatus !== "Oui"}
             isLoading={localIsLoading}
+            changeRequests={changeRequestsByLead}
+            onApproveChangeRequest={onApproveChangeRequest}
+            onRejectChangeRequest={onRejectChangeRequest}
+            isAdmin={isAdmin}
             {...getFieldProps("giyusDate")}
           />
 
@@ -436,6 +510,10 @@ export const TsahalSection = ({
             }))}
             hidden={armyEntryDateStatus !== "Oui"}
             isLoading={localIsLoading}
+            changeRequests={changeRequestsByLead}
+            onApproveChangeRequest={onApproveChangeRequest}
+            onRejectChangeRequest={onRejectChangeRequest}
+            isAdmin={isAdmin}
             {...getFieldProps("michveAlonTraining")}
           />
         </FormSubSection>

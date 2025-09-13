@@ -13,7 +13,13 @@ import { Lead } from './lead.entity';
 import { LeadStatistics } from './type';
 import { parseLimitParam } from 'src/shared/utils/util';
 import { Permissions } from './../../shared/decorators/permissions.decorator';
-import { LeadFilterDto, UpdateLeadDto } from './lead.dto';
+import {
+  LeadFilterDto,
+  UpdateLeadDto,
+  BulkTsavRishonGradesUpdateDto,
+  BulkTsavRishonDateUpdateDto,
+  BulkGiyusUpdateDto,
+} from './lead.dto';
 
 @Controller('api/leads')
 export class LeadController {
@@ -110,5 +116,39 @@ export class LeadController {
     @Body() updateData: UpdateLeadDto,
   ): Promise<Lead> {
     return this.leadService.updateLead(id, updateData);
+  }
+
+  @Post('bulk-tsav-rishon-grades')
+  @Permissions('write:data')
+  async bulkUpdateTsavRishonGrades(
+    @Body() bulkData: BulkTsavRishonGradesUpdateDto,
+  ): Promise<{
+    updated: number;
+    failed: number;
+    errors: string[];
+  }> {
+    return this.leadService.bulkUpdateTsavRishonGrades(bulkData);
+  }
+
+  @Post('bulk-tsav-rishon-date')
+  @Permissions('write:data')
+  async bulkUpdateTsavRishonDate(
+    @Body() bulkData: BulkTsavRishonDateUpdateDto,
+  ): Promise<{
+    updated: number;
+    failed: number;
+    errors: string[];
+  }> {
+    return this.leadService.bulkUpdateTsavRishonDate(bulkData);
+  }
+
+  @Post('bulk-giyus')
+  @Permissions('write:data')
+  async bulkUpdateGiyus(@Body() bulkData: BulkGiyusUpdateDto): Promise<{
+    updated: number;
+    failed: number;
+    errors: string[];
+  }> {
+    return this.leadService.bulkUpdateGiyus(bulkData);
   }
 }

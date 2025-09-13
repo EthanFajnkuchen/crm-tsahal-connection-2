@@ -25,11 +25,17 @@ import { processLeadInfoData } from "@/utils/form-data-processors";
 interface LeadInfoSectionProps {
   lead: Lead;
   changeRequestsByLead: ChangeRequest[];
+  isAdmin?: boolean;
+  onApproveChangeRequest?: (changeRequestId: number) => void;
+  onRejectChangeRequest?: (changeRequestId: number) => void;
 }
 
 export const LeadInfoSection = ({
   lead,
   changeRequestsByLead,
+  isAdmin = false,
+  onApproveChangeRequest,
+  onRejectChangeRequest,
 }: LeadInfoSectionProps) => {
   // Fields that can be modified in this section
   const fieldsToCheck = [
@@ -240,6 +246,10 @@ export const LeadInfoSection = ({
               value: option.value,
               label: option.displayName,
             }))}
+            changeRequests={changeRequestsByLead}
+            onApproveChangeRequest={onApproveChangeRequest}
+            onRejectChangeRequest={onRejectChangeRequest}
+            isAdmin={isAdmin}
             {...getFieldProps("statutCandidat")}
           />
 
@@ -269,6 +279,10 @@ export const LeadInfoSection = ({
             label="Téléphone"
             mode={mode}
             isLoading={localIsLoading}
+            changeRequests={changeRequestsByLead}
+            onApproveChangeRequest={onApproveChangeRequest}
+            onRejectChangeRequest={onRejectChangeRequest}
+            isAdmin={isAdmin}
             {...getFieldProps("phoneNumber")}
           />
 
@@ -283,6 +297,10 @@ export const LeadInfoSection = ({
               !lead.whatsappNumber &&
               !getFieldProps("whatsappNumber").pendingChange
             }
+            changeRequests={changeRequestsByLead}
+            onApproveChangeRequest={onApproveChangeRequest}
+            onRejectChangeRequest={onRejectChangeRequest}
+            isAdmin={isAdmin}
             {...getFieldProps("whatsappNumber")}
           />
 
@@ -292,6 +310,10 @@ export const LeadInfoSection = ({
             label="Email"
             mode={mode}
             isLoading={localIsLoading}
+            changeRequests={changeRequestsByLead}
+            onApproveChangeRequest={onApproveChangeRequest}
+            onRejectChangeRequest={onRejectChangeRequest}
+            isAdmin={isAdmin}
             {...getFieldProps("email")}
           />
 
@@ -310,6 +332,10 @@ export const LeadInfoSection = ({
             label="Date Giyus"
             mode={mode}
             isLoading={localIsLoading}
+            changeRequests={changeRequestsByLead}
+            onApproveChangeRequest={onApproveChangeRequest}
+            onRejectChangeRequest={onRejectChangeRequest}
+            isAdmin={isAdmin}
             {...getFieldProps("giyusDate")}
           />
 
@@ -343,6 +369,10 @@ export const LeadInfoSection = ({
               value: option.value,
               label: option.displayName,
             }))}
+            changeRequests={changeRequestsByLead}
+            onApproveChangeRequest={onApproveChangeRequest}
+            onRejectChangeRequest={onRejectChangeRequest}
+            isAdmin={isAdmin}
             {...getFieldProps("typePoste")}
           />
 
@@ -352,6 +382,10 @@ export const LeadInfoSection = ({
             label="Nom du poste"
             mode={mode}
             isLoading={localIsLoading}
+            changeRequests={changeRequestsByLead}
+            onApproveChangeRequest={onApproveChangeRequest}
+            onRejectChangeRequest={onRejectChangeRequest}
+            isAdmin={isAdmin}
             {...getFieldProps("nomPoste")}
           />
 
@@ -365,6 +399,10 @@ export const LeadInfoSection = ({
               value: option.value,
               label: option.displayName,
             }))}
+            changeRequests={changeRequestsByLead}
+            onApproveChangeRequest={onApproveChangeRequest}
+            onRejectChangeRequest={onRejectChangeRequest}
+            isAdmin={isAdmin}
             {...getFieldProps("pikoud")}
           />
 
@@ -374,6 +412,10 @@ export const LeadInfoSection = ({
             label="Date de fin de service"
             mode={mode}
             isLoading={localIsLoading}
+            changeRequests={changeRequestsByLead}
+            onApproveChangeRequest={onApproveChangeRequest}
+            onRejectChangeRequest={onRejectChangeRequest}
+            isAdmin={isAdmin}
             {...getFieldProps("dateFinService")}
           />
         </FormSubSection>

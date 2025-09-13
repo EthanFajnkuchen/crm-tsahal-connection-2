@@ -4,6 +4,8 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ChangeRequestIndicator } from "@/components/app-components/change-request-indicator/change-request-indicator";
+import { ChangeRequest } from "@/types/change-request";
 
 type Mode = "EDIT" | "VIEW";
 
@@ -18,6 +20,12 @@ interface FormInputProps<T extends FieldValues>
   className?: string;
   isLoading?: boolean;
   readOnly?: boolean;
+  // Admin change request functionality
+  changeRequests?: ChangeRequest[];
+  onApproveChangeRequest?: (changeRequestId: number) => void;
+  onRejectChangeRequest?: (changeRequestId: number) => void;
+  isAdmin?: boolean;
+  // Legacy pending change (for volunteers)
   pendingChange?: boolean;
   pendingChangeDetails?: {
     oldValue: string;
@@ -35,11 +43,21 @@ const FormInput = <T extends FieldValues>({
   hidden = false,
   isLoading = false,
   readOnly = false,
+  // Admin change request props
+  changeRequests = [],
+  onApproveChangeRequest,
+  onRejectChangeRequest,
+  isAdmin = false,
+  // Legacy pending change props
   pendingChange = false,
   pendingChangeDetails,
   ...props
 }: FormInputProps<T>) => {
   if (hidden) return null;
+
+  const fieldChangeRequests = changeRequests.filter(
+    (request) => request.fieldChanged === name
+  );
 
   if (isLoading) {
     return (
@@ -55,10 +73,22 @@ const FormInput = <T extends FieldValues>({
       <Label
         htmlFor={name}
         className={cn(
-          "text-sm text-gray-500 leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 font-[Poppins]"
+          "text-sm text-gray-500 leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 font-[Poppins] flex items-center gap-2"
         )}
       >
-        {label}
+        <span>{label}</span>
+        {isAdmin &&
+          changeRequests.length > 0 &&
+          onApproveChangeRequest &&
+          onRejectChangeRequest && (
+            <ChangeRequestIndicator
+              changeRequests={changeRequests}
+              fieldName={name}
+              label={label || name}
+              onApprove={onApproveChangeRequest}
+              onReject={onRejectChangeRequest}
+            />
+          )}
       </Label>
       {mode === "EDIT" ? (
         <Controller
@@ -72,7 +102,7 @@ const FormInput = <T extends FieldValues>({
                 error && "border-red-500 focus-visible:ring-red-500",
                 className
               )}
-              disabled={readOnly}
+              disabled={readOnly || (fieldChangeRequests.length > 0 && isAdmin)}
             />
           )}
         />

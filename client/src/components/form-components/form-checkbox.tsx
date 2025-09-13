@@ -2,6 +2,8 @@ import { Control, Controller, FieldValues, Path } from "react-hook-form";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ChangeRequestIndicator } from "@/components/app-components/change-request-indicator/change-request-indicator";
+import { ChangeRequest } from "@/types/change-request";
 
 // Updated to support pending changes for volunteer workflow
 
@@ -17,6 +19,12 @@ interface FormCheckboxProps<T extends FieldValues> {
   hidden?: boolean;
   isLoading?: boolean;
   readOnly?: boolean;
+  // Admin change request functionality
+  changeRequests?: ChangeRequest[];
+  onApproveChangeRequest?: (changeRequestId: number) => void;
+  onRejectChangeRequest?: (changeRequestId: number) => void;
+  isAdmin?: boolean;
+  // Legacy pending change (for volunteers)
   pendingChange?: boolean;
   pendingChangeDetails?: {
     oldValue: string;
@@ -33,6 +41,12 @@ const FormCheckbox = <T extends FieldValues>({
   hidden = false,
   isLoading = false,
   readOnly = false,
+  // Admin change request props
+  changeRequests = [],
+  onApproveChangeRequest,
+  onRejectChangeRequest,
+  isAdmin = false,
+  // Legacy pending change props
   pendingChange = false,
   pendingChangeDetails,
 }: FormCheckboxProps<T>) => {
@@ -58,9 +72,21 @@ const FormCheckbox = <T extends FieldValues>({
               {label && (
                 <Label
                   htmlFor={name}
-                  className="text-sm text-gray-500 leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 font-[Poppins]"
+                  className="text-sm text-gray-500 leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 font-[Poppins] flex items-center gap-2"
                 >
-                  {label}
+                  <span>{label}</span>
+                  {isAdmin &&
+                    changeRequests.length > 0 &&
+                    onApproveChangeRequest &&
+                    onRejectChangeRequest && (
+                      <ChangeRequestIndicator
+                        changeRequests={changeRequests}
+                        fieldName={name}
+                        label={label || name}
+                        onApprove={onApproveChangeRequest}
+                        onReject={onRejectChangeRequest}
+                      />
+                    )}
                 </Label>
               )}
               <div className="pt-4">
@@ -83,9 +109,21 @@ const FormCheckbox = <T extends FieldValues>({
               {label && (
                 <Label
                   htmlFor={name}
-                  className="text-sm text-muted-foreground font-regular font-[Poppins]"
+                  className="text-sm text-muted-foreground font-regular font-[Poppins] flex items-center gap-2"
                 >
-                  {label}
+                  <span>{label}</span>
+                  {isAdmin &&
+                    changeRequests.length > 0 &&
+                    onApproveChangeRequest &&
+                    onRejectChangeRequest && (
+                      <ChangeRequestIndicator
+                        changeRequests={changeRequests}
+                        fieldName={name}
+                        label={label || name}
+                        onApprove={onApproveChangeRequest}
+                        onReject={onRejectChangeRequest}
+                      />
+                    )}
                 </Label>
               )}
               <Checkbox id={name} checked={field.value} disabled />

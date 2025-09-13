@@ -16,6 +16,9 @@ export class CreateDiscussionDto {
 
   @IsString()
   contenu: string;
+
+  @IsString()
+  created_by: string;
 }
 
 export class UpdateDiscussionDto {

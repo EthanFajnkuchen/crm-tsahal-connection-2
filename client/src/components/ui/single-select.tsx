@@ -3,6 +3,7 @@ import { Check, ChevronsUpDown } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Command,
   CommandEmpty,
@@ -31,6 +32,7 @@ interface SingleSelectProps {
   onChange?: (value: string) => void;
   className?: string;
   disabled?: boolean;
+  isLoading?: boolean;
 }
 
 export function SingleSelect({
@@ -42,6 +44,7 @@ export function SingleSelect({
   onChange,
   className,
   disabled = false,
+  isLoading = false,
 }: SingleSelectProps) {
   const [open, setOpen] = React.useState(false);
   const [selectedValue, setSelectedValue] = React.useState<string | undefined>(
@@ -58,6 +61,10 @@ export function SingleSelect({
     onChange?.(newValue);
     setOpen(false);
   };
+
+  if (isLoading) {
+    return <Skeleton className={cn("h-9 w-full", className)} />;
+  }
 
   return (
     <Popover open={open} onOpenChange={setOpen}>

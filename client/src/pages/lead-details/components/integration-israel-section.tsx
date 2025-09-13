@@ -15,11 +15,17 @@ import { processIntegrationIsraelData } from "@/utils/form-data-processors";
 interface IntegrationIsraelSectionProps {
   lead: Lead;
   changeRequestsByLead: ChangeRequest[];
+  isAdmin?: boolean;
+  onApproveChangeRequest?: (changeRequestId: number) => void;
+  onRejectChangeRequest?: (changeRequestId: number) => void;
 }
 
 export const IntegrationIsraelSection = ({
   lead,
   changeRequestsByLead,
+  isAdmin = false,
+  onApproveChangeRequest,
+  onRejectChangeRequest,
 }: IntegrationIsraelSectionProps) => {
   // Fields that can be modified in this section
   const fieldsToCheck = [
@@ -113,6 +119,10 @@ export const IntegrationIsraelSection = ({
               label: option.displayName,
             }))}
             isLoading={localIsLoading}
+            changeRequests={changeRequestsByLead}
+            onApproveChangeRequest={onApproveChangeRequest}
+            onRejectChangeRequest={onRejectChangeRequest}
+            isAdmin={isAdmin}
             {...getFieldProps("arrivalAge")}
           />
 
@@ -129,6 +139,10 @@ export const IntegrationIsraelSection = ({
             )}
             hidden={arrivalAge !== "Après mes 14 ans"}
             isLoading={localIsLoading}
+            changeRequests={changeRequestsByLead}
+            onApproveChangeRequest={onApproveChangeRequest}
+            onRejectChangeRequest={onRejectChangeRequest}
+            isAdmin={isAdmin}
             {...getFieldProps("programParticipation")}
           />
 
@@ -155,6 +169,10 @@ export const IntegrationIsraelSection = ({
               arrivalAge !== "Après mes 14 ans"
             }
             isLoading={localIsLoading}
+            changeRequests={changeRequestsByLead}
+            onApproveChangeRequest={onApproveChangeRequest}
+            onRejectChangeRequest={onRejectChangeRequest}
+            isAdmin={isAdmin}
             {...getFieldProps("programName")}
           />
 
@@ -177,6 +195,10 @@ export const IntegrationIsraelSection = ({
               arrivalAge !== "Après mes 14 ans"
             }
             isLoading={localIsLoading}
+            changeRequests={changeRequestsByLead}
+            onApproveChangeRequest={onApproveChangeRequest}
+            onRejectChangeRequest={onRejectChangeRequest}
+            isAdmin={isAdmin}
             {...getFieldProps("schoolYears")}
           />
 
@@ -192,6 +214,10 @@ export const IntegrationIsraelSection = ({
               })
             )}
             isLoading={localIsLoading}
+            changeRequests={changeRequestsByLead}
+            onApproveChangeRequest={onApproveChangeRequest}
+            onRejectChangeRequest={onRejectChangeRequest}
+            isAdmin={isAdmin}
             {...getFieldProps("armyDeferralProgram")}
           />
 
@@ -206,6 +232,10 @@ export const IntegrationIsraelSection = ({
               )
             }
             isLoading={localIsLoading}
+            changeRequests={changeRequestsByLead}
+            onApproveChangeRequest={onApproveChangeRequest}
+            onRejectChangeRequest={onRejectChangeRequest}
+            isAdmin={isAdmin}
             {...getFieldProps("programNameHebrewArmyDeferral")}
           />
         </FormSubSection>

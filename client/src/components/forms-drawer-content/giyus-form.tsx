@@ -3,7 +3,7 @@ import { useForm, useWatch } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
 import { fetchAllLeadsThunk } from "@/store/thunks/data/all-leads.thunk";
-import { bulkUpdateTsavRishonGradesThunk } from "@/store/thunks/bulk-operations/bulk-tsav-rishon.thunk";
+import { bulkUpdateGiyusThunk } from "@/store/thunks/bulk-operations/bulk-giyus.thunk";
 import {
   Form,
   FormField,
@@ -17,14 +17,15 @@ import {
   SideDrawerFooter,
   SideDrawerAction,
 } from "@/components/ui/side-drawer";
-import type { FormValues } from "./types";
+import type { GiyusFormValues } from "./types";
 import { SingleSelect } from "../ui/single-select";
 import { FormMultiSelect } from "../form-components/form-multi-select";
+import { FormDatePicker } from "../form-components/form-date-picker";
 import { toast } from "sonner";
 import { useUserPermissions } from "@/hooks/use-user-permissions";
 import { RoleType } from "@/types/role-types";
 
-const TsavRishonDrawerContent = (closeDrawer: () => void): React.ReactNode => {
+const GiyusDrawerContent = (closeDrawer: () => void): React.ReactNode => {
   const dispatch = useDispatch<AppDispatch>();
   const { roleType, isLoading: isPermissionsLoading } = useUserPermissions();
   const [localIsLoading, setLocalIsLoading] = React.useState(false);
@@ -35,8 +36,8 @@ const TsavRishonDrawerContent = (closeDrawer: () => void): React.ReactNode => {
   );
 
   // Get bulk operation state
-  const { isGradesLoading: isBulkLoading } = useSelector(
-    (state: RootState) => state.bulkTsavRishon
+  const { isLoading: isBulkLoading } = useSelector(
+    (state: RootState) => state.bulkGiyus
   );
 
   // Fetch leads on component mount (only once)
@@ -46,12 +47,11 @@ const TsavRishonDrawerContent = (closeDrawer: () => void): React.ReactNode => {
     }
   }, [dispatch]); // Only depend on dispatch to avoid unnecessary re-fetches
 
-  const form = useForm<FormValues>({
+  const form = useForm<GiyusFormValues>({
     defaultValues: {
       leads: [],
-      noteDapar: "",
-      simoulIvrit: "",
-      profileMedical: "",
+      giyusDate: "",
+      michveAlonTraining: "",
     },
   });
 
@@ -97,12 +97,24 @@ const TsavRishonDrawerContent = (closeDrawer: () => void): React.ReactNode => {
 
   // Helper function to get lead IDs from selected names
   const getLeadIdsFromNames = (selectedNames: string[]): number[] => {
-    if (!uniqueLeads) return [];
+    if (!uniqueLeads) {
+      console.log("No unique leads available");
+      return [];
+    }
+
+    console.log("Selected names:", selectedNames);
+    console.log("Available unique leads:", uniqueLeads.slice(0, 3)); // Log first 3 leads for debugging
 
     return selectedNames
       .map((name) => {
         const lead = uniqueLeads.find(
           (l) => `${l.firstName} ${l.lastName}` === name
+        );
+        console.log(
+          `Looking for: "${name}", Found:`,
+          lead
+            ? `${lead.firstName} ${lead.lastName} (ID: ${lead.ID})`
+            : "NOT FOUND"
         );
         return lead ? lead.ID : null;
       })
@@ -110,7 +122,7 @@ const TsavRishonDrawerContent = (closeDrawer: () => void): React.ReactNode => {
   };
 
   // Real submit handler
-  const onSubmit = async (values: FormValues) => {
+  const onSubmit = async (values: GiyusFormValues) => {
     if (!isVolunteer && !isAdmin) {
       toast.error("Accès non autorisé pour cette action");
       return;
@@ -131,28 +143,32 @@ const TsavRishonDrawerContent = (closeDrawer: () => void): React.ReactNode => {
       }
 
       // Prepare bulk update data
-      const bulkData = {
+      const bulkData: any = {
         leadIds,
-        daparNote: values.noteDapar || undefined,
-        medicalProfile: values.profileMedical || undefined,
-        hebrewScore: values.simoulIvrit || undefined,
-        // Add other fields as needed
       };
 
-      const result = await dispatch(
-        bulkUpdateTsavRishonGradesThunk(bulkData)
-      ).unwrap();
+      if (values.giyusDate) {
+        bulkData.giyusDate = values.giyusDate;
+      }
+
+      if (values.michveAlonTraining?.trim()) {
+        bulkData.michveAlonTraining = values.michveAlonTraining.trim();
+      }
+
+      console.log("Submitting bulk Giyus update:", bulkData);
+
+      const result = await dispatch(bulkUpdateGiyusThunk(bulkData)).unwrap();
 
       if (result.failed > 0) {
         toast.warning(
           `Mise à jour partielle: ${result.updated} réussies, ${result.failed} échouées`
         );
         if (result.errors.length > 0) {
-          console.error("Bulk update errors:", result.errors);
+          console.error("Errors:", result.errors);
         }
       } else {
         toast.success(
-          `Formulaire de Tsav Rishon soumis avec succès pour ${result.updated} lead(s)`
+          `Formulaire Giyus soumis avec succès pour ${result.updated} lead(s)`
         );
       }
 
@@ -165,18 +181,8 @@ const TsavRishonDrawerContent = (closeDrawer: () => void): React.ReactNode => {
     }
   };
 
-  // Conversion des options pour le format attendu par DeselectableSelect
-  const daparOptions = MILITARY.dapar_grades.map(({ value, displayName }) => ({
-    value: String(value),
-    label: displayName,
-  }));
-
-  const hebrewOptions = MILITARY.hebrew_grade.map(({ value, displayName }) => ({
-    value: String(value),
-    label: displayName,
-  }));
-
-  const medicalOptions = MILITARY.medical_profile.map(
+  // Conversion des options pour le format attendu par SingleSelect
+  const michveAlonOptions = MILITARY.program_at_michve_alon.map(
     ({ value, displayName }) => ({
       value: String(value),
       label: displayName,
@@ -188,7 +194,7 @@ const TsavRishonDrawerContent = (closeDrawer: () => void): React.ReactNode => {
       <form
         onSubmit={form.handleSubmit(onSubmit)}
         className="flex flex-col gap-4 px-4"
-        id="tsav-rishon-form"
+        id="giyus-form"
       >
         {/* Multi-select Leads avec composant générique */}
         <FormMultiSelect
@@ -203,62 +209,30 @@ const TsavRishonDrawerContent = (closeDrawer: () => void): React.ReactNode => {
           isLoading={isLeadsLoading || localIsLoading}
         />
 
-        <FormField
-          control={form.control}
-          name="noteDapar"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Note Dapar</FormLabel>
-              <FormControl>
-                <SingleSelect
-                  options={daparOptions}
-                  value={field.value}
-                  onChange={field.onChange}
-                  placeholder="Sélectionner une note"
-                  disabled={localIsLoading}
-                  isLoading={localIsLoading}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+        {/* Date de Giyus */}
+        <FormDatePicker
+          control={form.control as any}
+          name="giyusDate"
+          label="Date de Giyus"
+          mode="EDIT"
+          isLoading={localIsLoading}
+          allowFuture={true}
+          maxFutureYears={3}
         />
 
-        {/* Simoul Ivrit avec DeselectableSelect */}
+        {/* Programme Michve Alon */}
         <FormField
           control={form.control}
-          name="simoulIvrit"
+          name="michveAlonTraining"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Simoul Ivrit</FormLabel>
+              <FormLabel>Programme Michve Alon</FormLabel>
               <FormControl>
                 <SingleSelect
-                  options={hebrewOptions}
+                  options={michveAlonOptions}
                   value={field.value}
                   onChange={field.onChange}
-                  placeholder="Sélectionner une note"
-                  disabled={localIsLoading}
-                  isLoading={localIsLoading}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* Profil Médical avec DeselectableSelect */}
-        <FormField
-          control={form.control}
-          name="profileMedical"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Profil médical</FormLabel>
-              <FormControl>
-                <SingleSelect
-                  options={medicalOptions}
-                  value={field.value}
-                  onChange={field.onChange}
-                  placeholder="Sélectionner un profil"
+                  placeholder="Sélectionner un programme"
                   disabled={localIsLoading}
                   isLoading={localIsLoading}
                 />
@@ -273,7 +247,7 @@ const TsavRishonDrawerContent = (closeDrawer: () => void): React.ReactNode => {
             onSave={() => console.log(form.getValues())}
             buttonContent={localIsLoading ? "Enregistrement..." : "Enregistrer"}
             type="submit"
-            formId="tsav-rishon-form"
+            formId="giyus-form"
             disabled={
               localIsLoading ||
               isPermissionsLoading ||
@@ -287,4 +261,4 @@ const TsavRishonDrawerContent = (closeDrawer: () => void): React.ReactNode => {
   );
 };
 
-export default TsavRishonDrawerContent;
+export default GiyusDrawerContent;

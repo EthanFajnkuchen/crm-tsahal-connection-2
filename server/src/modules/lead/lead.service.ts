@@ -9,7 +9,13 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, MoreThan, Brackets, Not, IsNull, In } from 'typeorm';
 import { Lead } from './lead.entity';
 import { LeadStatistics } from './type';
-import { LeadFilterDto, UpdateLeadDto } from './lead.dto';
+import {
+  LeadFilterDto,
+  UpdateLeadDto,
+  BulkTsavRishonGradesUpdateDto,
+  BulkTsavRishonDateUpdateDto,
+  BulkGiyusUpdateDto,
+} from './lead.dto';
 import { PassThrough } from 'stream';
 import { Workbook } from 'exceljs';
 @Injectable()
@@ -775,6 +781,155 @@ export class LeadService {
         `Failed to update lead: ${error.message}`,
       );
     }
+  }
+
+  async bulkUpdateTsavRishonGrades(
+    bulkData: BulkTsavRishonGradesUpdateDto,
+  ): Promise<{
+    updated: number;
+    failed: number;
+    errors: string[];
+  }> {
+    const dataWithStatuses = {
+      ...bulkData,
+      tsavRishonStatus: 'Oui',
+      tsavRishonGradesReceived: 'Oui',
+    };
+    return this.performBulkUpdate(dataWithStatuses, 'Tsav Rishon grades');
+  }
+
+  async bulkUpdateTsavRishonDate(
+    bulkData: BulkTsavRishonDateUpdateDto,
+  ): Promise<{
+    updated: number;
+    failed: number;
+    errors: string[];
+  }> {
+    // Ensure tsavRishonStatus is set to "Oui"
+    const dataWithStatus = {
+      ...bulkData,
+      tsavRishonStatus: 'Oui',
+    };
+
+    return this.performBulkUpdate(
+      dataWithStatus,
+      'Tsav Rishon date and location',
+    );
+  }
+
+  async bulkUpdateGiyus(bulkData: BulkGiyusUpdateDto): Promise<{
+    updated: number;
+    failed: number;
+    errors: string[];
+  }> {
+    // Ensure armyEntryDateStatus is set to "Oui"
+    const dataWithStatus = {
+      ...bulkData,
+      armyEntryDateStatus: 'Oui',
+    };
+
+    return this.performBulkUpdate(dataWithStatus, 'Giyus');
+  }
+
+  private async performBulkUpdate(
+    bulkData:
+      | BulkTsavRishonGradesUpdateDto
+      | (BulkTsavRishonDateUpdateDto & { tsavRishonStatus: string })
+      | (BulkGiyusUpdateDto & { armyEntryDateStatus: string }),
+    operationType: string,
+  ): Promise<{
+    updated: number;
+    failed: number;
+    errors: string[];
+  }> {
+    const { leadIds, ...updateData } = bulkData;
+
+    if (!leadIds || leadIds.length === 0) {
+      throw new BadRequestException('Lead IDs are required');
+    }
+
+    const errors: string[] = [];
+    let updatedCount = 0;
+    let failedCount = 0;
+
+    try {
+      // Use a transaction to ensure atomicity
+      await this.leadRepository.manager.transaction(
+        async (transactionalEntityManager) => {
+          // Find all leads to update
+          const leadsToUpdate = await transactionalEntityManager.find(Lead, {
+            where: { ID: In(leadIds) },
+          });
+
+          if (leadsToUpdate.length === 0) {
+            throw new NotFoundException('No leads found with provided IDs');
+          }
+
+          // Check if some IDs were not found
+          const foundIds = leadsToUpdate.map((lead) => lead.ID);
+          const notFoundIds = leadIds.filter((id) => !foundIds.includes(id));
+
+          if (notFoundIds.length > 0) {
+            errors.push(`Lead IDs not found: ${notFoundIds.join(', ')}`);
+            failedCount += notFoundIds.length;
+          }
+
+          // Filter out empty values from updateData
+          const filteredUpdateData = this.filterEmptyValues(updateData);
+
+          // Update each lead with the data
+          for (const lead of leadsToUpdate) {
+            try {
+              Object.assign(lead, filteredUpdateData);
+              await transactionalEntityManager.save(lead);
+              updatedCount++;
+            } catch (error) {
+              errors.push(
+                `Failed to update lead ID ${lead.ID}: ${error.message}`,
+              );
+              failedCount++;
+            }
+          }
+        },
+      );
+
+      console.log(
+        `Bulk ${operationType} update completed: ${updatedCount} updated, ${failedCount} failed`,
+      );
+
+      return {
+        updated: updatedCount,
+        failed: failedCount,
+        errors,
+      };
+    } catch (error) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof BadRequestException
+      ) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        `Failed to perform bulk ${operationType} update: ${error.message}`,
+      );
+    }
+  }
+
+  /**
+   * Filters out empty values (null, undefined, empty strings) from the update data
+   * to prevent overwriting existing values with empty ones
+   */
+  private filterEmptyValues(data: any): any {
+    const filtered = {};
+
+    for (const [key, value] of Object.entries(data)) {
+      // Skip if value is null, undefined, or empty string
+      if (value !== null && value !== undefined && value !== '') {
+        filtered[key] = value;
+      }
+    }
+
+    return filtered;
   }
 
   async getTafkidim(): Promise<{

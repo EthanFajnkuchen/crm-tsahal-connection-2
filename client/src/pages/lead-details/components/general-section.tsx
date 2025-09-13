@@ -5,7 +5,6 @@ import {
   FormSection,
   FormSubSection,
 } from "@/components/form-components/form-section";
-import { FormCheckbox } from "@/components/form-components/form-checkbox";
 import { FormDropdown } from "@/components/form-components/form-dropdown";
 import { FormDatePicker } from "@/components/form-components/form-date-picker";
 import { RELATION } from "@/i18n/emergency-contact";
@@ -17,12 +16,25 @@ import { processGeneralData } from "@/utils/form-data-processors";
 interface GeneralSectionProps {
   lead: Lead;
   changeRequestsByLead: ChangeRequest[];
+  isAdmin?: boolean;
+  onApproveChangeRequest?: (changeRequestId: number) => void;
+  onRejectChangeRequest?: (changeRequestId: number) => void;
 }
 
 export const GeneralSection = ({
   lead,
   changeRequestsByLead,
+  isAdmin = false,
+  onApproveChangeRequest,
+  onRejectChangeRequest,
 }: GeneralSectionProps) => {
+  console.log("GeneralSection render", {
+    isAdmin,
+    changeRequestsByLead,
+    lead: lead?.ID,
+    hasApproveHandler: !!onApproveChangeRequest,
+    hasRejectHandler: !!onRejectChangeRequest,
+  });
   // Fields that can be modified in this section
   const fieldsToCheck = [
     "firstName",
@@ -65,7 +77,7 @@ export const GeneralSection = ({
       birthDate: lead.birthDate,
       city: lead.city,
       gender: lead.gender || "",
-      isOnlyChild: lead.isOnlyChild === "Oui" ? true : false,
+      isOnlyChild: lead.isOnlyChild || "",
       contactUrgenceFirstName: lead.contactUrgenceFirstName || "",
       contactUrgenceLastName: lead.contactUrgenceLastName || "",
       contactUrgencePhoneNumber: lead.contactUrgencePhoneNumber || "",
@@ -82,7 +94,7 @@ export const GeneralSection = ({
       birthDate: lead.birthDate,
       city: lead.city,
       gender: lead.gender || "",
-      isOnlyChild: lead.isOnlyChild === "Oui" ? true : false,
+      isOnlyChild: lead.isOnlyChild || "",
       contactUrgenceFirstName: lead.contactUrgenceFirstName || "",
       contactUrgenceLastName: lead.contactUrgenceLastName || "",
       contactUrgencePhoneNumber: lead.contactUrgencePhoneNumber || "",
@@ -127,6 +139,10 @@ export const GeneralSection = ({
             label="Prénom"
             mode={mode}
             isLoading={localIsLoading}
+            changeRequests={changeRequestsByLead}
+            onApproveChangeRequest={onApproveChangeRequest}
+            onRejectChangeRequest={onRejectChangeRequest}
+            isAdmin={isAdmin}
             {...getFieldProps("firstName")}
           />
 
@@ -136,6 +152,10 @@ export const GeneralSection = ({
             label="Nom"
             mode={mode}
             isLoading={localIsLoading}
+            changeRequests={changeRequestsByLead}
+            onApproveChangeRequest={onApproveChangeRequest}
+            onRejectChangeRequest={onRejectChangeRequest}
+            isAdmin={isAdmin}
             {...getFieldProps("lastName")}
           />
 
@@ -145,6 +165,10 @@ export const GeneralSection = ({
             label="Ville"
             mode={mode}
             isLoading={localIsLoading}
+            changeRequests={changeRequestsByLead}
+            onApproveChangeRequest={onApproveChangeRequest}
+            onRejectChangeRequest={onRejectChangeRequest}
+            isAdmin={isAdmin}
             {...getFieldProps("city")}
           />
 
@@ -158,6 +182,10 @@ export const GeneralSection = ({
               { value: "Féminin", label: "Féminin" },
             ]}
             isLoading={localIsLoading}
+            changeRequests={changeRequestsByLead}
+            onApproveChangeRequest={onApproveChangeRequest}
+            onRejectChangeRequest={onRejectChangeRequest}
+            isAdmin={isAdmin}
             {...getFieldProps("gender")}
           />
 
@@ -167,15 +195,27 @@ export const GeneralSection = ({
             label="Date de naissance"
             mode={mode}
             isLoading={localIsLoading}
+            changeRequests={changeRequestsByLead}
+            onApproveChangeRequest={onApproveChangeRequest}
+            onRejectChangeRequest={onRejectChangeRequest}
+            isAdmin={isAdmin}
             {...getFieldProps("birthDate")}
           />
 
-          <FormCheckbox
+          <FormDropdown
             control={control}
             name="isOnlyChild"
             label="Enfant unique"
             mode={mode}
+            options={[
+              { value: "Oui", label: "Oui" },
+              { value: "Non", label: "Non" },
+            ]}
             isLoading={localIsLoading}
+            changeRequests={changeRequestsByLead}
+            onApproveChangeRequest={onApproveChangeRequest}
+            onRejectChangeRequest={onRejectChangeRequest}
+            isAdmin={isAdmin}
             {...getFieldProps("isOnlyChild")}
           />
         </FormSubSection>
@@ -187,6 +227,10 @@ export const GeneralSection = ({
             label="Prénom"
             mode={mode}
             isLoading={localIsLoading}
+            changeRequests={changeRequestsByLead}
+            onApproveChangeRequest={onApproveChangeRequest}
+            onRejectChangeRequest={onRejectChangeRequest}
+            isAdmin={isAdmin}
             {...getFieldProps("contactUrgenceFirstName")}
           />
 
@@ -196,6 +240,10 @@ export const GeneralSection = ({
             label="Nom"
             mode={mode}
             isLoading={localIsLoading}
+            changeRequests={changeRequestsByLead}
+            onApproveChangeRequest={onApproveChangeRequest}
+            onRejectChangeRequest={onRejectChangeRequest}
+            isAdmin={isAdmin}
             {...getFieldProps("contactUrgenceLastName")}
           />
 
@@ -205,6 +253,10 @@ export const GeneralSection = ({
             label="Numéro de téléphone"
             mode={mode}
             isLoading={localIsLoading}
+            changeRequests={changeRequestsByLead}
+            onApproveChangeRequest={onApproveChangeRequest}
+            onRejectChangeRequest={onRejectChangeRequest}
+            isAdmin={isAdmin}
             {...getFieldProps("contactUrgencePhoneNumber")}
           />
 
@@ -214,6 +266,10 @@ export const GeneralSection = ({
             label="Email"
             mode={mode}
             isLoading={localIsLoading}
+            changeRequests={changeRequestsByLead}
+            onApproveChangeRequest={onApproveChangeRequest}
+            onRejectChangeRequest={onRejectChangeRequest}
+            isAdmin={isAdmin}
             {...getFieldProps("contactUrgenceMail")}
           />
 
@@ -227,6 +283,10 @@ export const GeneralSection = ({
               label: option.displayName,
             }))}
             isLoading={localIsLoading}
+            changeRequests={changeRequestsByLead}
+            onApproveChangeRequest={onApproveChangeRequest}
+            onRejectChangeRequest={onRejectChangeRequest}
+            isAdmin={isAdmin}
             {...getFieldProps("contactUrgenceRelation")}
           />
         </FormSubSection>

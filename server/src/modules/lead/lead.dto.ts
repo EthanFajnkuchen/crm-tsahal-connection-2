@@ -5,6 +5,7 @@ import {
   IsString,
   IsEmail,
   IsDateString,
+  IsInt,
 } from 'class-validator';
 
 export class LeadFilterDto {
@@ -371,4 +372,57 @@ export class UpdateLeadDto {
   @IsOptional()
   @IsString()
   summary?: string;
+}
+
+export class BulkTsavRishonGradesUpdateDto {
+  @IsArray()
+  @IsInt({ each: true })
+  leadIds: number[];
+
+  @IsOptional()
+  @IsString()
+  daparNote?: string;
+
+  @IsOptional()
+  @IsString()
+  medicalProfile?: string;
+
+  @IsOptional()
+  @IsString()
+  hebrewScore?: string;
+
+  @IsOptional()
+  @IsString()
+  tsavRishonGradesReceived?: string;
+}
+
+export class BulkTsavRishonDateUpdateDto {
+  @IsArray()
+  @IsInt({ each: true })
+  leadIds: number[];
+
+  @IsDateString()
+  tsavRishonDate: string;
+
+  @IsString()
+  recruitmentCenter: string;
+
+  // Automatically set tsavRishonStatus to "Oui"
+  tsavRishonStatus: string = 'Oui';
+}
+
+export class BulkGiyusUpdateDto {
+  @IsArray()
+  @IsInt({ each: true })
+  leadIds: number[];
+
+  @IsDateString()
+  giyusDate: string;
+
+  @IsOptional()
+  @IsString()
+  michveAlonTraining?: string;
+
+  // Automatically set armyEntryDateStatus to "Oui"
+  armyEntryDateStatus: string = 'Oui';
 }

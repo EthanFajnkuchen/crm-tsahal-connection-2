@@ -26,6 +26,7 @@ export class ChangeRequestService {
 
   async findAll(): Promise<ChangeRequest[]> {
     return this.changeRequestRepository.find({
+      relations: ['lead'],
       order: { id: 'DESC' },
     });
   }
@@ -33,6 +34,7 @@ export class ChangeRequestService {
   async findOne(id: number): Promise<ChangeRequest> {
     const changeRequest = await this.changeRequestRepository.findOne({
       where: { id },
+      relations: ['lead'],
     });
 
     if (!changeRequest) {
@@ -45,6 +47,7 @@ export class ChangeRequestService {
   async findByLeadId(leadId: number): Promise<ChangeRequest[]> {
     return this.changeRequestRepository.find({
       where: { leadId },
+      relations: ['lead'],
       order: { dateModified: 'DESC' },
     });
   }

@@ -17,6 +17,8 @@ import leadDetailsReducer from "./slices/lead-details/lead-details.slice";
 import discussionsReducer from "./slices/discussions/discussions.slice";
 import tafkidimReducer from "./slices/tafkidim/tafkidim.slice";
 import changeRequestReducer from "./slices/change-request/change-request.slice";
+import bulkTsavRishonReducer from "./slices/bulk-operations/bulk-tsav-rishon.slice";
+import bulkGiyusReducer from "./slices/bulk-operations/bulk-giyus.slice";
 
 export const store = configureStore({
   reducer: {
@@ -38,6 +40,8 @@ export const store = configureStore({
     discussions: discussionsReducer,
     tafkidim: tafkidimReducer,
     changeRequest: changeRequestReducer,
+    bulkTsavRishon: bulkTsavRishonReducer,
+    bulkGiyus: bulkGiyusReducer,
   },
 });
 
