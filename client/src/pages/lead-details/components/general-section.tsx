@@ -28,13 +28,6 @@ export const GeneralSection = ({
   onApproveChangeRequest,
   onRejectChangeRequest,
 }: GeneralSectionProps) => {
-  console.log("GeneralSection render", {
-    isAdmin,
-    changeRequestsByLead,
-    lead: lead?.ID,
-    hasApproveHandler: !!onApproveChangeRequest,
-    hasRejectHandler: !!onRejectChangeRequest,
-  });
   // Fields that can be modified in this section
   const fieldsToCheck = [
     "firstName",
