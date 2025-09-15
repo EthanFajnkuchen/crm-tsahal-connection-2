@@ -36,13 +36,6 @@ const LeadDetailsPage: React.FC = () => {
 
   const isAdmin = roleType[0] === RoleType.ADMINISTRATEUR;
 
-  console.log("LeadDetails render", {
-    isAdmin,
-    roleType,
-    changeRequestsByLead,
-    leadId: lead?.ID,
-  });
-
   // Functions to handle change request approval/rejection for admins
   const handleApproveChangeRequest = async (changeRequestId: number) => {
     const changeRequest = changeRequestsByLead.find(
