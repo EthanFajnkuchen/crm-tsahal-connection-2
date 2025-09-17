@@ -75,8 +75,6 @@ export function LeadTable() {
     }
   }, [dispatch, searchQuery]);
 
-  console.log({ data });
-
   const handleDownloadExcel = async () => {
     try {
       setIsDownloading(true);
