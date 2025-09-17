@@ -14,6 +14,7 @@ import { DiscussionModule } from './modules/discussion/discussion.module';
 import { ChangeRequestModule } from './modules/change-request/change-request.module';
 import { MailModule } from './modules/mail/mail.module';
 import { SchedulerModule } from './modules/scheduler/scheduler.module';
+import { ActivityModule } from './modules/activity/activity.module';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { JwtModule } from '@nestjs/jwt';
@@ -29,6 +30,7 @@ import { LoggerMiddleware } from './middlewares/logging.middleware';
     ChangeRequestModule,
     MailModule,
     SchedulerModule,
+    ActivityModule,
     JwtModule.register({
       secret: process.env.JWT_SECRET || 'default_secret_key',
       signOptions: { expiresIn: '1h' },
