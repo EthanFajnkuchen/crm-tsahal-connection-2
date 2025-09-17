@@ -154,6 +154,217 @@ export class MailService {
     `;
   }
 
+  async sendActivityConfirmationEmail(
+    participantEmail: string,
+    participantName: string,
+    activityName: string,
+    activityDate: Date | string,
+  ): Promise<void> {
+    try {
+      // Vérifier les credentials avant d'essayer d'envoyer
+      if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
+        throw new Error(
+          'Gmail credentials not configured. Please set GMAIL_USER and GMAIL_APP_PASSWORD environment variables.',
+        );
+      }
+
+      // Convertir la date en chaîne pour le formatage
+      let dateString: string;
+      if (activityDate instanceof Date) {
+        dateString = activityDate.toISOString();
+      } else {
+        dateString = activityDate;
+      }
+
+      const formattedDate = this.formatDateForDisplay(dateString);
+      const subject = `Confirmation d'inscription - ${activityName}`;
+
+      const htmlContent = this.generateActivityConfirmationEmailContent(
+        participantName,
+        activityName,
+        formattedDate,
+      );
+
+      const mailOptions = {
+        from: process.env.GMAIL_USER,
+        to: participantEmail,
+        subject: subject,
+        html: htmlContent,
+      };
+
+      this.logger.log(
+        `Sending activity confirmation email to ${participantEmail} for activity: ${activityName}`,
+      );
+
+      const result = await this.transporter.sendMail(mailOptions);
+      this.logger.log(
+        `Activity confirmation email sent successfully: ${result.messageId}`,
+      );
+    } catch (error) {
+      this.logger.error(
+        `Failed to send activity confirmation email to ${participantEmail}`,
+        error.stack,
+      );
+      throw error;
+    }
+  }
+
+  private generateActivityConfirmationEmailContent(
+    participantName: string,
+    activityName: string,
+    activityDate: string,
+  ): string {
+    return `
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <style>
+            body { 
+              font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+              line-height: 1.6; 
+              color: #333; 
+              margin: 0; 
+              padding: 0; 
+              background-color: #f5f5f5;
+            }
+            .container { 
+              max-width: 600px; 
+              margin: 20px auto; 
+              background-color: white; 
+              border-radius: 10px; 
+              overflow: hidden; 
+              box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            }
+            .header { 
+              background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+              color: black; 
+              padding: 30px 20px; 
+              text-align: center; 
+            }
+            .header h1 { 
+              margin: 0; 
+              font-size: 28px; 
+              font-weight: 300; 
+            }
+            .content { 
+              padding: 40px 30px; 
+            }
+            .greeting { 
+              font-size: 18px; 
+              margin-bottom: 20px; 
+              color: #2c3e50;
+            }
+            .event-details { 
+              background-color: #f8f9fa; 
+              border-left: 4px solid #667eea; 
+              padding: 20px; 
+              margin: 25px 0; 
+              border-radius: 0 8px 8px 0;
+            }
+            .event-details h2 { 
+              margin: 0 0 10px 0; 
+              color: #667eea; 
+              font-size: 20px;
+            }
+            .event-date { 
+              font-size: 16px; 
+              color: #7f8c8d; 
+              font-weight: 500;
+            }
+            .message { 
+              font-size: 16px; 
+              line-height: 1.8; 
+              margin: 20px 0; 
+            }
+            .highlight { 
+              color: #667eea; 
+              font-weight: 600; 
+            }
+            .footer { 
+              background-color: #f8f9fa; 
+              padding: 20px; 
+              text-align: center; 
+              color: #7f8c8d; 
+              font-size: 14px; 
+              border-top: 1px solid #e9ecef;
+            }
+            .logo { 
+              font-size: 24px; 
+              font-weight: bold; 
+              margin-bottom: 10px; 
+              color: black;
+            }
+            .cta { 
+              background-color: #667eea; 
+              color: white; 
+              padding: 12px 25px; 
+              border-radius: 25px; 
+              text-decoration: none; 
+              display: inline-block; 
+              margin: 20px 0; 
+              font-weight: 500; 
+              transition: background-color 0.3s;
+            }
+            .emoji { 
+              font-size: 20px; 
+              margin: 0 5px; 
+            }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <div class="logo">🇮🇱 Tsahal Connection</div>
+              <h1>Inscription confirmée !</h1>
+            </div>
+            
+            <div class="content">
+              <div class="greeting">
+                Shalom <strong>${participantName}</strong> ! 👋
+              </div>
+              
+              <div class="message">
+                Nous avons le plaisir de vous confirmer votre inscription pour :
+              </div>
+              
+              <div class="event-details">
+                <h2><span class="emoji">🎯</span> ${activityName}</h2>
+                <div class="event-date">
+                  <span class="emoji">📅</span> Prévu pour le <strong>${activityDate}</strong>
+                </div>
+              </div>
+              
+              <div class="message">
+                <span class="highlight">Nous avons hâte de vous retrouver</span> lors de cet événement ! 
+                Votre participation contribue à renforcer la communauté des français en Israël 
+                et à soutenir nos futurs soldats.
+              </div>
+              
+              <div class="message">
+                <strong>Quelques informations importantes :</strong>
+                <ul style="margin: 15px 0; padding-left: 20px;">
+                  <li>Merci de conserver cet email comme confirmation de votre inscription</li>
+                  <li>En cas d'empêchement, nous vous remercions de nous prévenir à l'avance</li>
+                  <li>N'hésitez pas à nous contacter si vous avez des questions</li>
+                </ul>
+              </div>
+              
+              <div class="message">
+                Merci pour votre engagement et à très bientôt ! <span class="emoji">🙏</span>
+              </div>
+            </div>
+            
+            <div class="footer">
+              <strong>Équipe Tsahal Connection</strong><br>
+              Pour toute question : ${process.env.GMAIL_USER || 'info@tsahalconnection.com'}<br>
+              <em>Ensemble, soutenons nos futurs soldats</em>
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+  }
+
   async testConnection(): Promise<boolean> {
     try {
       // Vérifier d'abord les variables d'environnement

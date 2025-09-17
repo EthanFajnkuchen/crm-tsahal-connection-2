@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ActiviteConf } from './activite-conf.entity';
@@ -7,12 +7,18 @@ import {
   UpdateActiviteConfDto,
   ActiviteConfFilterDto,
 } from './activite-conf.dto';
+import { MailService } from '../mail/mail.service';
+import { ActivityService } from '../activity/activity.service';
 
 @Injectable()
 export class ActiviteConfService {
+  private readonly logger = new Logger(ActiviteConfService.name);
+
   constructor(
     @InjectRepository(ActiviteConf)
     private readonly activiteConfRepository: Repository<ActiviteConf>,
+    private readonly mailService: MailService,
+    private readonly activityService: ActivityService,
   ) {}
 
   async create(
@@ -21,7 +27,51 @@ export class ActiviteConfService {
     const activiteConf = this.activiteConfRepository.create(
       createActiviteConfDto,
     );
-    return this.activiteConfRepository.save(activiteConf);
+    const savedActiviteConf =
+      await this.activiteConfRepository.save(activiteConf);
+
+    // Envoyer l'email de confirmation en arrière-plan (ne pas bloquer la réponse)
+    this.sendConfirmationEmailAsync(savedActiviteConf);
+
+    return savedActiviteConf;
+  }
+
+  private async sendConfirmationEmailAsync(
+    activiteConf: ActiviteConf,
+  ): Promise<void> {
+    try {
+      // Récupérer les détails de l'activité
+      const activity = await this.activityService.findOne(
+        activiteConf.activiteType,
+      );
+
+      if (!activity) {
+        this.logger.warn(
+          `Activity with ID ${activiteConf.activiteType} not found, skipping email confirmation`,
+        );
+        return;
+      }
+
+      const participantName = `${activiteConf.firstName} ${activiteConf.lastName}`;
+
+      // Envoyer l'email de confirmation
+      await this.mailService.sendActivityConfirmationEmail(
+        activiteConf.mail,
+        participantName,
+        activity.name,
+        activity.date,
+      );
+
+      this.logger.log(
+        `Confirmation email sent successfully to ${activiteConf.mail} for activity: ${activity.name}`,
+      );
+    } catch (error) {
+      // Ne pas faire échouer la création si l'email échoue
+      this.logger.error(
+        `Failed to send confirmation email for participant ${activiteConf.firstName} ${activiteConf.lastName}`,
+        error.stack,
+      );
+    }
   }
 
   async findAll(filter?: ActiviteConfFilterDto): Promise<ActiviteConf[]> {
@@ -126,5 +176,52 @@ export class ActiviteConfService {
         count: parseInt(item.count),
       })),
     };
+  }
+
+  async testConfirmationEmail(id: number): Promise<{
+    message: string;
+    participantEmail: string;
+    activityName: string;
+  }> {
+    const activiteConf = await this.findOne(id);
+
+    try {
+      // Récupérer les détails de l'activité
+      const activity = await this.activityService.findOne(
+        activiteConf.activiteType,
+      );
+
+      if (!activity) {
+        throw new NotFoundException(
+          `Activity with ID ${activiteConf.activiteType} not found`,
+        );
+      }
+
+      const participantName = `${activiteConf.firstName} ${activiteConf.lastName}`;
+
+      // Envoyer l'email de test
+      await this.mailService.sendActivityConfirmationEmail(
+        activiteConf.mail,
+        participantName,
+        activity.name,
+        activity.date,
+      );
+
+      this.logger.log(
+        `Test confirmation email sent successfully to ${activiteConf.mail} for activity: ${activity.name}`,
+      );
+
+      return {
+        message: 'Email de confirmation envoyé avec succès',
+        participantEmail: activiteConf.mail,
+        activityName: activity.name,
+      };
+    } catch (error) {
+      this.logger.error(
+        `Failed to send test confirmation email for participant ${activiteConf.firstName} ${activiteConf.lastName}`,
+        error.stack,
+      );
+      throw error;
+    }
   }
 }

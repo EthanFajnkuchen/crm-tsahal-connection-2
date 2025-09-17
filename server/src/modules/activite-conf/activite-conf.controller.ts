@@ -82,4 +82,14 @@ export class ActiviteConfController {
   async remove(@Param('id') id: string): Promise<void> {
     return this.activiteConfService.remove(+id);
   }
+
+  @Post('test-email/:id')
+  @HttpCode(HttpStatus.OK)
+  async testConfirmationEmail(@Param('id') id: string): Promise<{
+    message: string;
+    participantEmail: string;
+    activityName: string;
+  }> {
+    return this.activiteConfService.testConfirmationEmail(+id);
+  }
 }

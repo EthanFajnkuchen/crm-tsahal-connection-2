@@ -16,6 +16,8 @@ Module de gestion des confirmations de participation aux activités de service.
 
 **Créer une nouvelle confirmation d'activité**
 
+⚡ **Fonctionnalité automatique** : Un email de confirmation est automatiquement envoyé au participant après une inscription réussie.
+
 #### Body (JSON):
 
 ```json
@@ -46,6 +48,15 @@ Module de gestion des confirmations de participation aux activités de service.
   "hasArrived": false
 }
 ```
+
+#### 📧 Email automatique envoyé
+
+L'email de confirmation contient :
+
+- Le nom de l'activité
+- La date de l'événement
+- Un message personnalisé de bienvenue
+- Les informations de contact
 
 ---
 
@@ -294,6 +305,41 @@ DELETE /api/activite-conf/1
 
 ---
 
+### 9. **POST** `/api/activite-conf/test-email/:id`
+
+**Renvoyer l'email de confirmation pour une inscription existante**
+
+#### Path Parameters:
+
+- `id` : ID de la confirmation
+
+#### Exemple:
+
+```
+POST /api/activite-conf/test-email/1
+```
+
+#### Response: `200 OK`
+
+```json
+{
+  "message": "Email de confirmation envoyé avec succès",
+  "participantEmail": "jean.dupont@email.com",
+  "activityName": "Salon de l'étudiant 2024"
+}
+```
+
+#### Response: `404 Not Found`
+
+```json
+{
+  "statusCode": 404,
+  "message": "ActiviteConf with ID 999 not found"
+}
+```
+
+---
+
 ## 🔍 Champs de l'entité
 
 | Champ            | Type      | Description                          |
@@ -320,6 +366,32 @@ DELETE /api/activite-conf/1
 
 ## 📊 Cas d'usage typiques
 
+### Inscrire un participant avec email automatique
+
+```bash
+POST /api/activite-conf
+Content-Type: application/json
+
+{
+  "activiteType": 1,
+  "firstName": "Marie",
+  "lastName": "Cohen",
+  "isFuturSoldier": false,
+  "phoneNumber": "0501234567",
+  "mail": "marie.cohen@email.com",
+  "lead_id": 15,
+  "hasArrived": false
+}
+```
+
+➡️ L'email de confirmation sera automatiquement envoyé
+
+### Renvoyer un email de confirmation
+
+```bash
+POST /api/activite-conf/test-email/1
+```
+
 ### Marquer l'arrivée d'un participant
 
 ```bash
@@ -342,3 +414,16 @@ GET /api/activite-conf?activiteType=1&hasArrived=true
 ```bash
 GET /api/activite-conf/statistics
 ```
+
+---
+
+## 📧 Configuration des emails
+
+Pour que les emails fonctionnent, assurez-vous que les variables d'environnement suivantes sont configurées :
+
+```bash
+GMAIL_USER=votre-email@gmail.com
+GMAIL_APP_PASSWORD=votre-mot-de-passe-app
+```
+
+**Note** : Utilisez un mot de passe d'application Google, pas votre mot de passe habituel.
