@@ -45,6 +45,37 @@ export const getActiviteConfByActivityTypeAdapter = async (
   }
 };
 
+export const getActiviteConfByLeadIdAdapter = async (
+  leadId: number
+): Promise<ActiviteConf[]> => {
+  try {
+    const response = await fetch(
+      `${API_ROUTES.ACTIVITE_CONF}/by-lead/${leadId}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${M2M_TOKEN}`,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(
+        errorData.message || `HTTP error! status: ${response.status}`
+      );
+    }
+
+    const result = await response.json();
+    console.log("ActiviteConf by lead fetch successful:", result);
+    return result;
+  } catch (error) {
+    console.error("ActiviteConf by lead fetch failed:", error);
+    throw error;
+  }
+};
+
 export const updateActiviteConfAdapter = async (
   id: number,
   updates: Partial<ActiviteConf>

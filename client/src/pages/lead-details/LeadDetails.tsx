@@ -18,6 +18,7 @@ import { IntegrationIsraelSection } from "./components/integration-israel-sectio
 import { TsahalSection } from "./components/tsahal-section";
 import { LeadInfoSection } from "./components/lead-info-section";
 import { DiscussionsSection } from "./components/discussions-section";
+import { ActivitiesSection } from "./components/activities-section";
 import { useScrollSpy, useScrollToSection } from "./hooks";
 import { tabs } from "./constants/tabs";
 
@@ -99,7 +100,7 @@ const LeadDetailsPage: React.FC = () => {
                 key={tab.id}
                 onClick={() => scrollToSection(tab.id)}
                 className={`
-                  flex items-center space-x-2 px-4 py-2 rounded-lg text-xs font-medium whitespace-nowrap transition-all duration-200 font-[Poppins]
+                  flex items-center space-x-2 px-4 py-2 rounded-lg text-xs font-small whitespace-nowrap transition-all duration-200 font-[Poppins]
                   ${
                     activeTab === tab.id
                       ? "bg-purple-100 text-purple-700 border border-purple-200 shadow-sm"
@@ -216,6 +217,14 @@ const LeadDetailsPage: React.FC = () => {
               className="scroll-mt-20"
             >
               <DiscussionsSection lead={lead} />
+            </div>
+
+            <div
+              ref={(el) => (sectionRefs.current["activities"] = el)}
+              id="activities"
+              className="scroll-mt-20"
+            >
+              <ActivitiesSection lead={lead} />
             </div>
           </>
         )}

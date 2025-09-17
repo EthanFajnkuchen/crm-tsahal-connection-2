@@ -2,21 +2,26 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { ActiviteConf } from "@/store/adapters/activite-conf/activite-conf.adapter";
 import {
   getActiviteConfByActivityTypeThunk,
+  getActiviteConfByLeadIdThunk,
   updateActiviteConfThunk,
 } from "@/store/thunks/activite-conf/activite-conf.thunk";
 
 interface ActiviteConfState {
   activiteConfs: ActiviteConf[];
+  activiteConfsByLead: ActiviteConf[];
   isLoading: boolean;
   isUpdating: boolean;
   error: string | null;
+  currentLeadId: number | null;
 }
 
 const initialState: ActiviteConfState = {
   activiteConfs: [],
+  activiteConfsByLead: [],
   isLoading: false,
   isUpdating: false,
   error: null,
+  currentLeadId: null,
 };
 
 const activiteConfSlice = createSlice({
@@ -28,6 +33,10 @@ const activiteConfSlice = createSlice({
     },
     clearActiviteConfs: (state) => {
       state.activiteConfs = [];
+    },
+    clearActiviteConfsByLead: (state) => {
+      state.activiteConfsByLead = [];
+      state.currentLeadId = null;
     },
   },
   extraReducers: (builder) => {
@@ -65,9 +74,25 @@ const activiteConfSlice = createSlice({
       .addCase(updateActiviteConfThunk.rejected, (state, action) => {
         state.isUpdating = false;
         state.error = action.error.message || "Failed to update activite conf";
+      })
+      // Get activite confs by lead id
+      .addCase(getActiviteConfByLeadIdThunk.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(getActiviteConfByLeadIdThunk.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.activiteConfsByLead = action.payload;
+        state.currentLeadId = action.meta.arg;
+      })
+      .addCase(getActiviteConfByLeadIdThunk.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error =
+          action.error.message || "Failed to fetch activite confs by lead";
       });
   },
 });
 
-export const { clearError, clearActiviteConfs } = activiteConfSlice.actions;
+export const { clearError, clearActiviteConfs, clearActiviteConfsByLead } =
+  activiteConfSlice.actions;
 export default activiteConfSlice.reducer;
