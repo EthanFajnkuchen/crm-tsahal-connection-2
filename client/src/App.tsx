@@ -19,6 +19,7 @@ import LeadDetails from "./pages/lead-details/LeadDetails";
 import TafkidimPage from "./pages/tafkidim/TafkidimPage";
 import Volunteers from "./pages/volunteers/Volunteers";
 import Activities from "./pages/activities/Activities";
+import ActivityDetails from "./pages/activities/activity-details/ActivityDetails";
 const ProtectedAppLayout = withAuthenticationRequired(AppLayout, {
   onRedirecting: () => (
     <div className="flex items-center justify-center h-screen bg-white">
@@ -47,6 +48,7 @@ function App() {
           <Route path="tafkidim" element={<TafkidimPage />} />
           <Route path="volontaires" element={<Volunteers />} />
           <Route path="activities" element={<Activities />} />
+          <Route path="activites/:idActivite" element={<ActivityDetails />} />
         </Route>
       </Routes>
     </Router>

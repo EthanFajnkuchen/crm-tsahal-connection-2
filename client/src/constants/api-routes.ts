@@ -21,4 +21,5 @@ export const API_ROUTES = {
   BULK_TSAV_RISHON_DATE: `${BACKEND_BASE_URL}/api/leads/bulk-tsav-rishon-date`,
   BULK_GIYUS: `${BACKEND_BASE_URL}/api/leads/bulk-giyus`,
   ACTIVITIES: `${BACKEND_BASE_URL}/api/activities`,
+  ACTIVITE_CONF: `${BACKEND_BASE_URL}/api/activite-conf`,
 };

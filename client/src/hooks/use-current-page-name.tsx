@@ -9,6 +9,7 @@ const useCurrentPageName = (): string | React.ReactNode => {
   const location = useLocation();
   const currentPath = location.pathname;
   const { data: lead } = useSelector((state: RootState) => state.leadDetails);
+  const { activities } = useSelector((state: RootState) => state.activity);
 
   const expertCoBadge = useExpertCoBadge({
     expertConnection: lead?.expertConnection,
@@ -28,6 +29,27 @@ const useCurrentPageName = (): string | React.ReactNode => {
         {expertCoBadge}
       </div>
     );
+  }
+
+  if (currentPath.includes("/activites/")) {
+    // Try to get activity name from navigation state first
+    const activityName = location.state?.activityName;
+    if (activityName) {
+      return activityName;
+    }
+
+    // Fallback: try to find in activities store
+    const activityIdMatch = currentPath.match(/\/activites\/(\d+)/);
+    if (activityIdMatch) {
+      const activityId = parseInt(activityIdMatch[1], 10);
+      const currentActivity = activities.find(
+        (activity) => activity.id === activityId
+      );
+      if (currentActivity) {
+        return currentActivity.name;
+      }
+    }
+    return "Détails de l'activité";
   }
 
   return currentPage ? currentPage.displayName : "Page inconnue";

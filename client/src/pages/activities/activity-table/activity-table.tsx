@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { ArrowUpDown } from "lucide-react";
 
 import { DataTable } from "@/components/app-components/table/table";
@@ -80,6 +81,7 @@ const columns: ColumnDef<Activity>[] = [
 
 export function ActivityTable() {
   const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
 
   const { activities, isLoading, error } = useSelector(
@@ -95,6 +97,12 @@ export function ActivityTable() {
 
   const handleCategoryChange = (value: string) => {
     setSelectedCategory(value);
+  };
+
+  const handleRowClick = (activity: Activity) => {
+    navigate(`/activites/${activity.id}`, {
+      state: { activityName: activity.name },
+    });
   };
 
   if (error) {
@@ -132,6 +140,7 @@ export function ActivityTable() {
           columns={columns}
           data={activities}
           isLoading={isLoading}
+          onRowClick={handleRowClick}
           // searchKey="name"
           // searchPlaceholder="Rechercher par nom d'activité..."
         />

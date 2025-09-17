@@ -357,7 +357,7 @@ export class MailService {
             <div class="footer">
               <strong>Équipe Tsahal Connection</strong><br>
               Pour toute question : ${process.env.GMAIL_USER || 'info@tsahalconnection.com'}<br>
-              <em>Ensemble, soutenons nos futurs soldats</em>
+              <em>Vous accompagner, notre fierté !</em>
             </div>
           </div>
         </body>
