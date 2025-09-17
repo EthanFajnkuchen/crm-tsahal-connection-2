@@ -55,7 +55,7 @@ export const SIDEBAR_ITEMS = [
   },
   {
     displayName: "Activités",
-    link: "/activitees",
+    link: "/activities",
     icon: Activity,
     roles: [RoleType.ADMINISTRATEUR],
   },
