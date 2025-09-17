@@ -98,8 +98,12 @@ const GiyusDrawerContent = (closeDrawer: () => void): React.ReactNode => {
   // Helper function to get lead IDs from selected names
   const getLeadIdsFromNames = (selectedNames: string[]): number[] => {
     if (!uniqueLeads) {
+      console.log("No unique leads available");
       return [];
     }
+
+    console.log("Selected names:", selectedNames);
+    console.log("Available unique leads:", uniqueLeads.slice(0, 3)); // Log first 3 leads for debugging
 
     return selectedNames
       .map((name) => {
