@@ -19,6 +19,11 @@ export type GiyusFormValues = {
   michveAlonTraining: string;
 };
 
+export type ActivityFormValues = {
+  name: string;
+  date: string;
+};
+
 // Configuration générique pour les formulaires bulk
 export interface BulkFormField {
   name: string;

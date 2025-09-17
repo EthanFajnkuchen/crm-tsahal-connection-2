@@ -3,6 +3,7 @@ import Section from "@/components/app-components/section/section";
 import TsavRishonDrawerContent from "@/components/forms-drawer-content/tsav-rishon-grade-form";
 import TsavRishonDateDrawerContent from "@/components/forms-drawer-content/tsav-rishon-date-form";
 import GiyusDrawerContent from "@/components/forms-drawer-content/giyus-form";
+import ActivityDrawerContent from "@/components/forms-drawer-content/activity-form";
 
 const FormsRapports: React.FC = () => {
   return (
@@ -31,6 +32,14 @@ const FormsRapports: React.FC = () => {
             className="max-w-md"
             drawerTitle="Giyus"
             drawerContent={GiyusDrawerContent}
+          />
+
+          <CardForm
+            title="Nouvelle Activité Salon/Conférence"
+            description="Créer une nouvelle activité de type Salon/Conférence avec nom et date."
+            className="max-w-md"
+            drawerTitle="Créer une Activité"
+            drawerContent={ActivityDrawerContent}
           />
         </div>
       </Section>

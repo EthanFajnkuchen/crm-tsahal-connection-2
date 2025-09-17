@@ -1,6 +1,6 @@
 import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 
-@Entity('activities')
+@Entity('activite_type')
 export class Activity {
   @PrimaryGeneratedColumn({ type: 'bigint', unsigned: true })
   id: number;
