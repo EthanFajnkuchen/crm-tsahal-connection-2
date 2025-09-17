@@ -1,3 +1,7 @@
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "@/store/store";
+import { fetchAllLeadsThunk } from "@/store/thunks/data/all-leads.thunk";
 import CardForm from "@/components/app-components/card-form/card-form";
 import Section from "@/components/app-components/section/section";
 import TsavRishonDrawerContent from "@/components/forms-drawer-content/tsav-rishon-grade-form";
@@ -6,6 +10,17 @@ import GiyusDrawerContent from "@/components/forms-drawer-content/giyus-form";
 import ActivityDrawerContent from "@/components/forms-drawer-content/activity-form";
 
 const FormsRapports: React.FC = () => {
+  const dispatch = useDispatch<AppDispatch>();
+
+  // Get leads from Redux store to check if we need to fetch them
+  const { data: leads } = useSelector((state: RootState) => state.allLeads);
+
+  // Fetch leads once when the page loads (shared by all forms)
+  useEffect(() => {
+    if (!leads || leads.length === 0) {
+      dispatch(fetchAllLeadsThunk());
+    }
+  }, [dispatch, leads]);
   return (
     <div className="min-h-[90vh]">
       <Section title="Formulaires">
