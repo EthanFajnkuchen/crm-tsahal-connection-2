@@ -1,10 +1,26 @@
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "@/store/store";
+import { fetchAllLeadsThunk } from "@/store/thunks/data/all-leads.thunk";
 import CardForm from "@/components/app-components/card-form/card-form";
 import Section from "@/components/app-components/section/section";
 import TsavRishonDrawerContent from "@/components/forms-drawer-content/tsav-rishon-grade-form";
 import TsavRishonDateDrawerContent from "@/components/forms-drawer-content/tsav-rishon-date-form";
 import GiyusDrawerContent from "@/components/forms-drawer-content/giyus-form";
+import ActivityDrawerContent from "@/components/forms-drawer-content/activity-form";
 
 const FormsRapports: React.FC = () => {
+  const dispatch = useDispatch<AppDispatch>();
+
+  // Get leads from Redux store to check if we need to fetch them
+  const { data: leads } = useSelector((state: RootState) => state.allLeads);
+
+  // Fetch leads once when the page loads (shared by all forms)
+  useEffect(() => {
+    if (!leads || leads.length === 0) {
+      dispatch(fetchAllLeadsThunk());
+    }
+  }, [dispatch, leads]);
   return (
     <div className="min-h-[90vh]">
       <Section title="Formulaires">
@@ -31,6 +47,14 @@ const FormsRapports: React.FC = () => {
             className="max-w-md"
             drawerTitle="Giyus"
             drawerContent={GiyusDrawerContent}
+          />
+
+          <CardForm
+            title="Nouvelle Activité Salon/Conférence"
+            description="Créer une nouvelle activité de type Salon/Conférence avec nom et date."
+            className="max-w-md"
+            drawerTitle="Créer une Activité"
+            drawerContent={ActivityDrawerContent}
           />
         </div>
       </Section>

@@ -49,8 +49,6 @@ export const ChangeRequestIndicator: React.FC<ChangeRequestIndicatorProps> = ({
     e.preventDefault();
     e.stopPropagation();
 
-    console.log("Indicator clicked", { fieldName, fieldChangeRequests });
-
     if (fieldChangeRequests.length === 1) {
       setSelectedRequest(fieldChangeRequests[0]);
     } else {
@@ -64,7 +62,6 @@ export const ChangeRequestIndicator: React.FC<ChangeRequestIndicatorProps> = ({
 
     setActionLoading("approve");
     try {
-      console.log("Approving change request:", selectedRequest.id);
       await onApprove(selectedRequest.id);
       setIsDialogOpen(false);
       setSelectedRequest(null);
@@ -80,7 +77,6 @@ export const ChangeRequestIndicator: React.FC<ChangeRequestIndicatorProps> = ({
 
     setActionLoading("reject");
     try {
-      console.log("Rejecting change request:", selectedRequest.id);
       await onReject(selectedRequest.id);
       setIsDialogOpen(false);
       setSelectedRequest(null);

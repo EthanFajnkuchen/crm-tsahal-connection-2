@@ -42,10 +42,8 @@ const ExpertCoCardsSection: React.FC = () => {
   const {
     data: filteredLeads,
     isLoading: isLoadingFiltered,
-    error: errorFiltered,
+    error: _errorFiltered,
   } = useSelector((state: RootState) => state.expertCoFilteredLeads);
-
-  console.log(filteredLeads, isLoadingFiltered, errorFiltered);
 
   const fetchFilteredData = async (apiKey: string) => {
     const selectedCard = EXPERT_CO_CARD_ITEMS.find(

@@ -19,6 +19,8 @@ import tafkidimReducer from "./slices/tafkidim/tafkidim.slice";
 import changeRequestReducer from "./slices/change-request/change-request.slice";
 import bulkTsavRishonReducer from "./slices/bulk-operations/bulk-tsav-rishon.slice";
 import bulkGiyusReducer from "./slices/bulk-operations/bulk-giyus.slice";
+import activityReducer from "./slices/activity/activity.slice";
+import activiteConfReducer from "./slices/activite-conf/activite-conf.slice";
 
 export const store = configureStore({
   reducer: {
@@ -42,6 +44,8 @@ export const store = configureStore({
     changeRequest: changeRequestReducer,
     bulkTsavRishon: bulkTsavRishonReducer,
     bulkGiyus: bulkGiyusReducer,
+    activity: activityReducer,
+    activiteConf: activiteConfReducer,
   },
 });
 

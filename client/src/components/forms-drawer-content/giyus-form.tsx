@@ -1,8 +1,7 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useMemo } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
-import { fetchAllLeadsThunk } from "@/store/thunks/data/all-leads.thunk";
 import { bulkUpdateGiyusThunk } from "@/store/thunks/bulk-operations/bulk-giyus.thunk";
 import {
   Form,
@@ -40,12 +39,7 @@ const GiyusDrawerContent = (closeDrawer: () => void): React.ReactNode => {
     (state: RootState) => state.bulkGiyus
   );
 
-  // Fetch leads on component mount (only once)
-  useEffect(() => {
-    if (!leads || leads.length === 0) {
-      dispatch(fetchAllLeadsThunk());
-    }
-  }, [dispatch]); // Only depend on dispatch to avoid unnecessary re-fetches
+  // Leads are now fetched at the page level (Form-Rapports.tsx)
 
   const form = useForm<GiyusFormValues>({
     defaultValues: {
@@ -98,12 +92,8 @@ const GiyusDrawerContent = (closeDrawer: () => void): React.ReactNode => {
   // Helper function to get lead IDs from selected names
   const getLeadIdsFromNames = (selectedNames: string[]): number[] => {
     if (!uniqueLeads) {
-      console.log("No unique leads available");
       return [];
     }
-
-    console.log("Selected names:", selectedNames);
-    console.log("Available unique leads:", uniqueLeads.slice(0, 3)); // Log first 3 leads for debugging
 
     return selectedNames
       .map((name) => {

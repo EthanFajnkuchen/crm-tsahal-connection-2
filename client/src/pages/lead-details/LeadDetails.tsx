@@ -18,6 +18,7 @@ import { IntegrationIsraelSection } from "./components/integration-israel-sectio
 import { TsahalSection } from "./components/tsahal-section";
 import { LeadInfoSection } from "./components/lead-info-section";
 import { DiscussionsSection } from "./components/discussions-section";
+import { ActivitiesSection } from "./components/activities-section";
 import { useScrollSpy, useScrollToSection } from "./hooks";
 import { tabs } from "./constants/tabs";
 
@@ -35,13 +36,6 @@ const LeadDetailsPage: React.FC = () => {
   );
 
   const isAdmin = roleType[0] === RoleType.ADMINISTRATEUR;
-
-  console.log("LeadDetails render", {
-    isAdmin,
-    roleType,
-    changeRequestsByLead,
-    leadId: lead?.ID,
-  });
 
   // Functions to handle change request approval/rejection for admins
   const handleApproveChangeRequest = async (changeRequestId: number) => {
@@ -114,7 +108,7 @@ const LeadDetailsPage: React.FC = () => {
                   }
                 `}
               >
-                <span className="text-lg">{tab.icon}</span>
+                <span className="text-sm">{tab.icon}</span>
                 <span>{tab.label}</span>
               </button>
             ))}
@@ -223,6 +217,14 @@ const LeadDetailsPage: React.FC = () => {
               className="scroll-mt-20"
             >
               <DiscussionsSection lead={lead} />
+            </div>
+
+            <div
+              ref={(el) => (sectionRefs.current["activities"] = el)}
+              id="activities"
+              className="scroll-mt-20"
+            >
+              <ActivitiesSection lead={lead} />
             </div>
           </>
         )}

@@ -1,8 +1,7 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useMemo } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
-import { fetchAllLeadsThunk } from "@/store/thunks/data/all-leads.thunk";
 import { bulkUpdateTsavRishonDateThunk } from "@/store/thunks/bulk-operations/bulk-tsav-rishon.thunk";
 import {
   Form,
@@ -42,12 +41,7 @@ const TsavRishonDateDrawerContent = (
     (state: RootState) => state.bulkTsavRishon
   );
 
-  // Fetch leads on component mount (only once)
-  useEffect(() => {
-    if (!leads || leads.length === 0) {
-      dispatch(fetchAllLeadsThunk());
-    }
-  }, [dispatch]); // Only depend on dispatch to avoid unnecessary re-fetches
+  // Leads are now fetched at the page level (Form-Rapports.tsx)
 
   const form = useForm<TsavRishonDateFormValues>({
     defaultValues: {
