@@ -5,9 +5,7 @@ import ProtectedComponent from "@/components/app-components/protected-component/
 const Activities: React.FC = () => {
   return (
     <div className="min-h-[90vh]">
-      <ProtectedComponent showUnauthorizedMessage={true}>
-        <ActivityTable />
-      </ProtectedComponent>
+      <ActivityTable />
     </div>
   );
 };
