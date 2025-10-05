@@ -1,4 +1,4 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice } from "@reduxjs/toolkit";
 import { ActiviteConf } from "@/store/adapters/activite-conf/activite-conf.adapter";
 import {
   getActiviteConfByActivityTypeThunk,
