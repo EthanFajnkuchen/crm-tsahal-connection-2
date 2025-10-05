@@ -8,6 +8,7 @@ import TsavRishonDrawerContent from "@/components/forms-drawer-content/tsav-rish
 import TsavRishonDateDrawerContent from "@/components/forms-drawer-content/tsav-rishon-date-form";
 import GiyusDrawerContent from "@/components/forms-drawer-content/giyus-form";
 import ActivityDrawerContent from "@/components/forms-drawer-content/activity-form";
+import ActivityMassaDrawerContent from "@/components/forms-drawer-content/activity-massa-form";
 
 const FormsRapports: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -55,6 +56,14 @@ const FormsRapports: React.FC = () => {
             className="max-w-md"
             drawerTitle="Créer une Activité"
             drawerContent={ActivityDrawerContent}
+          />
+
+          <CardForm
+            title="Nouvelle Activité Massa/Écoles"
+            description="Créer une nouvelle activité de type Massa/Écoles avec nom d'activité."
+            className="max-w-md"
+            drawerTitle="Créer une Activité Massa/Écoles"
+            drawerContent={ActivityMassaDrawerContent}
           />
         </div>
       </Section>

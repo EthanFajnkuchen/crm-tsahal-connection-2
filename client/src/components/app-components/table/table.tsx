@@ -35,6 +35,7 @@ interface DataTableProps<TData, TValue> {
   isLoading?: boolean;
   error?: string | null;
   onRowClick?: (row: TData) => void;
+  onRowDoubleClick?: (row: TData) => void;
   initialPage?: number;
   onPageChange?: (page: number) => void;
 }
@@ -45,6 +46,7 @@ export function DataTable<TData, TValue>({
   isLoading,
   error,
   onRowClick,
+  onRowDoubleClick,
   initialPage = 0,
   onPageChange,
 }: DataTableProps<TData, TValue>) {
@@ -146,6 +148,7 @@ export function DataTable<TData, TValue>({
                       data-state={row.getIsSelected() && "selected"}
                       className="cursor-pointer hover:bg-muted/50"
                       onClick={() => onRowClick?.(row.original)}
+                      onDoubleClick={() => onRowDoubleClick?.(row.original)}
                     >
                       {row.getVisibleCells().map((cell) => (
                         <TableCell key={cell.id}>
