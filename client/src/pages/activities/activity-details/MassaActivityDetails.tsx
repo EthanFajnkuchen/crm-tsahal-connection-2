@@ -90,7 +90,7 @@ export default function MassaActivityDetails() {
   const { activiteMassaParticipations } = useSelector(
     (state: RootState) => state.activiteMassaParticipation
   );
-  const { data: filteredLeads, status: leadsStatus } = useSelector(
+  const { data: filteredLeads, status: _leadsStatus } = useSelector(
     (state: RootState) => state.filteredLeads
   );
 
@@ -113,25 +113,21 @@ export default function MassaActivityDetails() {
     if (activiteMassa.length === 0) {
       dispatch(getActiviteMassaThunk({}));
     }
+  }, [dispatch, activities.length, activiteMassa.length]);
 
+  // Charger les participations quand l'ID change
+  useEffect(() => {
     if (idActivite) {
       const activityId = parseInt(idActivite, 10);
       if (!isNaN(activityId)) {
-        // Charger les participations pour les activités Massa
         dispatch(getActiviteMassaParticipationByActiviteMassaThunk(activityId));
       }
     }
-  }, [
-    dispatch,
-    idActivite,
-    activities.length,
-    activiteMassa.length,
-    leadsStatus,
-  ]);
+  }, [dispatch, idActivite]);
 
-  // Charger les leads pour les activités Massa
+  // Mettre à jour les leads quand les données changent
   useEffect(() => {
-    if (idActivite && filteredLeads) {
+    if (filteredLeads) {
       setIsMassaLoading(true);
       setMassaError(null);
 
@@ -152,24 +148,9 @@ export default function MassaActivityDetails() {
         setIsMassaLoading(false);
       }
     }
-  }, [idActivite, filteredLeads, activiteMassaParticipations]);
+  }, [filteredLeads, activiteMassaParticipations]);
 
-  // Mettre à jour les leads quand les participations changent
-  useEffect(() => {
-    if (filteredLeads) {
-      // Marquer les leads qui participent déjà
-      const leadsWithParticipation = filteredLeads.map((lead: any) => ({
-        ...lead,
-        isParticipating: activiteMassaParticipations.some(
-          (participation) => participation.lead_id === lead.ID
-        ),
-      }));
-
-      setMassaLeads(leadsWithParticipation);
-    }
-  }, [activiteMassaParticipations, filteredLeads]);
-
-  // Effet séparé pour charger les leads filtrés quand les activités Massa sont chargées
+  // Charger les leads filtrés quand l'activité Massa est trouvée
   useEffect(() => {
     if (idActivite && activiteMassa.length > 0) {
       const activityId = parseInt(idActivite, 10);
