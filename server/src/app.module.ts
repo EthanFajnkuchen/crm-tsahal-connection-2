@@ -17,6 +17,7 @@ import { SchedulerModule } from './modules/scheduler/scheduler.module';
 import { ActivityModule } from './modules/activity/activity.module';
 import { ActiviteConfModule } from './modules/activite-conf/activite-conf.module';
 import { ActiviteMassaModule } from './modules/activite-massa/activite-massa.module';
+import { ActiviteMassaParticipationModule } from './modules/activite-massa-participation/activite-massa-participation.module';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { JwtModule } from '@nestjs/jwt';
@@ -35,6 +36,7 @@ import { LoggerMiddleware } from './middlewares/logging.middleware';
     ActivityModule,
     ActiviteConfModule,
     ActiviteMassaModule,
+    ActiviteMassaParticipationModule,
     JwtModule.register({
       secret: process.env.JWT_SECRET || 'default_secret_key',
       signOptions: { expiresIn: '1h' },
