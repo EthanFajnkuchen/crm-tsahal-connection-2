@@ -48,7 +48,6 @@ export const createActivityAdapter = async (
     }
 
     const result = await response.json();
-    console.log("Activity creation successful:", result);
     return result;
   } catch (error) {
     console.error("Activity creation failed:", error);

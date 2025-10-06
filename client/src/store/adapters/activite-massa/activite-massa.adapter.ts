@@ -46,7 +46,6 @@ export const createActiviteMassaAdapter = async (
     }
 
     const result = await response.json();
-    console.log("ActiviteMassa creation successful:", result);
     return result;
   } catch (error) {
     console.error("ActiviteMassa creation failed:", error);
@@ -87,7 +86,6 @@ export const getActiviteMassaAdapter = async (
     }
 
     const result = await response.json();
-    console.log("ActiviteMassa fetch successful:", result);
     return result;
   } catch (error) {
     console.error("ActiviteMassa fetch failed:", error);
@@ -117,7 +115,6 @@ export const updateActiviteMassaAdapter = async (
     }
 
     const result = await response.json();
-    console.log("ActiviteMassa update successful:", result);
     return result;
   } catch (error) {
     console.error("ActiviteMassa update failed:", error);
@@ -141,8 +138,6 @@ export const deleteActiviteMassaAdapter = async (id: number): Promise<void> => {
         errorData.message || `HTTP error! status: ${response.status}`
       );
     }
-
-    console.log("ActiviteMassa deletion successful");
   } catch (error) {
     console.error("ActiviteMassa deletion failed:", error);
     throw error;

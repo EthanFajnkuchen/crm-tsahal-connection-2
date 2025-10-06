@@ -212,8 +212,13 @@ export function ActivityTable() {
   ];
 
   const handleRowClick = (activity: CombinedActivity) => {
+    const activityType =
+      "type" in activity && activity.type === "massa" ? "massa" : "salon";
     navigate(`/activites/${activity.id}`, {
-      state: { activityName: activity.name },
+      state: {
+        activityName: activity.name,
+        activityType: activityType,
+      },
     });
   };
 

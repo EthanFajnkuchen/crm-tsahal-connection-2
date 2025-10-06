@@ -1,5 +1,5 @@
-import { useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { ArrowLeft, CheckCircle, XCircle } from "lucide-react";
 
@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import type { ColumnDef } from "@tanstack/react-table";
 import { ActiviteConf } from "@/store/adapters/activite-conf/activite-conf.adapter";
+import { Lead } from "@/types/lead";
 
 import { RootState, AppDispatch } from "@/store/store";
 import {
@@ -16,8 +17,17 @@ import {
   updateActiviteConfThunk,
 } from "@/store/thunks/activite-conf/activite-conf.thunk";
 import { getActivitiesThunk } from "@/store/thunks/activity/activity.thunk";
+import { getActiviteMassaThunk } from "@/store/thunks/activite-massa/activite-massa.thunk";
+import { getActiviteMassaParticipationByActiviteMassaThunk } from "@/store/thunks/activite-massa-participation/activite-massa-participation.thunk";
+import {
+  createActiviteMassaParticipationThunk,
+  deleteActiviteMassaParticipationThunk,
+} from "@/store/thunks/activite-massa-participation/activite-massa-participation.thunk";
+import { fetchFilteredLeadsThunk } from "@/store/thunks/dashboard/filtered-card-leads.thunk";
+import { LeadFilterDto } from "@/store/adapters/dashboard/filtered-card-leads.adapter";
 
-const columns: ColumnDef<ActiviteConf>[] = [
+// Colonnes pour les activités Salon/Conférence
+const activiteConfColumns: ColumnDef<ActiviteConf>[] = [
   {
     accessorKey: "fullName",
     header: "Nom complet",
@@ -85,9 +95,66 @@ const columns: ColumnDef<ActiviteConf>[] = [
   },
 ];
 
+// Colonnes pour les activités Massa/Ecole
+const massaColumns: ColumnDef<Lead & { isParticipating: boolean }>[] = [
+  {
+    accessorKey: "fullName",
+    header: "Nom complet",
+    cell: ({ row }) => {
+      const lead = row.original;
+      return (
+        <div className="font-medium">
+          {lead.firstName} {lead.lastName}
+        </div>
+      );
+    },
+  },
+  {
+    accessorKey: "email",
+    header: "Email",
+    cell: ({ row }) => {
+      const email = row.getValue("email") as string;
+      return <div>{email}</div>;
+    },
+  },
+  {
+    accessorKey: "phoneNumber",
+    header: "Téléphone",
+    cell: ({ row }) => {
+      const phoneNumber = row.getValue("phoneNumber") as string;
+      return <div>{phoneNumber}</div>;
+    },
+  },
+  {
+    id: "isParticipating",
+    accessorKey: "isParticipating",
+    header: "Confirmation de venue",
+    cell: ({ row }) => {
+      const isParticipating = row.getValue("isParticipating") as boolean;
+
+      return (
+        <div className="flex items-center gap-2">
+          {isParticipating ? (
+            <Badge variant="default" className="bg-green-100 text-green-800">
+              <CheckCircle className="mr-1 h-3 w-3" />
+              Présent
+            </Badge>
+          ) : (
+            <Badge variant="secondary" className="bg-gray-100 text-gray-800">
+              <XCircle className="mr-1 h-3 w-3" />
+              Non confirmé
+            </Badge>
+          )}
+        </div>
+      );
+    },
+  },
+];
+
 export default function ActivityDetails() {
   const { idActivite } = useParams<{ idActivite: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const dispatch = useDispatch<AppDispatch>();
 
   const { activiteConfs, isLoading, error } = useSelector(
@@ -95,6 +162,25 @@ export default function ActivityDetails() {
   );
 
   const { activities } = useSelector((state: RootState) => state.activity);
+  const { activiteMassa } = useSelector(
+    (state: RootState) => state.activiteMassa
+  );
+  const { activiteMassaParticipations } = useSelector(
+    (state: RootState) => state.activiteMassaParticipation
+  );
+  const { data: filteredLeads, status: leadsStatus } = useSelector(
+    (state: RootState) => state.filteredLeads
+  );
+
+  const [massaLeads, setMassaLeads] = useState<
+    (Lead & { isParticipating: boolean })[]
+  >([]);
+  const [isMassaLoading, setIsMassaLoading] = useState(false);
+  const [massaError, setMassaError] = useState<string | null>(null);
+
+  // Déterminer le type d'activité depuis le state de navigation
+  const activityType = location.state?.activityType || "salon";
+  const activityName = location.state?.activityName || "";
 
   useEffect(() => {
     // Load activities if not already loaded
@@ -102,23 +188,139 @@ export default function ActivityDetails() {
       dispatch(getActivitiesThunk());
     }
 
+    // Load activite massa if not already loaded
+    if (activiteMassa.length === 0) {
+      dispatch(getActiviteMassaThunk({}));
+    }
+
     if (idActivite) {
       const activityId = parseInt(idActivite, 10);
       if (!isNaN(activityId)) {
-        dispatch(getActiviteConfByActivityTypeThunk(activityId));
+        if (activityType === "massa") {
+          // Charger les participations pour les activités Massa
+          dispatch(
+            getActiviteMassaParticipationByActiviteMassaThunk(activityId)
+          );
+        } else {
+          // Charger les conférences pour les activités Salon/Conférence
+          dispatch(getActiviteConfByActivityTypeThunk(activityId));
+        }
       }
     }
-  }, [dispatch, idActivite, activities.length]);
+  }, [
+    dispatch,
+    idActivite,
+    activities.length,
+    activiteMassa.length,
+    leadsStatus,
+    activityType,
+  ]);
 
-  const handleRowClick = (activiteConf: ActiviteConf) => {
-    // Toggle hasArrived status
-    const updatedStatus = !activiteConf.hasArrived;
-    dispatch(
-      updateActiviteConfThunk({
-        id: activiteConf.id,
-        updates: { hasArrived: updatedStatus },
-      })
-    );
+  // Charger les leads pour les activités Massa
+  useEffect(() => {
+    if (activityType === "massa" && idActivite && filteredLeads) {
+      setIsMassaLoading(true);
+      setMassaError(null);
+
+      try {
+        // Marquer les leads qui participent déjà
+        const leadsWithParticipation = filteredLeads.map((lead: any) => ({
+          ...lead,
+          isParticipating: activiteMassaParticipations.some(
+            (participation) => participation.lead_id === lead.ID
+          ),
+        }));
+
+        setMassaLeads(leadsWithParticipation);
+      } catch (error) {
+        console.error("Error loading Massa leads:", error);
+        setMassaError("Erreur lors du chargement des leads");
+      } finally {
+        setIsMassaLoading(false);
+      }
+    }
+  }, [idActivite, activityType, filteredLeads, activiteMassaParticipations]);
+
+  // Mettre à jour les leads quand les participations changent
+  useEffect(() => {
+    if (activityType === "massa" && filteredLeads) {
+      // Marquer les leads qui participent déjà
+      const leadsWithParticipation = filteredLeads.map((lead: any) => ({
+        ...lead,
+        isParticipating: activiteMassaParticipations.some(
+          (participation) => participation.lead_id === lead.ID
+        ),
+      }));
+
+      setMassaLeads(leadsWithParticipation);
+    }
+  }, [activiteMassaParticipations, filteredLeads, activityType]);
+
+  // Effet séparé pour charger les leads filtrés quand les activités Massa sont chargées
+  useEffect(() => {
+    if (activityType === "massa" && idActivite && activiteMassa.length > 0) {
+      const activityId = parseInt(idActivite, 10);
+      const activity = activiteMassa.find((a) => Number(a.id) === activityId);
+
+      if (activity) {
+        const filters: LeadFilterDto = {
+          included: {
+            programName: [activity.programName],
+            schoolYears: [activity.programYear],
+          },
+          excluded: {},
+          fieldsToSend: [
+            "ID",
+            "firstName",
+            "lastName",
+            "email",
+            "phoneNumber",
+            "programName",
+            "schoolYears",
+          ],
+        };
+        dispatch(fetchFilteredLeadsThunk(filters));
+      }
+    }
+  }, [activityType, idActivite, activiteMassa, dispatch]);
+
+  const handleRowClick = (
+    data: ActiviteConf | (Lead & { isParticipating: boolean })
+  ) => {
+    if (activityType === "massa") {
+      // Gérer les clics pour les activités Massa
+      const lead = data as Lead & { isParticipating: boolean };
+      const activityId = parseInt(idActivite || "0", 10);
+
+      if (lead.isParticipating) {
+        // Supprimer la participation
+        const participation = activiteMassaParticipations.find(
+          (p) =>
+            p.lead_id === lead.ID && Number(p.id_activite_massa) === activityId
+        );
+        if (participation) {
+          dispatch(deleteActiviteMassaParticipationThunk(participation.id));
+        }
+      } else {
+        // Ajouter la participation
+        dispatch(
+          createActiviteMassaParticipationThunk({
+            id_activite_massa: activityId,
+            lead_id: lead.ID,
+          })
+        );
+      }
+    } else {
+      // Gérer les clics pour les activités Salon/Conférence
+      const activiteConf = data as ActiviteConf;
+      const updatedStatus = !activiteConf.hasArrived;
+      dispatch(
+        updateActiviteConfThunk({
+          id: activiteConf.id,
+          updates: { hasArrived: updatedStatus },
+        })
+      );
+    }
   };
 
   const handleGoBack = () => {
@@ -126,22 +328,46 @@ export default function ActivityDetails() {
   };
 
   // Find the current activity details
-  const currentActivity = activities.find(
-    (activity) => activity.id === parseInt(idActivite || "0", 10)
-  );
+  const currentActivity =
+    activityType === "massa"
+      ? activiteMassa.find(
+          (activity) => activity.id === parseInt(idActivite || "0", 10)
+        )
+      : activities.find(
+          (activity) => activity.id === parseInt(idActivite || "0", 10)
+        );
 
-  if (error) {
+  if (error || massaError) {
     return (
       <Section title="Détails de l'activité">
         <div className="p-4 text-center text-red-500">
-          Erreur lors du chargement des participants: {error}
+          Erreur lors du chargement des participants: {error || massaError}
         </div>
       </Section>
     );
   }
 
+  // Déterminer les données et colonnes selon le type d'activité
+  const isMassaActivity = activityType === "massa";
+  const currentData = isMassaActivity ? massaLeads : activiteConfs;
+  const currentLoading = isMassaActivity ? isMassaLoading : isLoading;
+
+  // Calculer les statistiques selon le type d'activité
+  const totalParticipants = currentData.length;
+  const presentCount = isMassaActivity
+    ? massaLeads.filter((lead) => lead.isParticipating).length
+    : activiteConfs.filter((conf) => conf.hasArrived).length;
+  const absentCount = totalParticipants - presentCount;
+
   return (
-    <Section title={`Détails de l'activité ${currentActivity?.name || ""}`}>
+    <Section
+      title={`Détails de l'activité ${
+        activityName ||
+        (currentActivity && "name" in currentActivity
+          ? currentActivity.name
+          : "")
+      }`}
+    >
       <div className="space-y-4">
         {/* Header with back button and activity info */}
         <div className="flex items-center justify-between">
@@ -156,10 +382,19 @@ export default function ActivityDetails() {
 
           {currentActivity && (
             <div className="text-right">
-              <h2 className="text-lg font-semibold">{currentActivity.name}</h2>
+              <h2 className="text-lg font-semibold">
+                {activityName ||
+                  ("name" in currentActivity
+                    ? currentActivity.name
+                    : `${currentActivity.programName} - ${currentActivity.programYear}`)}
+              </h2>
               <p className="text-sm text-gray-600">
                 {new Date(currentActivity.date).toLocaleDateString("fr-FR")} -{" "}
-                {currentActivity.category}
+                {isMassaActivity
+                  ? "Massa/École"
+                  : "category" in currentActivity
+                  ? currentActivity.category
+                  : "Massa/École"}
               </p>
             </div>
           )}
@@ -169,26 +404,26 @@ export default function ActivityDetails() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="bg-blue-50 p-4 rounded-lg">
             <div className="text-2xl font-bold text-blue-600">
-              {activiteConfs.length}
+              {totalParticipants}
             </div>
             <div className="text-sm text-blue-800">Total participants</div>
-            <div className="text-xs text-blue-600 mt-1">
-              {activiteConfs.filter((conf) => conf.isFuturSoldier).length}{" "}
-              futurs soldats •{" "}
-              {activiteConfs.filter((conf) => !conf.isFuturSoldier).length}{" "}
-              accompagnants
-            </div>
+            {!isMassaActivity && (
+              <div className="text-xs text-blue-600 mt-1">
+                {activiteConfs.filter((conf) => conf.isFuturSoldier).length}{" "}
+                futurs soldats •{" "}
+                {activiteConfs.filter((conf) => !conf.isFuturSoldier).length}{" "}
+                accompagnants
+              </div>
+            )}
           </div>
           <div className="bg-green-50 p-4 rounded-lg">
             <div className="text-2xl font-bold text-green-600">
-              {activiteConfs.filter((conf) => conf.hasArrived).length}
+              {presentCount}
             </div>
             <div className="text-sm text-green-800">Présents</div>
           </div>
           <div className="bg-red-50 p-4 rounded-lg">
-            <div className="text-2xl font-bold text-red-600">
-              {activiteConfs.filter((conf) => !conf.hasArrived).length}
-            </div>
+            <div className="text-2xl font-bold text-red-600">{absentCount}</div>
             <div className="text-sm text-red-800">Absents</div>
           </div>
         </div>
@@ -200,12 +435,21 @@ export default function ActivityDetails() {
             Cliquez sur une ligne pour marquer/démarquer la présence d'un
             participant.
           </p>
-          <DataTable
-            columns={columns}
-            data={activiteConfs}
-            isLoading={isLoading}
-            onRowClick={handleRowClick}
-          />
+          {isMassaActivity ? (
+            <DataTable
+              columns={massaColumns}
+              data={massaLeads}
+              isLoading={currentLoading}
+              onRowClick={handleRowClick}
+            />
+          ) : (
+            <DataTable
+              columns={activiteConfColumns}
+              data={activiteConfs}
+              isLoading={currentLoading}
+              onRowClick={handleRowClick}
+            />
+          )}
         </div>
       </div>
     </Section>

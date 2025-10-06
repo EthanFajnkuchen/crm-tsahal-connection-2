@@ -22,6 +22,7 @@ import bulkGiyusReducer from "./slices/bulk-operations/bulk-giyus.slice";
 import activityReducer from "./slices/activity/activity.slice";
 import activiteConfReducer from "./slices/activite-conf/activite-conf.slice";
 import activiteMassaReducer from "./slices/activite-massa/activite-massa.slice";
+import activiteMassaParticipationReducer from "./slices/activite-massa-participation/activite-massa-participation.slice";
 
 export const store = configureStore({
   reducer: {
@@ -48,6 +49,7 @@ export const store = configureStore({
     activity: activityReducer,
     activiteConf: activiteConfReducer,
     activiteMassa: activiteMassaReducer,
+    activiteMassaParticipation: activiteMassaParticipationReducer,
   },
 });
 
