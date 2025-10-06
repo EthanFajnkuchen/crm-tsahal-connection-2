@@ -2,6 +2,8 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 import {
   createActiviteMassaAdapter,
   getActiviteMassaAdapter,
+  updateActiviteMassaAdapter,
+  deleteActiviteMassaAdapter,
   ActiviteMassaData,
   CreateActiviteMassaResponse,
   ActiviteMassa,
@@ -20,3 +22,18 @@ export const getActiviteMassaThunk = createAsyncThunk<
 >("activiteMassa/getAll", async ({ id_activite_type, programYear, date }) => {
   return await getActiviteMassaAdapter(id_activite_type, programYear, date);
 });
+
+export const updateActiviteMassaThunk = createAsyncThunk<
+  ActiviteMassa,
+  { id: number; data: { date: string } }
+>("activiteMassa/update", async ({ id, data }) => {
+  return await updateActiviteMassaAdapter(id, data);
+});
+
+export const deleteActiviteMassaThunk = createAsyncThunk<number, number>(
+  "activiteMassa/delete",
+  async (id: number) => {
+    await deleteActiviteMassaAdapter(id);
+    return id;
+  }
+);

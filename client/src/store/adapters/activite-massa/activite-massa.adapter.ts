@@ -94,3 +94,57 @@ export const getActiviteMassaAdapter = async (
     throw error;
   }
 };
+
+export const updateActiviteMassaAdapter = async (
+  id: number,
+  data: { date: string }
+): Promise<ActiviteMassa> => {
+  try {
+    const response = await fetch(`${API_ROUTES.ACTIVITE_MASSA}/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${M2M_TOKEN}`,
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(
+        errorData.message || `HTTP error! status: ${response.status}`
+      );
+    }
+
+    const result = await response.json();
+    console.log("ActiviteMassa update successful:", result);
+    return result;
+  } catch (error) {
+    console.error("ActiviteMassa update failed:", error);
+    throw error;
+  }
+};
+
+export const deleteActiviteMassaAdapter = async (id: number): Promise<void> => {
+  try {
+    const response = await fetch(`${API_ROUTES.ACTIVITE_MASSA}/${id}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${M2M_TOKEN}`,
+      },
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(
+        errorData.message || `HTTP error! status: ${response.status}`
+      );
+    }
+
+    console.log("ActiviteMassa deletion successful");
+  } catch (error) {
+    console.error("ActiviteMassa deletion failed:", error);
+    throw error;
+  }
+};

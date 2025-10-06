@@ -3,12 +3,16 @@ import { ActiviteMassa } from "@/store/adapters/activite-massa/activite-massa.ad
 import {
   createActiviteMassaThunk,
   getActiviteMassaThunk,
+  updateActiviteMassaThunk,
+  deleteActiviteMassaThunk,
 } from "@/store/thunks/activite-massa/activite-massa.thunk";
 
 interface ActiviteMassaState {
   activiteMassa: ActiviteMassa[];
   isLoading: boolean;
   isCreating: boolean;
+  isUpdating: boolean;
+  isDeleting: boolean;
   error: string | null;
 }
 
@@ -16,6 +20,8 @@ const initialState: ActiviteMassaState = {
   activiteMassa: [],
   isLoading: false,
   isCreating: false,
+  isUpdating: false,
+  isDeleting: false,
   error: null,
 };
 
@@ -57,6 +63,39 @@ const activiteMassaSlice = createSlice({
       .addCase(getActiviteMassaThunk.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.error.message || "Failed to fetch activite massa";
+      })
+      // Update activite massa
+      .addCase(updateActiviteMassaThunk.pending, (state) => {
+        state.isUpdating = true;
+        state.error = null;
+      })
+      .addCase(updateActiviteMassaThunk.fulfilled, (state, action) => {
+        state.isUpdating = false;
+        const index = state.activiteMassa.findIndex(
+          (activiteMassa) => activiteMassa.id === action.payload.id
+        );
+        if (index !== -1) {
+          state.activiteMassa[index] = action.payload;
+        }
+      })
+      .addCase(updateActiviteMassaThunk.rejected, (state, action) => {
+        state.isUpdating = false;
+        state.error = action.error.message || "Failed to update activite massa";
+      })
+      // Delete activite massa
+      .addCase(deleteActiviteMassaThunk.pending, (state) => {
+        state.isDeleting = true;
+        state.error = null;
+      })
+      .addCase(deleteActiviteMassaThunk.fulfilled, (state, action) => {
+        state.isDeleting = false;
+        state.activiteMassa = state.activiteMassa.filter(
+          (activiteMassa) => activiteMassa.id !== action.payload
+        );
+      })
+      .addCase(deleteActiviteMassaThunk.rejected, (state, action) => {
+        state.isDeleting = false;
+        state.error = action.error.message || "Failed to delete activite massa";
       });
   },
 });
