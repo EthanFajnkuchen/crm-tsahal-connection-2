@@ -20,6 +20,8 @@ import TafkidimPage from "./pages/tafkidim/TafkidimPage";
 import Volunteers from "./pages/volunteers/Volunteers";
 import Activities from "./pages/activities/Activities";
 import ActivityDetails from "./pages/activities/activity-details/ActivityDetails";
+import SalonActivityDetails from "./pages/activities/activity-details/SalonActivityDetails";
+import MassaActivityDetails from "./pages/activities/activity-details/MassaActivityDetails";
 const ProtectedAppLayout = withAuthenticationRequired(AppLayout, {
   onRedirecting: () => (
     <div className="flex items-center justify-center h-screen bg-white">
@@ -49,6 +51,14 @@ function App() {
           <Route path="volontaires" element={<Volunteers />} />
           <Route path="activities" element={<Activities />} />
           <Route path="activites/:idActivite" element={<ActivityDetails />} />
+          <Route
+            path="activites/salon/:idActivite"
+            element={<SalonActivityDetails />}
+          />
+          <Route
+            path="activites/massa/:idActivite"
+            element={<MassaActivityDetails />}
+          />
         </Route>
       </Routes>
     </Router>

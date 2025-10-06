@@ -214,12 +214,23 @@ export function ActivityTable() {
   const handleRowClick = (activity: CombinedActivity) => {
     const activityType =
       "type" in activity && activity.type === "massa" ? "massa" : "salon";
-    navigate(`/activites/${activity.id}`, {
-      state: {
-        activityName: activity.name,
-        activityType: activityType,
-      },
-    });
+
+    // Utiliser les routes spécifiques selon le type d'activité
+    if (activityType === "massa") {
+      navigate(`/activites/massa/${activity.id}`, {
+        state: {
+          activityName: activity.name,
+          activityType: activityType,
+        },
+      });
+    } else {
+      navigate(`/activites/salon/${activity.id}`, {
+        state: {
+          activityName: activity.name,
+          activityType: activityType,
+        },
+      });
+    }
   };
 
   if (error) {
