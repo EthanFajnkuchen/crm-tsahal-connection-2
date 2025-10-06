@@ -26,6 +26,7 @@ export class ActiviteMassaService {
   async findAll(
     id_activite_type?: number,
     programYear?: string,
+    date?: string,
   ): Promise<ActiviteMassa[]> {
     const queryBuilder = this.activiteMassaRepository
       .createQueryBuilder('activiteMassa')
@@ -40,6 +41,12 @@ export class ActiviteMassaService {
     if (programYear) {
       queryBuilder.andWhere('activiteMassa.programYear = :programYear', {
         programYear,
+      });
+    }
+
+    if (date) {
+      queryBuilder.andWhere('DATE(activiteMassa.date) = :date', {
+        date,
       });
     }
 

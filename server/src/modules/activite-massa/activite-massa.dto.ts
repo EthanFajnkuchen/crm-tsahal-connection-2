@@ -1,4 +1,4 @@
-import { IsOptional, IsString, IsNumber } from 'class-validator';
+import { IsOptional, IsString, IsNumber, IsDate } from 'class-validator';
 
 export class CreateActiviteMassaDto {
   @IsNumber()
@@ -9,6 +9,9 @@ export class CreateActiviteMassaDto {
 
   @IsString()
   programYear: string;
+
+  @IsDate()
+  date: Date;
 }
 
 export class UpdateActiviteMassaDto {
@@ -23,6 +26,10 @@ export class UpdateActiviteMassaDto {
   @IsOptional()
   @IsString()
   programYear?: string;
+
+  @IsOptional()
+  @IsDate()
+  date?: Date;
 }
 
 export class ActiviteMassaFilterDto {
@@ -33,4 +40,8 @@ export class ActiviteMassaFilterDto {
   @IsOptional()
   @IsString()
   programYear?: string;
+
+  @IsOptional()
+  @IsDate()
+  date?: Date;
 }

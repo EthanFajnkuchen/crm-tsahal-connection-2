@@ -13,4 +13,7 @@ export class ActiviteMassa {
 
   @Column({ length: 255 })
   programYear: string;
+
+  @Column({ type: 'date' })
+  date: Date;
 }

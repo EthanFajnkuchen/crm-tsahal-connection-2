@@ -33,10 +33,12 @@ export class ActiviteMassaController {
   async findAll(
     @Query('id_activite_type') id_activite_type?: string,
     @Query('programYear') programYear?: string,
+    @Query('date') date?: string,
   ): Promise<ActiviteMassa[]> {
     return this.activiteMassaService.findAll(
       id_activite_type ? +id_activite_type : undefined,
       programYear,
+      date,
     );
   }
 
