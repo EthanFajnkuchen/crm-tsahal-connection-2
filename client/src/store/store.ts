@@ -21,6 +21,7 @@ import bulkTsavRishonReducer from "./slices/bulk-operations/bulk-tsav-rishon.sli
 import bulkGiyusReducer from "./slices/bulk-operations/bulk-giyus.slice";
 import activityReducer from "./slices/activity/activity.slice";
 import activiteConfReducer from "./slices/activite-conf/activite-conf.slice";
+import activiteMassaReducer from "./slices/activite-massa/activite-massa.slice";
 
 export const store = configureStore({
   reducer: {
@@ -46,6 +47,7 @@ export const store = configureStore({
     bulkGiyus: bulkGiyusReducer,
     activity: activityReducer,
     activiteConf: activiteConfReducer,
+    activiteMassa: activiteMassaReducer,
   },
 });
 

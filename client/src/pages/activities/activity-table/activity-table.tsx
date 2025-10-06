@@ -19,6 +19,7 @@ import { Activity } from "@/store/adapters/activity/activity.adapter";
 import { RootState, AppDispatch } from "@/store/store";
 import { getActivitiesThunk } from "@/store/thunks/activity/activity.thunk";
 import { ActivityActions } from "./activity-actions";
+import { AddActiviteMassaDialog } from "@/components/app-components/add-activite-massa-dialog";
 
 const columns: ColumnDef<Activity>[] = [
   {
@@ -135,21 +136,38 @@ export function ActivityTable() {
   return (
     <Section title="Liste des activités">
       <div className="space-y-4">
-        {/* Category Filter */}
-        <div className="flex items-center gap-2">
-          <label htmlFor="category-filter" className="text-sm font-medium">
-            Filtrer par catégorie :
-          </label>
-          <Select value={selectedCategory} onValueChange={handleCategoryChange}>
-            <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder="Sélectionner une catégorie" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Toutes les catégories</SelectItem>
-              <SelectItem value="Salon/Conférence">Salon/Conférence</SelectItem>
-              <SelectItem value="Massa/Ecole">Massa/Ecole</SelectItem>
-            </SelectContent>
-          </Select>
+        {/* Header with Add Button and Category Filter */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <label htmlFor="category-filter" className="text-sm font-medium">
+              Filtrer par catégorie :
+            </label>
+            <Select
+              value={selectedCategory}
+              onValueChange={handleCategoryChange}
+            >
+              <SelectTrigger className="w-[200px]">
+                <SelectValue placeholder="Sélectionner une catégorie" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Toutes les catégories</SelectItem>
+                <SelectItem value="Salon/Conférence">
+                  Salon/Conférence
+                </SelectItem>
+                <SelectItem value="Massa/Ecole">Massa/Ecole</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <AddActiviteMassaDialog
+            onSuccess={() => {
+              // Optionally refresh the activities list
+              dispatch(
+                getActivitiesThunk(
+                  selectedCategory === "all" ? undefined : selectedCategory
+                )
+              );
+            }}
+          />
         </div>
 
         {/* Data Table */}
