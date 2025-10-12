@@ -2,9 +2,10 @@ import { createSlice } from "@reduxjs/toolkit";
 import { searchLeadsThunk } from "../../thunks/data/search-leads.thunk";
 import { searchLeadByEmailThunk } from "../../thunks/lead/search-lead-by-email.thunk";
 import { Lead } from "@/types/lead";
+import { ApiLead } from "@/store/adapters/lead/search-lead-by-email.adapter";
 
 interface SearchLeadsState {
-  data: Lead[] | null;
+  data: Lead[] | ApiLead[] | null;
   status: "idle" | "loading" | "succeeded" | "failed";
   isLoading: boolean;
   error: string | null;
