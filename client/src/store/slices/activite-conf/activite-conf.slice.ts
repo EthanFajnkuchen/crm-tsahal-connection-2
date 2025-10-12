@@ -4,6 +4,7 @@ import {
   getActiviteConfByActivityTypeThunk,
   getActiviteConfByLeadIdThunk,
   updateActiviteConfThunk,
+  createActiviteConfThunk,
 } from "@/store/thunks/activite-conf/activite-conf.thunk";
 
 interface ActiviteConfState {
@@ -11,6 +12,7 @@ interface ActiviteConfState {
   activiteConfsByLead: ActiviteConf[];
   isLoading: boolean;
   isUpdating: boolean;
+  isCreating: boolean;
   error: string | null;
   currentLeadId: number | null;
 }
@@ -20,6 +22,7 @@ const initialState: ActiviteConfState = {
   activiteConfsByLead: [],
   isLoading: false,
   isUpdating: false,
+  isCreating: false,
   error: null,
   currentLeadId: null,
 };
@@ -89,6 +92,19 @@ const activiteConfSlice = createSlice({
         state.isLoading = false;
         state.error =
           action.error.message || "Failed to fetch activite confs by lead";
+      })
+      // Create activite conf
+      .addCase(createActiviteConfThunk.pending, (state) => {
+        state.isCreating = true;
+        state.error = null;
+      })
+      .addCase(createActiviteConfThunk.fulfilled, (state, action) => {
+        state.isCreating = false;
+        state.activiteConfs.push(action.payload);
+      })
+      .addCase(createActiviteConfThunk.rejected, (state, action) => {
+        state.isCreating = false;
+        state.error = action.error.message || "Failed to create activite conf";
       });
   },
 });

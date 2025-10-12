@@ -3,6 +3,7 @@ import {
   getActiviteConfByActivityTypeAdapter,
   getActiviteConfByLeadIdAdapter,
   updateActiviteConfAdapter,
+  createActiviteConfAdapter,
   ActiviteConf,
 } from "@/store/adapters/activite-conf/activite-conf.adapter";
 
@@ -25,4 +26,11 @@ export const updateActiviteConfThunk = createAsyncThunk<
   { id: number; updates: Partial<ActiviteConf> }
 >("activiteConf/update", async ({ id, updates }) => {
   return await updateActiviteConfAdapter(id, updates);
+});
+
+export const createActiviteConfThunk = createAsyncThunk<
+  ActiviteConf,
+  Omit<ActiviteConf, "id" | "hasArrived">
+>("activiteConf/create", async (activiteConf) => {
+  return await createActiviteConfAdapter(activiteConf);
 });

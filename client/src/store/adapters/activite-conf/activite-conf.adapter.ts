@@ -105,3 +105,35 @@ export const updateActiviteConfAdapter = async (
     throw error;
   }
 };
+
+export const createActiviteConfAdapter = async (
+  activiteConf: Omit<ActiviteConf, "id" | "hasArrived">
+): Promise<ActiviteConf> => {
+  try {
+    const response = await fetch(`${API_ROUTES.ACTIVITE_CONF}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${M2M_TOKEN}`,
+      },
+      body: JSON.stringify({
+        ...activiteConf,
+        hasArrived: false, // Default to not arrived
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(
+        errorData.message || `HTTP error! status: ${response.status}`
+      );
+    }
+
+    const result = await response.json();
+    console.log("ActiviteConf create successful:", result);
+    return result;
+  } catch (error) {
+    console.error("ActiviteConf create failed:", error);
+    throw error;
+  }
+};
