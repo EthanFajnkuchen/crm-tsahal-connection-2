@@ -264,7 +264,7 @@ export function ActivityTable() {
                 <SelectItem value="Salon/Conférence">
                   Salon/Conférence
                 </SelectItem>
-                <SelectItem value="Massa/Ecole">Massa/Ecole</SelectItem>
+                <SelectItem value="Massa/Écoles">Massa/Écoles</SelectItem>
               </SelectContent>
             </Select>
           </div>
