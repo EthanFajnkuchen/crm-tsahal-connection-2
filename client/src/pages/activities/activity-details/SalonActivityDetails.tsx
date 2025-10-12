@@ -1,12 +1,13 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { ArrowLeft, CheckCircle, XCircle } from "lucide-react";
+import { ArrowLeft, CheckCircle, XCircle, Plus, Search } from "lucide-react";
 
 import { DataTable } from "@/components/app-components/table/table";
 import Section from "@/components/app-components/section/section";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import type { ColumnDef } from "@tanstack/react-table";
 import { ActiviteConf } from "@/store/adapters/activite-conf/activite-conf.adapter";
 
@@ -14,8 +15,11 @@ import { RootState, AppDispatch } from "@/store/store";
 import {
   getActiviteConfByActivityTypeThunk,
   updateActiviteConfThunk,
+  createActiviteConfThunk,
 } from "@/store/thunks/activite-conf/activite-conf.thunk";
 import { getActivitiesThunk } from "@/store/thunks/activity/activity.thunk";
+import { searchLeadByEmailThunk } from "@/store/thunks/lead/search-lead-by-email.thunk";
+import { AddParticipantDrawer } from "@/components/forms-drawer-content/add-participant-drawer";
 
 // Colonnes pour les activités Salon/Conférence
 const activiteConfColumns: ColumnDef<ActiviteConf>[] = [
@@ -91,12 +95,17 @@ export default function SalonActivityDetails() {
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch<AppDispatch>();
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
 
-  const { activiteConfs, isLoading, error } = useSelector(
+  const { activiteConfs, isLoading, error, isCreating } = useSelector(
     (state: RootState) => state.activiteConf
   );
 
   const { activities } = useSelector((state: RootState) => state.activity);
+  const { isLoading: isSearchingLeads } = useSelector(
+    (state: RootState) => state.searchLeads
+  );
 
   // Déterminer le type d'activité depuis le state de navigation
   const activityName = location.state?.activityName || "";
@@ -131,6 +140,37 @@ export default function SalonActivityDetails() {
     navigate("/activities");
   };
 
+  const handleAddParticipant = async (participant: {
+    firstName: string;
+    lastName: string;
+    mail: string;
+    phoneNumber: string;
+    isFuturSoldier: boolean;
+    lead_id: number;
+  }) => {
+    if (!idActivite) return;
+
+    const activityId = parseInt(idActivite, 10);
+    if (isNaN(activityId)) return;
+
+    dispatch(
+      createActiviteConfThunk({
+        activiteType: activityId,
+        firstName: participant.firstName,
+        lastName: participant.lastName,
+        mail: participant.mail,
+        phoneNumber: participant.phoneNumber,
+        isFuturSoldier: participant.isFuturSoldier,
+        lead_id: participant.lead_id,
+      })
+    );
+  };
+
+  const handleSearchLeads = async (email: string) => {
+    const result = await dispatch(searchLeadByEmailThunk(email));
+    return (result.payload as any[]) || [];
+  };
+
   // Find the current activity details
   const currentActivity = activities.find(
     (activity) => activity.id === parseInt(idActivite || "0", 10)
@@ -145,6 +185,21 @@ export default function SalonActivityDetails() {
       </Section>
     );
   }
+
+  // Filtrer les participants selon le terme de recherche
+  const filteredParticipants = activiteConfs.filter((conf) => {
+    if (!searchTerm) return true;
+    const fullName = `${conf.firstName} ${conf.lastName}`.toLowerCase();
+    const email = conf.mail.toLowerCase();
+    const phone = conf.phoneNumber.toLowerCase();
+    const searchLower = searchTerm.toLowerCase();
+
+    return (
+      fullName.includes(searchLower) ||
+      email.includes(searchLower) ||
+      phone.includes(searchLower)
+    );
+  });
 
   // Calculer les statistiques
   const totalParticipants = activiteConfs.length;
@@ -169,17 +224,27 @@ export default function SalonActivityDetails() {
             Retour aux activités
           </Button>
 
-          {currentActivity && (
-            <div className="text-right">
-              <h2 className="text-lg font-semibold">
-                {activityName || currentActivity.name}
-              </h2>
-              <p className="text-sm text-gray-600">
-                {new Date(currentActivity.date).toLocaleDateString("fr-FR")} -{" "}
-                {currentActivity.category}
-              </p>
-            </div>
-          )}
+          <div className="flex items-center gap-4">
+            <Button
+              onClick={() => setIsDrawerOpen(true)}
+              className="flex items-center gap-2"
+            >
+              <Plus className="h-4 w-4" />
+              Ajouter un participant
+            </Button>
+
+            {currentActivity && (
+              <div className="text-right">
+                <h2 className="text-lg font-semibold">
+                  {activityName || currentActivity.name}
+                </h2>
+                <p className="text-sm text-gray-600">
+                  {new Date(currentActivity.date).toLocaleDateString("fr-FR")} -{" "}
+                  {currentActivity.category}
+                </p>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Statistics */}
@@ -210,19 +275,43 @@ export default function SalonActivityDetails() {
 
         {/* Participants Table */}
         <div>
-          <h3 className="text-lg font-medium mb-3">Liste des participants</h3>
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-lg font-medium">Liste des participants</h3>
+            <div className="flex items-center gap-2">
+              <Input
+                placeholder="Rechercher par nom, email ou téléphone..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-80"
+              />
+            </div>
+          </div>
           <p className="text-sm text-gray-600 mb-4">
             Cliquez sur une ligne pour marquer/démarquer la présence d'un
             participant.
+            {searchTerm && (
+              <span className="ml-2 text-blue-600">
+                {filteredParticipants.length} résultat(s) trouvé(s)
+              </span>
+            )}
           </p>
           <DataTable
             columns={activiteConfColumns}
-            data={activiteConfs}
+            data={filteredParticipants}
             isLoading={isLoading}
             onRowClick={handleRowClick}
           />
         </div>
       </div>
+
+      {/* Add Participant Drawer */}
+      <AddParticipantDrawer
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+        onAddParticipant={handleAddParticipant}
+        onSearchLeads={handleSearchLeads}
+        isSearching={isSearchingLeads || isCreating}
+      />
     </Section>
   );
 }
