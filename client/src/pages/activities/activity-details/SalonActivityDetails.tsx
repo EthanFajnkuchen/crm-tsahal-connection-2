@@ -125,15 +125,26 @@ export default function SalonActivityDetails() {
     }
   }, [dispatch, idActivite, activities.length]);
 
-  const handleRowClick = (data: ActiviteConf) => {
+  const handleRowClick = async (data: ActiviteConf) => {
     // Gérer les clics pour les activités Salon/Conférence
     const updatedStatus = !data.hasArrived;
-    dispatch(
-      updateActiviteConfThunk({
-        id: data.id,
-        updates: { hasArrived: updatedStatus },
-      })
-    );
+    try {
+      await dispatch(
+        updateActiviteConfThunk({
+          id: data.id,
+          updates: { hasArrived: updatedStatus },
+        })
+      ).unwrap();
+      // Recharger les données après modification
+      if (idActivite) {
+        const activityId = parseInt(idActivite, 10);
+        if (!isNaN(activityId)) {
+          dispatch(getActiviteConfByActivityTypeThunk(activityId));
+        }
+      }
+    } catch (error) {
+      console.error("Failed to update participant status:", error);
+    }
   };
 
   const handleGoBack = () => {
@@ -153,17 +164,23 @@ export default function SalonActivityDetails() {
     const activityId = parseInt(idActivite, 10);
     if (isNaN(activityId)) return;
 
-    dispatch(
-      createActiviteConfThunk({
-        activiteType: activityId,
-        firstName: participant.firstName,
-        lastName: participant.lastName,
-        mail: participant.mail,
-        phoneNumber: participant.phoneNumber,
-        isFuturSoldier: participant.isFuturSoldier,
-        lead_id: participant.lead_id,
-      })
-    );
+    try {
+      await dispatch(
+        createActiviteConfThunk({
+          activiteType: activityId,
+          firstName: participant.firstName,
+          lastName: participant.lastName,
+          mail: participant.mail,
+          phoneNumber: participant.phoneNumber,
+          isFuturSoldier: participant.isFuturSoldier,
+          lead_id: participant.lead_id,
+        })
+      ).unwrap();
+      // Recharger les données après ajout
+      dispatch(getActiviteConfByActivityTypeThunk(activityId));
+    } catch (error) {
+      console.error("Failed to add participant:", error);
+    }
   };
 
   const handleSearchLeads = async (email: string) => {

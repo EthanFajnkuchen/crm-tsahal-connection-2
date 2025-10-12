@@ -206,7 +206,7 @@ export function ActivityTable() {
           );
         }
         // Sinon, utiliser les actions normales
-        return <ActivityActions activity={activity} />;
+        return <ActivityActions activity={activity} onSuccess={refreshData} />;
       },
     },
   ];

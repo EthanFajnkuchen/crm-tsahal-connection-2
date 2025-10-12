@@ -25,9 +25,10 @@ import { RoleType } from "@/types/role-types";
 
 interface ActivityActionsProps {
   activity: Activity;
+  onSuccess?: () => void;
 }
 
-export function ActivityActions({ activity }: ActivityActionsProps) {
+export function ActivityActions({ activity, onSuccess }: ActivityActionsProps) {
   const dispatch = useDispatch<AppDispatch>();
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
@@ -58,6 +59,7 @@ export function ActivityActions({ activity }: ActivityActionsProps) {
           })
         ).unwrap();
         setIsEditOpen(false);
+        onSuccess?.();
       } catch (error) {
         console.error("Failed to update activity:", error);
       }
@@ -68,6 +70,7 @@ export function ActivityActions({ activity }: ActivityActionsProps) {
     try {
       await dispatch(deleteActivityThunk(activity.id)).unwrap();
       setIsDeleteOpen(false);
+      onSuccess?.();
     } catch (error) {
       console.error("Failed to delete activity:", error);
     }
