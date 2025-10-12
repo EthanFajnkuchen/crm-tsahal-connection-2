@@ -1,37 +1,35 @@
 import { API_ROUTES } from "@/constants/api-routes";
 
-export interface ActivityData {
-  name: string;
+export interface ActiviteMassaData {
+  id_activite_type: number;
+  programName: string;
+  programYear: string;
   date: string;
-  category: string;
 }
 
-export interface Activity {
+export interface ActiviteMassa {
   id: number;
-  name: string;
+  id_activite_type: number;
+  programName: string;
+  programYear: string;
   date: string;
-  category: string;
 }
 
-export interface CreateActivityResponse {
+export interface CreateActiviteMassaResponse {
   id: number;
-  name: string;
-  date: string;
-  category: string;
-}
-
-export interface UpdateActivityData {
-  name: string;
+  id_activite_type: number;
+  programName: string;
+  programYear: string;
   date: string;
 }
 
 const M2M_TOKEN = import.meta.env.VITE_API_M2M_TOKEN;
 
-export const createActivityAdapter = async (
-  data: ActivityData
-): Promise<CreateActivityResponse> => {
+export const createActiviteMassaAdapter = async (
+  data: ActiviteMassaData
+): Promise<CreateActiviteMassaResponse> => {
   try {
-    const response = await fetch(API_ROUTES.ACTIVITIES, {
+    const response = await fetch(API_ROUTES.ACTIVITE_MASSA, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -50,18 +48,26 @@ export const createActivityAdapter = async (
     const result = await response.json();
     return result;
   } catch (error) {
-    console.error("Activity creation failed:", error);
+    console.error("ActiviteMassa creation failed:", error);
     throw error;
   }
 };
 
-export const getActivitiesAdapter = async (
-  category?: string
-): Promise<Activity[]> => {
+export const getActiviteMassaAdapter = async (
+  id_activite_type?: number,
+  programYear?: string,
+  date?: string
+): Promise<ActiviteMassa[]> => {
   try {
-    const url = new URL(API_ROUTES.ACTIVITIES);
-    if (category) {
-      url.searchParams.set("category", category);
+    const url = new URL(API_ROUTES.ACTIVITE_MASSA);
+    if (id_activite_type) {
+      url.searchParams.set("id_activite_type", id_activite_type.toString());
+    }
+    if (programYear) {
+      url.searchParams.set("programYear", programYear);
+    }
+    if (date) {
+      url.searchParams.set("date", date);
     }
 
     const response = await fetch(url.toString(), {
@@ -80,20 +86,19 @@ export const getActivitiesAdapter = async (
     }
 
     const result = await response.json();
-    console.log("Activities fetch successful:", result);
     return result;
   } catch (error) {
-    console.error("Activities fetch failed:", error);
+    console.error("ActiviteMassa fetch failed:", error);
     throw error;
   }
 };
 
-export const updateActivityAdapter = async (
+export const updateActiviteMassaAdapter = async (
   id: number,
-  data: UpdateActivityData
-): Promise<Activity> => {
+  data: { date: string }
+): Promise<ActiviteMassa> => {
   try {
-    const response = await fetch(`${API_ROUTES.ACTIVITIES}/${id}`, {
+    const response = await fetch(`${API_ROUTES.ACTIVITE_MASSA}/${id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -110,17 +115,16 @@ export const updateActivityAdapter = async (
     }
 
     const result = await response.json();
-    console.log("Activity update successful:", result);
     return result;
   } catch (error) {
-    console.error("Activity update failed:", error);
+    console.error("ActiviteMassa update failed:", error);
     throw error;
   }
 };
 
-export const deleteActivityAdapter = async (id: number): Promise<void> => {
+export const deleteActiviteMassaAdapter = async (id: number): Promise<void> => {
   try {
-    const response = await fetch(`${API_ROUTES.ACTIVITIES}/${id}`, {
+    const response = await fetch(`${API_ROUTES.ACTIVITE_MASSA}/${id}`, {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",
@@ -134,10 +138,8 @@ export const deleteActivityAdapter = async (id: number): Promise<void> => {
         errorData.message || `HTTP error! status: ${response.status}`
       );
     }
-
-    console.log("Activity deletion successful");
   } catch (error) {
-    console.error("Activity deletion failed:", error);
+    console.error("ActiviteMassa deletion failed:", error);
     throw error;
   }
 };

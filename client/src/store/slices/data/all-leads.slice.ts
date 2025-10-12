@@ -1,6 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { fetchAllLeadsThunk } from "../../thunks/data/all-leads.thunk";
-import { Lead } from "../../adapters/data/all-leads.adapter";
+import { Lead } from "@/types/lead";
 
 interface LeadsState {
   data: Lead[] | null;

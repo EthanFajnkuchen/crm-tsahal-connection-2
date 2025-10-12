@@ -1,5 +1,6 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { fetchAllLeads, Lead } from "../../adapters/data/all-leads.adapter";
+import { fetchAllLeads } from "../../adapters/data/all-leads.adapter";
+import { Lead } from "@/types/lead";
 
 export const fetchAllLeadsThunk = createAsyncThunk<Lead[]>(
   "leads/fetchAllLeads",

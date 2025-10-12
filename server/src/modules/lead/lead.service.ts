@@ -187,8 +187,8 @@ export class LeadService {
 
     if (included) {
       Object.keys(included).forEach((field) => {
-        query = query.andWhere(`lead.${field} IN (:...values)`, {
-          values: included[field],
+        query = query.andWhere(`lead.${field} IN (:...${field}Values)`, {
+          [`${field}Values`]: included[field],
         });
       });
     }

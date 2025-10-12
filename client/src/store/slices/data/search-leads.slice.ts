@@ -1,9 +1,11 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { searchLeadsThunk } from "../../thunks/data/search-leads.thunk";
+import { searchLeadByEmailThunk } from "../../thunks/lead/search-lead-by-email.thunk";
 import { Lead } from "@/types/lead";
+import { ApiLead } from "@/store/adapters/lead/search-lead-by-email.adapter";
 
 interface SearchLeadsState {
-  data: Lead[] | null;
+  data: Lead[] | ApiLead[] | null;
   status: "idle" | "loading" | "succeeded" | "failed";
   isLoading: boolean;
   error: string | null;
@@ -35,6 +37,20 @@ const searchLeadsSlice = createSlice({
         state.isLoading = false;
         state.status = "failed";
         state.error = action.error.message ?? "Failed to search leads";
+      })
+      .addCase(searchLeadByEmailThunk.pending, (state) => {
+        state.isLoading = true;
+        state.status = "loading";
+      })
+      .addCase(searchLeadByEmailThunk.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.status = "succeeded";
+        state.data = action.payload;
+      })
+      .addCase(searchLeadByEmailThunk.rejected, (state, action) => {
+        state.isLoading = false;
+        state.status = "failed";
+        state.error = action.error.message ?? "Failed to search leads by email";
       });
   },
 });

@@ -22,4 +22,6 @@ export const API_ROUTES = {
   BULK_GIYUS: `${BACKEND_BASE_URL}/api/leads/bulk-giyus`,
   ACTIVITIES: `${BACKEND_BASE_URL}/api/activities`,
   ACTIVITE_CONF: `${BACKEND_BASE_URL}/api/activite-conf`,
+  ACTIVITE_MASSA: `${BACKEND_BASE_URL}/api/activite-massa`,
+  ACTIVITE_MASSA_PARTICIPATION: `${BACKEND_BASE_URL}/api/activite-massa-participation`,
 };
