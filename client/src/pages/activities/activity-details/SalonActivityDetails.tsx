@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { ArrowLeft, CheckCircle, XCircle, Plus, Search } from "lucide-react";
+import { ArrowLeft, CheckCircle, XCircle, Plus } from "lucide-react";
 
 import { DataTable } from "@/components/app-components/table/table";
 import Section from "@/components/app-components/section/section";
