@@ -57,7 +57,7 @@ export function ActivityMassaActions({
   // Vérifier si l'utilisateur peut modifier cette activité
   const canModifyActivity =
     roleType.includes(RoleType.ADMINISTRATEUR) ||
-    roleType.includes(RoleType.CONSULTANT);
+    roleType.includes(RoleType.VOLONTAIRE);
 
   // Vérifier si l'utilisateur peut supprimer cette activité (administrateur uniquement)
   const canDeleteActivity = roleType.includes(RoleType.ADMINISTRATEUR);
