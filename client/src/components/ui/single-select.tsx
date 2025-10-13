@@ -33,6 +33,7 @@ interface SingleSelectProps {
   className?: string;
   disabled?: boolean;
   isLoading?: boolean;
+  displayLabel?: boolean;
 }
 
 export function SingleSelect({
@@ -45,6 +46,7 @@ export function SingleSelect({
   className,
   disabled = false,
   isLoading = false,
+  displayLabel = false,
 }: SingleSelectProps) {
   const [open, setOpen] = React.useState(false);
   const [selectedValue, setSelectedValue] = React.useState<string | undefined>(
@@ -76,9 +78,15 @@ export function SingleSelect({
           className={cn("w-full justify-between", className)}
           disabled={disabled}
         >
-          {selectedValue
-            ? options.find((option) => option.value === selectedValue)?.value
-            : placeholder}
+          <span className="truncate">
+            {selectedValue
+              ? displayLabel
+                ? options.find((option) => option.value === selectedValue)
+                    ?.label
+                : options.find((option) => option.value === selectedValue)
+                    ?.value
+              : placeholder}
+          </span>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
@@ -102,7 +110,7 @@ export function SingleSelect({
                         : "opacity-0"
                     )}
                   />
-                  {option.value}
+                  {displayLabel ? option.label : option.value}
                 </CommandItem>
               ))}
             </CommandGroup>

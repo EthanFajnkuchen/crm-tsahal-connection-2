@@ -20,6 +20,7 @@ interface FormInputProps<T extends FieldValues>
   className?: string;
   isLoading?: boolean;
   readOnly?: boolean;
+  required?: boolean;
   // Admin change request functionality
   changeRequests?: ChangeRequest[];
   onApproveChangeRequest?: (changeRequestId: number) => void;
@@ -43,6 +44,7 @@ const FormInput = <T extends FieldValues>({
   hidden = false,
   isLoading = false,
   readOnly = false,
+  required = false,
   // Admin change request props
   changeRequests = [],
   onApproveChangeRequest,
@@ -77,6 +79,7 @@ const FormInput = <T extends FieldValues>({
         )}
       >
         <span>{label}</span>
+        {required && <span className="text-red-500">*</span>}
         {isAdmin &&
           changeRequests.length > 0 &&
           onApproveChangeRequest &&

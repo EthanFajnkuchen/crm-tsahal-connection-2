@@ -22,6 +22,7 @@ import Activities from "./pages/activities/Activities";
 import ActivityDetails from "./pages/activities/activity-details/ActivityDetails";
 import SalonActivityDetails from "./pages/activities/activity-details/SalonActivityDetails";
 import MassaActivityDetails from "./pages/activities/activity-details/MassaActivityDetails";
+import { LeadFormPage } from "./pages/lead-form/LeadFormPage";
 const ProtectedAppLayout = withAuthenticationRequired(AppLayout, {
   onRedirecting: () => (
     <div className="flex items-center justify-center h-screen bg-white">
@@ -40,6 +41,7 @@ function App() {
       <AuthTokenRouteGuard />
       <Routes>
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="candidature" element={<LeadFormPage />} />
         <Route path="*" element={<ProtectedAppLayout />}>
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="data" element={<Data />} />

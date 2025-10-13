@@ -20,6 +20,7 @@ interface FormDropdownProps<T extends FieldValues> {
   required?: boolean;
   isLoading?: boolean;
   disabled?: boolean;
+  passDisplayName?: boolean;
   // Admin change request functionality
   changeRequests?: ChangeRequest[];
   onApproveChangeRequest?: (changeRequestId: number) => void;
@@ -45,6 +46,7 @@ const FormDropdown = <T extends FieldValues>({
   required = false,
   isLoading = false,
   disabled = false,
+  passDisplayName = false,
   // Admin change request props
   changeRequests = [],
   onApproveChangeRequest,
@@ -113,6 +115,7 @@ const FormDropdown = <T extends FieldValues>({
                 disabled={
                   disabled || (fieldChangeRequests.length > 0 && isAdmin)
                 }
+                displayLabel={passDisplayName}
               />
             )}
           />
@@ -123,7 +126,10 @@ const FormDropdown = <T extends FieldValues>({
           name={name}
           render={({ field }) => (
             <p className="text-sm font-medium font-[Poppins]">
-              {options.find((opt) => opt.value === field.value)?.value || "-"}
+              {passDisplayName
+                ? options.find((opt) => opt.value === field.value)?.label || "-"
+                : options.find((opt) => opt.value === field.value)?.value ||
+                  "-"}
             </p>
           )}
         />
