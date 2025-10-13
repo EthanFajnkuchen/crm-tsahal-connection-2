@@ -259,13 +259,11 @@ export const JudaismNationalityStep: React.FC<JudaismNationalityStepProps> = ({
         <Controller
           control={control}
           name="passportNumber1"
-          rules={{ required: "Le numéro de passeport est requis" }}
           render={({ field, fieldState }) => (
             <FormInput
               control={control}
               name="passportNumber1"
               label="Numéro de passeport - Nationalité 1 :"
-              required
               error={fieldState.error?.message}
             />
           )}
@@ -297,13 +295,11 @@ export const JudaismNationalityStep: React.FC<JudaismNationalityStepProps> = ({
             <Controller
               control={control}
               name="passportNumber2"
-              rules={{ required: "Le numéro de passeport est requis" }}
               render={({ field, fieldState }) => (
                 <FormInput
                   control={control}
                   name="passportNumber2"
                   label="Numéro de passeport - Nationalité 2 :"
-                  required
                   error={fieldState.error?.message}
                 />
               )}
@@ -337,13 +333,11 @@ export const JudaismNationalityStep: React.FC<JudaismNationalityStepProps> = ({
             <Controller
               control={control}
               name="passportNumber3"
-              rules={{ required: "Le numéro de passeport est requis" }}
               render={({ field, fieldState }) => (
                 <FormInput
                   control={control}
                   name="passportNumber3"
                   label="Numéro de passeport - Nationalité 3 :"
-                  required
                   error={fieldState.error?.message}
                 />
               )}

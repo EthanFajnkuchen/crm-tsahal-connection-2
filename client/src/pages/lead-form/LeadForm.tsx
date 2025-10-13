@@ -155,11 +155,8 @@ export const LeadForm: React.FC = () => {
         "israeliIDNumber",
         "numberOfNationalities",
         "nationality1",
-        "passportNumber1",
         "nationality2",
-        "passportNumber2",
         "nationality3",
-        "passportNumber3",
       ], // Judaism & Nationality
       2: [], // Education - to be implemented
       3: [], // Integration Israel - to be implemented
