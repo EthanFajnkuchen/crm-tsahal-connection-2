@@ -48,7 +48,7 @@ const internal_status = [
     displayName: "Un soldat - Michve Alon",
   },
   {
-    value: "Un soldat - libéré",
+    value: "Un soldat libéré",
     displayName: "Un soldat - libéré",
   },
   {
