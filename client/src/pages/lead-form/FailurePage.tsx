@@ -48,32 +48,6 @@ const FailurePage: React.FC = () => {
               <li>• Contactez le support si le problème persiste</li>
             </ul>
           </div>
-
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button onClick={handleRetry} className="w-full sm:w-auto">
-              <RefreshCw className="mr-2 h-4 w-4" />
-              Réessayer
-            </Button>
-            <Button
-              onClick={handleGoHome}
-              variant="outline"
-              className="w-full sm:w-auto"
-            >
-              Retour à l'accueil
-            </Button>
-          </div>
-
-          <div className="text-sm text-gray-500">
-            <p>
-              Si le problème persiste, contactez-nous à :{" "}
-              <a
-                href="mailto:support@tsahalco.com"
-                className="text-blue-600 hover:text-blue-800 underline"
-              >
-                support@tsahalco.com
-              </a>
-            </p>
-          </div>
         </CardContent>
       </Card>
     </div>

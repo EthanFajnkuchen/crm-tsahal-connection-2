@@ -365,10 +365,10 @@ export const LeadForm: React.FC = () => {
       <div className="max-w-4xl mx-auto px-4">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Formulaire de candidature
+            Formulaire de contact
           </h1>
           <p className="text-gray-600">
-            Remplissez ce formulaire pour votre candidature
+            Remplissez ce formulaire pour nous contacter
           </p>
         </div>
 

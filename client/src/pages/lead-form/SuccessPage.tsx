@@ -39,19 +39,6 @@ const SuccessPage: React.FC = () => {
               <li>• Planification des prochaines étapes</li>
             </ul>
           </div>
-
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button
-              onClick={() => navigate("/candidature")}
-              variant="outline"
-              className="w-full sm:w-auto"
-            >
-              Nouvelle candidature
-            </Button>
-            <Button onClick={() => navigate("/")} className="w-full sm:w-auto">
-              Retour à l'accueil
-            </Button>
-          </div>
         </CardContent>
       </Card>
     </div>

@@ -19,11 +19,15 @@ import {
 } from './lead.dto';
 import { PassThrough } from 'stream';
 import { Workbook } from 'exceljs';
+import { DiscussionService } from '../discussion/discussion.service';
+import { MailService } from '../mail/mail.service';
 @Injectable()
 export class LeadService {
   constructor(
     @InjectRepository(Lead)
     private readonly leadRepository: Repository<Lead>,
+    private readonly discussionService: DiscussionService,
+    private readonly mailService: MailService,
   ) {}
 
   async createLead(createLeadDto: CreateLeadDto): Promise<{
@@ -171,11 +175,61 @@ export class LeadService {
       });
 
       const savedLead = await this.leadRepository.save(lead);
+      const leadId = Array.isArray(savedLead) ? savedLead[0].ID : savedLead.ID;
+
+      // Créer une discussion avec le summary si il existe
+      if (createLeadDto.summary && createLeadDto.summary.trim()) {
+        try {
+          await this.discussionService.create({
+            id_lead: leadId,
+            date_discussion: new Date().toISOString().split('T')[0],
+            contenu: createLeadDto.summary,
+            created_by: 'Raphael Madar',
+          });
+        } catch (discussionError) {
+          // Log l'erreur mais ne pas faire échouer la création du lead
+          console.error(
+            'Erreur lors de la création de la discussion:',
+            discussionError,
+          );
+        }
+      }
+
+      // Envoyer l'email de confirmation au candidat
+      const candidateName = `${createLeadDto.firstName} ${createLeadDto.lastName}`;
+      try {
+        await this.mailService.sendLeadConfirmationEmail(
+          createLeadDto.email,
+          candidateName,
+          leadId,
+        );
+      } catch (emailError) {
+        // Log l'erreur mais ne pas faire échouer la création du lead
+        console.error(
+          "Erreur lors de l'envoi de l'email de confirmation:",
+          emailError,
+        );
+      }
+
+      // Envoyer l'email de notification à l'admin
+      try {
+        await this.mailService.sendNewLeadNotificationEmail(
+          candidateName,
+          createLeadDto.email,
+          leadId,
+        );
+      } catch (emailError) {
+        // Log l'erreur mais ne pas faire échouer la création du lead
+        console.error(
+          "Erreur lors de l'envoi de l'email de notification admin:",
+          emailError,
+        );
+      }
 
       return {
         success: true,
         message: 'Candidature créée avec succès',
-        leadId: Array.isArray(savedLead) ? savedLead[0].ID : savedLead.ID,
+        leadId: leadId,
       };
     } catch (error) {
       if (error instanceof BadRequestException) {
