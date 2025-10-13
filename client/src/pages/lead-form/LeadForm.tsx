@@ -6,6 +6,7 @@ import { Progress } from "@/components/ui/progress";
 import { GeneralStep } from "./components/general-step";
 import { JudaismNationalityStep } from "./components/judaism-nationality-step";
 import { EducationStep } from "./components/education-step";
+import { IntegrationIsraelStep } from "./components/integration-israel-step";
 
 export interface LeadFormData {
   // General section
@@ -65,7 +66,12 @@ export interface LeadFormData {
   diplomaNameFrench: string;
 
   // Integration Israel section
-  // (to be added in future steps)
+  arrivalAge: string;
+  programParticipation: string;
+  programName: string;
+  schoolYears: string;
+  armyDeferralProgram: string;
+  programNameHebrewArmyDeferral: string;
 
   // Tsahal section
   // (to be added in future steps)
@@ -142,6 +148,13 @@ export const LeadForm: React.FC = () => {
       diplomaNameHebrew: "",
       universityNameFrench: "",
       diplomaNameFrench: "",
+      // Integration Israel
+      arrivalAge: "",
+      programParticipation: "",
+      programName: "",
+      schoolYears: "",
+      armyDeferralProgram: "",
+      programNameHebrewArmyDeferral: "",
     },
     mode: "onChange",
   });
@@ -203,7 +216,14 @@ export const LeadForm: React.FC = () => {
         "universityNameFrench",
         "diplomaNameFrench",
       ], // Education
-      3: [], // Integration Israel - to be implemented
+      3: [
+        "arrivalAge",
+        "programParticipation",
+        "programName",
+        "schoolYears",
+        "armyDeferralProgram",
+        "programNameHebrewArmyDeferral",
+      ], // Integration Israel
       4: [], // Tsahal - to be implemented
     };
 
@@ -235,16 +255,7 @@ export const LeadForm: React.FC = () => {
       case 2:
         return <EducationStep form={form} />;
       case 3:
-        return (
-          <div className="space-y-6">
-            <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">
-              Intégration Israël
-            </h3>
-            <p className="text-gray-600">
-              Cette section sera implémentée prochainement.
-            </p>
-          </div>
-        );
+        return <IntegrationIsraelStep form={form} />;
       case 4:
         return (
           <div className="space-y-6">
