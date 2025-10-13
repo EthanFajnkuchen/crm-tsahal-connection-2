@@ -11,17 +11,18 @@ const SuccessPage: React.FC = () => {
             <CheckCircle className="h-16 w-16 text-green-500" />
           </div>
           <CardTitle className="text-3xl font-bold text-green-600">
-            Candidature soumise avec succès !
+            Formulaire de contact reçu avec succès !
           </CardTitle>
         </CardHeader>
         <CardContent className="text-center space-y-6">
           <div className="space-y-2">
             <p className="text-lg text-gray-700">
-              Merci pour votre candidature. Nous avons bien reçu votre dossier.
+              Merci pour votre formulaire de contact. Nous avons bien reçu votre
+              demande.
             </p>
             <p className="text-gray-600">
-              Notre équipe va examiner votre candidature et vous contactera dans
-              les plus brefs délais.
+              Vous allez recevoir un email de confirmation et notre équipe vous
+              recontactera dans les plus brefs délais.
             </p>
           </div>
 
@@ -30,7 +31,7 @@ const SuccessPage: React.FC = () => {
               <strong>Prochaines étapes :</strong>
             </p>
             <ul className="text-sm text-green-700 mt-2 space-y-1 text-left">
-              <li>• Vérification de votre dossier</li>
+              <li>• Réception d'un email de confirmation</li>
               <li>• Contact par notre équipe</li>
               <li>• Planification des prochaines étapes</li>
             </ul>
