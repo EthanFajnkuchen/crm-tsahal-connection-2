@@ -1,12 +1,19 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { Loader2 } from "lucide-react";
+import { submitLeadForm } from "@/store/thunks/lead-form-thunk";
+import { resetFormState } from "@/store/slices/lead-form-slice";
+import { RootState } from "@/store/store";
 import { GeneralStep } from "./components/general-step";
 import { JudaismNationalityStep } from "./components/judaism-nationality-step";
 import { EducationStep } from "./components/education-step";
 import { IntegrationIsraelStep } from "./components/integration-israel-step";
+import { TsahalStep } from "./components/tsahal-step";
 
 export interface LeadFormData {
   // General section
@@ -74,7 +81,27 @@ export interface LeadFormData {
   programNameHebrewArmyDeferral: string;
 
   // Tsahal section
-  // (to be added in future steps)
+  currentStatus: string;
+  soldierAloneStatus: string;
+  serviceType: string;
+  mahalPath: string;
+  studyPath: string;
+  tsavRishonStatus: string;
+  recruitmentCenter: string;
+  tsavRishonDate: string;
+  tsavRishonGradesReceived: string;
+  daparNote: string;
+  medicalProfile: string;
+  hebrewScore: string;
+  yomHameaStatus: string;
+  yomHameaDate: string;
+  yomSayerotStatus: string;
+  yomSayerotDate: string;
+  armyEntryDateStatus: string;
+  giyusDate: string;
+  michveAlonTraining: string;
+  summary: string;
+  acceptTerms: boolean;
 }
 
 const steps = [
@@ -95,6 +122,12 @@ const steps = [
 
 export const LeadForm: React.FC = () => {
   const [currentStep, setCurrentStep] = useState(0);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const { isSubmitting, submitError, submitSuccess } = useSelector(
+    (state: RootState) => state.leadForm
+  );
 
   const form = useForm<LeadFormData>({
     defaultValues: {
@@ -155,6 +188,28 @@ export const LeadForm: React.FC = () => {
       schoolYears: "",
       armyDeferralProgram: "",
       programNameHebrewArmyDeferral: "",
+      // Tsahal
+      currentStatus: "",
+      soldierAloneStatus: "",
+      serviceType: "",
+      mahalPath: "",
+      studyPath: "",
+      tsavRishonStatus: "",
+      recruitmentCenter: "",
+      tsavRishonDate: "",
+      tsavRishonGradesReceived: "",
+      daparNote: "",
+      medicalProfile: "",
+      hebrewScore: "",
+      yomHameaStatus: "",
+      yomHameaDate: "",
+      yomSayerotStatus: "",
+      yomSayerotDate: "",
+      armyEntryDateStatus: "",
+      giyusDate: "",
+      michveAlonTraining: "",
+      summary: "",
+      acceptTerms: false,
     },
     mode: "onChange",
   });
@@ -164,6 +219,20 @@ export const LeadForm: React.FC = () => {
     trigger,
     formState: { isValid },
   } = form;
+
+  // Redirection basée sur le statut de soumission
+  useEffect(() => {
+    if (submitSuccess) {
+      navigate("/candidature/success");
+    } else if (submitError) {
+      navigate("/candidature/failure");
+    }
+  }, [submitSuccess, submitError, navigate]);
+
+  // Reset du state au montage du composant
+  useEffect(() => {
+    dispatch(resetFormState());
+  }, [dispatch]);
 
   const nextStep = async () => {
     // Define fields to validate for each step
@@ -224,7 +293,30 @@ export const LeadForm: React.FC = () => {
         "armyDeferralProgram",
         "programNameHebrewArmyDeferral",
       ], // Integration Israel
-      4: [], // Tsahal - to be implemented
+      4: [
+        // Tsahal
+        "currentStatus",
+        "soldierAloneStatus",
+        "serviceType",
+        "mahalPath",
+        "studyPath",
+        "tsavRishonStatus",
+        "recruitmentCenter",
+        "tsavRishonDate",
+        "tsavRishonGradesReceived",
+        "daparNote",
+        "medicalProfile",
+        "hebrewScore",
+        "yomHameaStatus",
+        "yomHameaDate",
+        "yomSayerotStatus",
+        "yomSayerotDate",
+        "armyEntryDateStatus",
+        "giyusDate",
+        "michveAlonTraining",
+        "summary",
+        "acceptTerms",
+      ],
     };
 
     const fieldsToValidate = stepFields[currentStep];
@@ -241,9 +333,12 @@ export const LeadForm: React.FC = () => {
     }
   };
 
-  const onSubmit = (data: LeadFormData) => {
-    console.log("Form submitted:", data);
-    // TODO: Implement actual submission
+  const onSubmit = async (data: LeadFormData) => {
+    try {
+      await dispatch(submitLeadForm(data) as any).unwrap();
+    } catch (error) {
+      console.error("Erreur lors de la soumission:", error);
+    }
   };
 
   const renderStep = () => {
@@ -256,17 +351,8 @@ export const LeadForm: React.FC = () => {
         return <EducationStep form={form} />;
       case 3:
         return <IntegrationIsraelStep form={form} />;
-      case 4:
-        return (
-          <div className="space-y-6">
-            <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">
-              Tsahal
-            </h3>
-            <p className="text-gray-600">
-              Cette section sera implémentée prochainement.
-            </p>
-          </div>
-        );
+      case 4: // Tsahal
+        return <TsahalStep form={form} />;
       default:
         return null;
     }
@@ -359,8 +445,19 @@ export const LeadForm: React.FC = () => {
                     Suivant
                   </Button>
                 ) : (
-                  <Button type="submit" disabled={!isValid}>
-                    Soumettre
+                  <Button
+                    type="submit"
+                    disabled={!isValid || isSubmitting}
+                    className="ml-auto"
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Soumission en cours...
+                      </>
+                    ) : (
+                      "Soumettre"
+                    )}
                   </Button>
                 )}
               </div>

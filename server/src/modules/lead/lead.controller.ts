@@ -19,11 +19,22 @@ import {
   BulkTsavRishonGradesUpdateDto,
   BulkTsavRishonDateUpdateDto,
   BulkGiyusUpdateDto,
+  CreateLeadDto,
 } from './lead.dto';
 
 @Controller('api/leads')
 export class LeadController {
   constructor(private readonly leadService: LeadService) {}
+
+  @Post('form-submission')
+  @HttpCode(201)
+  async createLead(@Body() createLeadDto: CreateLeadDto): Promise<{
+    success: boolean;
+    message: string;
+    leadId?: number;
+  }> {
+    return this.leadService.createLead(createLeadDto);
+  }
 
   @Get()
   @Permissions('read:data')

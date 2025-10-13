@@ -15,6 +15,7 @@ import {
   BulkTsavRishonGradesUpdateDto,
   BulkTsavRishonDateUpdateDto,
   BulkGiyusUpdateDto,
+  CreateLeadDto,
 } from './lead.dto';
 import { PassThrough } from 'stream';
 import { Workbook } from 'exceljs';
@@ -24,6 +25,167 @@ export class LeadService {
     @InjectRepository(Lead)
     private readonly leadRepository: Repository<Lead>,
   ) {}
+
+  async createLead(createLeadDto: CreateLeadDto): Promise<{
+    success: boolean;
+    message: string;
+    leadId?: number;
+  }> {
+    try {
+      // Validation des confirmations
+      if (createLeadDto.email !== createLeadDto.confirmEmail) {
+        throw new BadRequestException('Les emails ne correspondent pas');
+      }
+
+      if (createLeadDto.phoneNumber !== createLeadDto.confirmPhoneNumber) {
+        throw new BadRequestException(
+          'Les numéros de téléphone ne correspondent pas',
+        );
+      }
+
+      if (
+        createLeadDto.contactUrgenceEmail !==
+        createLeadDto.confirmContactUrgenceEmail
+      ) {
+        throw new BadRequestException(
+          "Les emails de contact d'urgence ne correspondent pas",
+        );
+      }
+
+      if (
+        createLeadDto.contactUrgencePhoneNumber !==
+        createLeadDto.confirmContactUrgencePhoneNumber
+      ) {
+        throw new BadRequestException(
+          "Les numéros de téléphone de contact d'urgence ne correspondent pas",
+        );
+      }
+
+      if (!createLeadDto.acceptTerms) {
+        throw new BadRequestException(
+          'Vous devez accepter les termes et conditions',
+        );
+      }
+
+      // Création du lead
+      const lead = this.leadRepository.create({
+        // General section
+        firstName: createLeadDto.firstName,
+        lastName: createLeadDto.lastName,
+        birthDate: createLeadDto.birthDate,
+        gender: createLeadDto.gender,
+        email: createLeadDto.email,
+        phoneNumber: createLeadDto.phoneNumber,
+        whatsappNumber:
+          createLeadDto.whatsappNumber || createLeadDto.phoneNumber,
+        city: createLeadDto.city,
+        isOnlyChild: createLeadDto.isOnlyChild,
+
+        // Emergency contact
+        contactUrgenceFirstName: createLeadDto.contactUrgenceFirstName,
+        contactUrgenceLastName: createLeadDto.contactUrgenceLastName,
+        contactUrgencePhoneNumber: createLeadDto.contactUrgencePhoneNumber,
+        contactUrgenceMail: createLeadDto.contactUrgenceEmail,
+        contactUrgenceRelation: createLeadDto.contactUrgenceRelation,
+
+        // Judaism & Nationality section
+        StatutLoiRetour: createLeadDto.StatutLoiRetour,
+        conversionDate: createLeadDto.conversionDate,
+        conversionAgency: createLeadDto.conversionAgency,
+        statutResidentIsrael: createLeadDto.statutResidentIsrael,
+        anneeAlyah: createLeadDto.anneeAlyah,
+        hasIsraeliID: createLeadDto.hasIsraeliID,
+        israeliIDNumber: createLeadDto.israeliIDNumber,
+        numberOfNationalities: createLeadDto.numberOfNationalities,
+        nationality1: createLeadDto.nationality1,
+        passportNumber1: createLeadDto.passportNumber1,
+        nationality2: createLeadDto.nationality2,
+        passportNumber2: createLeadDto.passportNumber2,
+        nationality3: createLeadDto.nationality3,
+        passportNumber3: createLeadDto.passportNumber3,
+
+        // Education section
+        bacObtention: createLeadDto.bacObtention,
+        bacCountry: createLeadDto.bacCountry,
+        bacType: createLeadDto.bacType,
+        israeliBacSchool: createLeadDto.israeliBacSchool,
+        frenchBacSchoolIsrael: createLeadDto.frenchBacSchoolIsrael,
+        otherSchoolName: createLeadDto.otherSchoolName,
+        jewishSchool: createLeadDto.jewishSchool,
+        frenchBacSchoolFrance: createLeadDto.frenchBacSchoolFrance,
+        academicDiploma: createLeadDto.academicDiploma,
+        higherEducationCountry: createLeadDto.higherEducationCountry,
+        universityNameHebrew: createLeadDto.universityNameHebrew,
+        diplomaNameHebrew: createLeadDto.diplomaNameHebrew,
+        universityNameFrench: createLeadDto.universityNameFrench,
+        diplomaNameFrench: createLeadDto.diplomaNameFrench,
+
+        // Integration Israel section
+        arrivalAge: createLeadDto.arrivalAge,
+        programParticipation: createLeadDto.programParticipation,
+        programName: createLeadDto.programName,
+        schoolYears: createLeadDto.schoolYears,
+        armyDeferralProgram: createLeadDto.armyDeferralProgram,
+        programNameHebrewArmyDeferral:
+          createLeadDto.programNameHebrewArmyDeferral,
+
+        // Tsahal section
+        currentStatus: createLeadDto.currentStatus,
+        soldierAloneStatus: createLeadDto.soldierAloneStatus,
+        serviceType: createLeadDto.serviceType,
+        mahalPath: createLeadDto.mahalPath,
+        studyPath: createLeadDto.studyPath,
+        tsavRishonStatus: createLeadDto.tsavRishonStatus,
+        recruitmentCenter: createLeadDto.recruitmentCenter,
+        tsavRishonDate: createLeadDto.tsavRishonDate,
+        tsavRishonGradesReceived: createLeadDto.tsavRishonGradesReceived,
+        daparNote: createLeadDto.daparNote,
+        medicalProfile: createLeadDto.medicalProfile,
+        hebrewScore: createLeadDto.hebrewScore,
+        yomHameaStatus: createLeadDto.yomHameaStatus,
+        yomHameaDate: createLeadDto.yomHameaDate,
+        yomSayerotStatus: createLeadDto.yomSayerotStatus,
+        yomSayerotDate: createLeadDto.yomSayerotDate,
+        armyEntryDateStatus: createLeadDto.armyEntryDateStatus,
+        giyusDate: createLeadDto.giyusDate,
+        michveAlonTraining: createLeadDto.michveAlonTraining,
+
+        // Additional fields
+        summary: createLeadDto.summary,
+
+        // Set default values for required fields
+        dateInscription: new Date().toISOString().split('T')[0],
+        statutCandidat: 'À traiter',
+        mahzorGiyus: '',
+        typeGiyus: '',
+        pikoud: '',
+        dateFinService: '',
+        typePoste: '',
+        nomPoste: '',
+        expertConnection: 'Non',
+        produitEC1: '',
+        produitEC2: '',
+        produitEC3: '',
+        produitEC4: '',
+        produitEC5: '',
+      });
+
+      const savedLead = await this.leadRepository.save(lead);
+
+      return {
+        success: true,
+        message: 'Candidature créée avec succès',
+        leadId: Array.isArray(savedLead) ? savedLead[0].ID : savedLead.ID,
+      };
+    } catch (error) {
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        'Erreur lors de la création de la candidature',
+      );
+    }
+  }
 
   async getLeads(limit?: number): Promise<Partial<Lead>[]> {
     const queryBuilder = this.leadRepository
