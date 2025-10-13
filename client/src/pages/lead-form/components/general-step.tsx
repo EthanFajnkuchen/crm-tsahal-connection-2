@@ -39,7 +39,7 @@ export const GeneralStep: React.FC<GeneralStepProps> = ({ form }) => {
             control={control}
             name="firstName"
             rules={{ required: "Le prénom est requis" }}
-            render={({ field, fieldState }) => (
+            render={({ fieldState }) => (
               <FormInput
                 control={control}
                 name="firstName"
@@ -54,7 +54,7 @@ export const GeneralStep: React.FC<GeneralStepProps> = ({ form }) => {
             control={control}
             name="lastName"
             rules={{ required: "Le nom de famille est requis" }}
-            render={({ field, fieldState }) => (
+            render={({ fieldState }) => (
               <FormInput
                 control={control}
                 name="lastName"
@@ -70,7 +70,7 @@ export const GeneralStep: React.FC<GeneralStepProps> = ({ form }) => {
           control={control}
           name="birthDate"
           rules={{ required: "La date de naissance est requise" }}
-          render={({ field, fieldState }) => (
+          render={({ fieldState }) => (
             <FormDatePicker
               control={control as any}
               name="birthDate"
@@ -85,7 +85,7 @@ export const GeneralStep: React.FC<GeneralStepProps> = ({ form }) => {
           control={control}
           name="gender"
           rules={{ required: "Le genre est requis" }}
-          render={({ field, fieldState }) => (
+          render={({ fieldState }) => (
             <FormDropdown
               control={control}
               name="gender"
@@ -111,7 +111,7 @@ export const GeneralStep: React.FC<GeneralStepProps> = ({ form }) => {
                 message: "Format d'email invalide",
               },
             }}
-            render={({ field, fieldState }) => (
+            render={({ fieldState }) => (
               <FormInput
                 control={control}
                 name="email"
@@ -131,7 +131,7 @@ export const GeneralStep: React.FC<GeneralStepProps> = ({ form }) => {
               validate: (value) =>
                 value === watch("email") || "Les emails ne correspondent pas",
             }}
-            render={({ field, fieldState }) => (
+            render={({ fieldState }) => (
               <FormInput
                 control={control}
                 name="confirmEmail"
@@ -250,7 +250,7 @@ export const GeneralStep: React.FC<GeneralStepProps> = ({ form }) => {
           control={control}
           name="city"
           rules={{ required: "La ville de résidence est requise" }}
-          render={({ field, fieldState }) => (
+          render={({ fieldState }) => (
             <FormInput
               control={control}
               name="city"
@@ -265,7 +265,7 @@ export const GeneralStep: React.FC<GeneralStepProps> = ({ form }) => {
           control={control}
           name="isOnlyChild"
           rules={{ required: "Cette information est requise" }}
-          render={({ field, fieldState }) => (
+          render={({ fieldState }) => (
             <FormDropdown
               control={control}
               name="isOnlyChild"
@@ -292,7 +292,7 @@ export const GeneralStep: React.FC<GeneralStepProps> = ({ form }) => {
             control={control}
             name="contactUrgenceFirstName"
             rules={{ required: "Le prénom du contact d'urgence est requis" }}
-            render={({ field, fieldState }) => (
+            render={({ fieldState }) => (
               <FormInput
                 control={control}
                 name="contactUrgenceFirstName"
@@ -307,7 +307,7 @@ export const GeneralStep: React.FC<GeneralStepProps> = ({ form }) => {
             control={control}
             name="contactUrgenceLastName"
             rules={{ required: "Le nom du contact d'urgence est requis" }}
-            render={({ field, fieldState }) => (
+            render={({ fieldState }) => (
               <FormInput
                 control={control}
                 name="contactUrgenceLastName"
@@ -376,7 +376,7 @@ export const GeneralStep: React.FC<GeneralStepProps> = ({ form }) => {
                 message: "Format d'email invalide",
               },
             }}
-            render={({ field, fieldState }) => (
+            render={({ fieldState }) => (
               <FormInput
                 control={control}
                 name="contactUrgenceEmail"
@@ -397,7 +397,7 @@ export const GeneralStep: React.FC<GeneralStepProps> = ({ form }) => {
                 value === watch("contactUrgenceEmail") ||
                 "Les emails ne correspondent pas",
             }}
-            render={({ field, fieldState }) => (
+            render={({ fieldState }) => (
               <FormInput
                 control={control}
                 name="confirmContactUrgenceEmail"
@@ -414,7 +414,7 @@ export const GeneralStep: React.FC<GeneralStepProps> = ({ form }) => {
           control={control}
           name="contactUrgenceRelation"
           rules={{ required: "Le lien avec le contact d'urgence est requis" }}
-          render={({ field, fieldState }) => (
+          render={({ fieldState }) => (
             <FormDropdown
               control={control}
               name="contactUrgenceRelation"

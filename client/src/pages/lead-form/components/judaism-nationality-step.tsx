@@ -62,7 +62,7 @@ export const JudaismNationalityStep: React.FC<JudaismNationalityStepProps> = ({
             required:
               "Le statut vis-à-vis de la loi du retour en Israël est requis",
           }}
-          render={({ field, fieldState }) => (
+          render={({ fieldState }) => (
             <FormDropdown
               control={control}
               name="StatutLoiRetour"
@@ -87,7 +87,7 @@ export const JudaismNationalityStep: React.FC<JudaismNationalityStepProps> = ({
                 required:
                   "La date indiquée sur votre certificat de conversion est requise",
               }}
-              render={({ field, fieldState }) => (
+              render={({ fieldState }) => (
                 <FormDatePicker
                   control={control as any}
                   name="conversionDate"
@@ -105,7 +105,7 @@ export const JudaismNationalityStep: React.FC<JudaismNationalityStepProps> = ({
                 required:
                   "L'organisme en charge de votre conversion est requis",
               }}
-              render={({ field, fieldState }) => (
+              render={({ fieldState }) => (
                 <FormDropdown
                   control={control}
                   name="conversionAgency"
@@ -134,7 +134,7 @@ export const JudaismNationalityStep: React.FC<JudaismNationalityStepProps> = ({
           control={control}
           name="statutResidentIsrael"
           rules={{ required: "Le statut de résident en Israël est requis" }}
-          render={({ field, fieldState }) => (
+          render={({ fieldState }) => (
             <FormDropdown
               control={control}
               name="statutResidentIsrael"
@@ -157,7 +157,7 @@ export const JudaismNationalityStep: React.FC<JudaismNationalityStepProps> = ({
             control={control}
             name="anneeAlyah"
             rules={{ required: "L'année d'Alyah est requise" }}
-            render={({ field, fieldState }) => (
+            render={({ fieldState }) => (
               <FormInput
                 control={control}
                 name="anneeAlyah"
@@ -177,7 +177,7 @@ export const JudaismNationalityStep: React.FC<JudaismNationalityStepProps> = ({
               control={control}
               name="hasIsraeliID"
               rules={{ required: "L'ID Israélien est requis" }}
-              render={({ field, fieldState }) => (
+              render={({ fieldState }) => (
                 <FormDropdown
                   control={control}
                   name="hasIsraeliID"
@@ -200,7 +200,7 @@ export const JudaismNationalityStep: React.FC<JudaismNationalityStepProps> = ({
                 rules={{
                   required: "Le numéro d'identité israélienne est requis",
                 }}
-                render={({ field, fieldState }) => (
+                render={({ fieldState }) => (
                   <FormInput
                     control={control}
                     name="israeliIDNumber"
@@ -218,7 +218,7 @@ export const JudaismNationalityStep: React.FC<JudaismNationalityStepProps> = ({
           control={control}
           name="numberOfNationalities"
           rules={{ required: "Le nombre de nationalités est requis" }}
-          render={({ field, fieldState }) => (
+          render={({ fieldState }) => (
             <FormDropdown
               control={control}
               name="numberOfNationalities"
@@ -239,7 +239,7 @@ export const JudaismNationalityStep: React.FC<JudaismNationalityStepProps> = ({
           control={control}
           name="nationality1"
           rules={{ required: "La première nationalité est requise" }}
-          render={({ field, fieldState }) => (
+          render={({ fieldState }) => (
             <FormDropdown
               control={control}
               name="nationality1"
@@ -259,7 +259,7 @@ export const JudaismNationalityStep: React.FC<JudaismNationalityStepProps> = ({
         <Controller
           control={control}
           name="passportNumber1"
-          render={({ field, fieldState }) => (
+          render={({ fieldState }) => (
             <FormInput
               control={control}
               name="passportNumber1"
@@ -276,7 +276,7 @@ export const JudaismNationalityStep: React.FC<JudaismNationalityStepProps> = ({
               control={control}
               name="nationality2"
               rules={{ required: "La deuxième nationalité est requise" }}
-              render={({ field, fieldState }) => (
+              render={({ fieldState }) => (
                 <FormDropdown
                   control={control}
                   name="nationality2"
@@ -295,7 +295,7 @@ export const JudaismNationalityStep: React.FC<JudaismNationalityStepProps> = ({
             <Controller
               control={control}
               name="passportNumber2"
-              render={({ field, fieldState }) => (
+              render={({ fieldState }) => (
                 <FormInput
                   control={control}
                   name="passportNumber2"
@@ -314,7 +314,7 @@ export const JudaismNationalityStep: React.FC<JudaismNationalityStepProps> = ({
               control={control}
               name="nationality3"
               rules={{ required: "La troisième nationalité est requise" }}
-              render={({ field, fieldState }) => (
+              render={({ fieldState }) => (
                 <FormDropdown
                   control={control}
                   name="nationality3"
@@ -333,7 +333,7 @@ export const JudaismNationalityStep: React.FC<JudaismNationalityStepProps> = ({
             <Controller
               control={control}
               name="passportNumber3"
-              render={({ field, fieldState }) => (
+              render={({ fieldState }) => (
                 <FormInput
                   control={control}
                   name="passportNumber3"
