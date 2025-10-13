@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { GeneralStep } from "./components/general-step";
 import { JudaismNationalityStep } from "./components/judaism-nationality-step";
+import { EducationStep } from "./components/education-step";
 
 export interface LeadFormData {
   // General section
@@ -48,7 +49,20 @@ export interface LeadFormData {
   passportNumber3: string;
 
   // Education section
-  // (to be added in future steps)
+  bacObtention: string;
+  bacCountry: string;
+  bacType: string;
+  israeliBacSchool: string;
+  frenchBacSchoolIsrael: string;
+  otherSchoolName: string;
+  jewishSchool: string;
+  frenchBacSchoolFrance: string;
+  academicDiploma: string;
+  higherEducationCountry: string;
+  universityNameHebrew: string;
+  diplomaNameHebrew: string;
+  universityNameFrench: string;
+  diplomaNameFrench: string;
 
   // Integration Israel section
   // (to be added in future steps)
@@ -113,6 +127,21 @@ export const LeadForm: React.FC = () => {
       passportNumber2: "",
       nationality3: "",
       passportNumber3: "",
+      // Education
+      bacObtention: "",
+      bacCountry: "",
+      bacType: "",
+      israeliBacSchool: "",
+      frenchBacSchoolIsrael: "",
+      otherSchoolName: "",
+      jewishSchool: "",
+      frenchBacSchoolFrance: "",
+      academicDiploma: "",
+      higherEducationCountry: "",
+      universityNameHebrew: "",
+      diplomaNameHebrew: "",
+      universityNameFrench: "",
+      diplomaNameFrench: "",
     },
     mode: "onChange",
   });
@@ -158,7 +187,22 @@ export const LeadForm: React.FC = () => {
         "nationality2",
         "nationality3",
       ], // Judaism & Nationality
-      2: [], // Education - to be implemented
+      2: [
+        "bacObtention",
+        "bacCountry",
+        "bacType",
+        "israeliBacSchool",
+        "frenchBacSchoolIsrael",
+        "otherSchoolName",
+        "jewishSchool",
+        "frenchBacSchoolFrance",
+        "academicDiploma",
+        "higherEducationCountry",
+        "universityNameHebrew",
+        "diplomaNameHebrew",
+        "universityNameFrench",
+        "diplomaNameFrench",
+      ], // Education
       3: [], // Integration Israel - to be implemented
       4: [], // Tsahal - to be implemented
     };
@@ -189,16 +233,7 @@ export const LeadForm: React.FC = () => {
       case 1:
         return <JudaismNationalityStep form={form} />;
       case 2:
-        return (
-          <div className="space-y-6">
-            <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">
-              Éducation
-            </h3>
-            <p className="text-gray-600">
-              Cette section sera implémentée prochainement.
-            </p>
-          </div>
-        );
+        return <EducationStep form={form} />;
       case 3:
         return (
           <div className="space-y-6">
