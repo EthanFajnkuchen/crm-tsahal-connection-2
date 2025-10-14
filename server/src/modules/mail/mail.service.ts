@@ -449,8 +449,7 @@ export class MailService {
         );
       }
 
-      const subject =
-        'Confirmation de réception de votre candidature - Tsahal Co';
+      const subject = 'Formulaire reçu ! - Tsahal Connection';
       const htmlContent = this.generateLeadConfirmationEmailContent(
         candidateName,
         leadId,
@@ -572,36 +571,31 @@ export class MailService {
     </head>
     <body>
         <div class="header">
-            <h1>🎖️ Tsahal Co</h1>
-            <h2>Confirmation de réception de votre candidature</h2>
+            <h1>🇮🇱 Tsahal Connection</h1>
+            <h2>Formulaire reçu !</h2>
         </div>
         
         <div class="content">
-            <p>Bonjour ${candidateName},</p>
+            <p>Shalom ${candidateName} 👋</p>
             
-            <p>Nous avons bien reçu votre candidature et nous vous remercions de votre intérêt pour rejoindre Tsahal Co.</p>
+            <p>Nous avons bien reçu votre inscription via notre formulaire de contact.<br>
+            Un membre de notre équipe prendra contact avec vous dans les prochains jours afin de répondre à votre demande.</p>
             
             <div class="highlight">
-                <strong>📋 Votre candidature a été enregistrée avec succès</strong><br>
-                <strong>Numéro de candidature :</strong> #${leadId}
+                <strong>📩 Et si vous ne recevez pas de réponse sous 14 jours ouvrés, n'hésitez pas à nous relancer directement :</strong><br><br>
+                <strong>📧 Par email :</strong> info@tsahalco.com<br><br>
+                <strong>💬 Ou par WhatsApp :</strong> +972-54-905-6016
             </div>
             
-            <p>Notre équipe va examiner votre dossier dans les plus brefs délais. Nous vous contacterons prochainement pour vous informer de la suite de la procédure.</p>
+            <p>Nous vous remercions pour votre intérêt et votre confiance.<br>
+            À très bientôt,</p>
             
-            <p>En attendant, n'hésitez pas à nous contacter si vous avez des questions :</p>
-            <ul>
-                <li>📧 Email : info@tsahalco.com</li>
-                <li>📱 Téléphone : [Numéro de téléphone]</li>
-            </ul>
-            
-            <p>Nous vous remercions encore pour votre confiance et nous avons hâte de vous accompagner dans votre parcours.</p>
-            
-            <p>Cordialement,<br>
-            <strong>L'équipe Tsahal Co</strong></p>
+            <p><strong>L'équipe Tsahal Connection</strong><br>
+            <em>"Vous accompagner, notre fierté !"</em></p>
         </div>
         
         <div class="footer">
-            <p>Tsahal Co - Votre partenaire pour l'intégration en Israël</p>
+            <p>Tsahal Connection - Votre partenaire pour l'intégration en Israël</p>
         </div>
     </body>
     </html>
@@ -630,7 +624,7 @@ export class MailService {
                 padding: 20px;
             }
             .header {
-                background-color: #dc2626;
+                background-color: #861A8F;
                 color: white;
                 padding: 20px;
                 text-align: center;
@@ -663,7 +657,7 @@ export class MailService {
     </head>
     <body>
         <div class="header">
-            <h1>🚨 Nouvelle candidature reçue</h1>
+            <h1>🚨 Nouveau formulaire reçu</h1>
             <h2>Action requise</h2>
         </div>
         
