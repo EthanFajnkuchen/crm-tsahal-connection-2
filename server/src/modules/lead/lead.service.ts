@@ -21,6 +21,7 @@ import { PassThrough } from 'stream';
 import { Workbook } from 'exceljs';
 import { DiscussionService } from '../discussion/discussion.service';
 import { MailService } from '../mail/mail.service';
+import { GoogleContactsService } from '../google-contacts/google-contacts.service';
 @Injectable()
 export class LeadService {
   constructor(
@@ -28,6 +29,7 @@ export class LeadService {
     private readonly leadRepository: Repository<Lead>,
     private readonly discussionService: DiscussionService,
     private readonly mailService: MailService,
+    private readonly googleContactsService: GoogleContactsService,
   ) {}
 
   async createLead(createLeadDto: CreateLeadDto): Promise<{
@@ -223,6 +225,25 @@ export class LeadService {
         console.error(
           "Erreur lors de l'envoi de l'email de notification admin:",
           emailError,
+        );
+      }
+
+      // Créer un contact dans Google Contacts
+      try {
+        await this.googleContactsService.createContact({
+          firstName: createLeadDto.firstName,
+          lastName: createLeadDto.lastName,
+          phoneNumber: createLeadDto.phoneNumber,
+          whatsappNumber: createLeadDto.whatsappNumber || createLeadDto.phoneNumber,
+          leadId: leadId,
+          email: createLeadDto.email,
+        });
+        console.log(`Contact Google créé avec succès pour le lead ID: ${leadId}`);
+      } catch (googleContactError) {
+        // Log l'erreur mais ne pas faire échouer la création du lead
+        console.error(
+          "Erreur lors de la création du contact Google:",
+          googleContactError,
         );
       }
 
