@@ -85,8 +85,7 @@ export class LeadService {
         gender: createLeadDto.gender,
         email: createLeadDto.email,
         phoneNumber: createLeadDto.phoneNumber,
-        whatsappNumber:
-          createLeadDto.whatsappNumber || createLeadDto.phoneNumber,
+        whatsappNumber: createLeadDto.whatsappNumber,
         city: createLeadDto.city,
         isOnlyChild: createLeadDto.isOnlyChild,
 
