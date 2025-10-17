@@ -291,7 +291,6 @@ export const TsahalStep: React.FC<TsahalStepProps> = ({ form }) => {
                 <Controller
                   control={control}
                   name="daparNote"
-                  rules={{ required: "La note Dapar est requise" }}
                   render={({ field: _, fieldState }) => (
                     <FormDropdown
                       control={control}
@@ -301,7 +300,6 @@ export const TsahalStep: React.FC<TsahalStepProps> = ({ form }) => {
                         value: option.value.toString(),
                         label: option.displayName,
                       }))}
-                      required
                       passDisplayName
                       error={fieldState.error?.message}
                     />
@@ -311,7 +309,6 @@ export const TsahalStep: React.FC<TsahalStepProps> = ({ form }) => {
                 <Controller
                   control={control}
                   name="medicalProfile"
-                  rules={{ required: "Le profil médical est requis" }}
                   render={({ field: _, fieldState }) => (
                     <FormDropdown
                       control={control}
@@ -321,7 +318,6 @@ export const TsahalStep: React.FC<TsahalStepProps> = ({ form }) => {
                         value: option.value.toString(),
                         label: option.displayName,
                       }))}
-                      required
                       passDisplayName
                       error={fieldState.error?.message}
                     />
@@ -331,7 +327,6 @@ export const TsahalStep: React.FC<TsahalStepProps> = ({ form }) => {
                 <Controller
                   control={control}
                   name="hebrewScore"
-                  rules={{ required: "Le score d'hébreu est requis" }}
                   render={({ field: _, fieldState }) => (
                     <FormDropdown
                       control={control}
@@ -341,7 +336,6 @@ export const TsahalStep: React.FC<TsahalStepProps> = ({ form }) => {
                         value: option.value.toString(),
                         label: option.displayName,
                       }))}
-                      required
                       passDisplayName
                       error={fieldState.error?.message}
                     />
