@@ -42,8 +42,11 @@ export const JudaismNationalityStep: React.FC<JudaismNationalityStepProps> = ({
     if (isNationality1Locked) {
       form.setValue("nationality1", "Israélienne");
     } else {
-      // Clear nationality1 when changing to a status that doesn't lock it
-      form.setValue("nationality1", "");
+      // Only clear nationality1 if it's currently "Israélienne" and we're changing to a status that doesn't lock it
+      const currentNationality1 = form.getValues("nationality1");
+      if (currentNationality1 === "Israélienne") {
+        form.setValue("nationality1", "");
+      }
     }
   }, [isNationality1Locked, form]);
 

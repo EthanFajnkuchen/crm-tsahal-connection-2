@@ -8,6 +8,7 @@ import { FormCheckbox } from "@/components/form-components/form-checkbox";
 import { LeadFormData } from "../LeadForm";
 import { RELATION } from "@/i18n/emergency-contact";
 import { Controller } from "react-hook-form";
+import { useEmailValidation } from "@/hooks/use-email-validation";
 
 interface GeneralStepProps {
   form: UseFormReturn<LeadFormData>;
@@ -19,12 +20,41 @@ export const GeneralStep: React.FC<GeneralStepProps> = ({ form }) => {
   const whatsappSameAsPhone = watch("whatsappSameAsPhone");
   const phoneNumber = watch("phoneNumber");
 
+  // Email validation hook
+  const {
+    validateEmail,
+    resetValidation,
+    isValid: isEmailValid,
+    isLoading: isValidatingEmail,
+    error: emailValidationError,
+    hasBeenValidated,
+  } = useEmailValidation();
+
   // Update WhatsApp number when checkbox is checked
   React.useEffect(() => {
     if (whatsappSameAsPhone && phoneNumber) {
       setValue("whatsappNumber", phoneNumber);
     }
   }, [whatsappSameAsPhone, phoneNumber, setValue]);
+
+  // Handle email validation on blur
+  const handleEmailBlur = React.useCallback(
+    async (email: string) => {
+      if (email && email.includes("@")) {
+        await validateEmail(email);
+      } else {
+        resetValidation();
+      }
+    },
+    [validateEmail, resetValidation]
+  );
+
+  // Handle email change to reset validation state when user starts typing
+  const handleEmailChange = React.useCallback(() => {
+    if (emailValidationError) {
+      resetValidation();
+    }
+  }, [emailValidationError, resetValidation]);
 
   return (
     <div className="space-y-8">
@@ -111,7 +141,7 @@ export const GeneralStep: React.FC<GeneralStepProps> = ({ form }) => {
                 message: "Format d'email invalide",
               },
             }}
-            render={({ fieldState }) => (
+            render={({ field, fieldState }) => (
               <FormInput
                 control={control}
                 name="email"
@@ -119,6 +149,18 @@ export const GeneralStep: React.FC<GeneralStepProps> = ({ form }) => {
                 type="email"
                 required
                 error={fieldState.error?.message}
+                isValidatingEmail={isValidatingEmail}
+                isEmailValid={isEmailValid}
+                emailValidationError={emailValidationError || undefined}
+                hasBeenValidated={hasBeenValidated}
+                onChange={(e) => {
+                  field.onChange(e);
+                  handleEmailChange();
+                }}
+                onBlur={(e) => {
+                  field.onBlur();
+                  handleEmailBlur(e.target.value);
+                }}
               />
             )}
           />

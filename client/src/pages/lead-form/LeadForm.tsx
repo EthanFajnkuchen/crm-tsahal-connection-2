@@ -122,6 +122,7 @@ const steps = [
 
 export const LeadForm: React.FC = () => {
   const [currentStep, setCurrentStep] = useState(0);
+  const [isCurrentStepValid, setIsCurrentStepValid] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -217,8 +218,114 @@ export const LeadForm: React.FC = () => {
   const {
     handleSubmit,
     trigger,
+    watch,
     formState: { isValid },
   } = form;
+
+  // Check if current step is valid
+  const validateCurrentStep = async () => {
+    const fieldsToValidate = stepFields[currentStep];
+    return await trigger(fieldsToValidate);
+  };
+
+  useEffect(() => {
+    console.log("isCurrentStepValid", isCurrentStepValid);
+  }, [isCurrentStepValid]);
+
+  // Watch only current step fields and revalidate
+  const stepFields: Record<number, (keyof LeadFormData)[]> = {
+    0: [
+      "firstName",
+      "lastName",
+      "birthDate",
+      "gender",
+      "email",
+      "confirmEmail",
+      "phoneNumber",
+      "confirmPhoneNumber",
+      "city",
+      "isOnlyChild",
+      "contactUrgenceFirstName",
+      "contactUrgenceLastName",
+      "contactUrgencePhoneNumber",
+      "confirmContactUrgencePhoneNumber",
+      "contactUrgenceEmail",
+      "confirmContactUrgenceEmail",
+      "contactUrgenceRelation",
+    ],
+    1: [
+      "StatutLoiRetour",
+      "conversionDate",
+      "conversionAgency",
+      "statutResidentIsrael",
+      "anneeAlyah",
+      "hasIsraeliID",
+      "israeliIDNumber",
+      "numberOfNationalities",
+      "nationality1",
+      "nationality2",
+      "nationality3",
+    ],
+    2: [
+      "bacObtention",
+      "bacCountry",
+      "bacType",
+      "israeliBacSchool",
+      "frenchBacSchoolIsrael",
+      "otherSchoolName",
+      "jewishSchool",
+      "frenchBacSchoolFrance",
+      "academicDiploma",
+      "higherEducationCountry",
+      "universityNameHebrew",
+      "diplomaNameHebrew",
+      "universityNameFrench",
+      "diplomaNameFrench",
+    ],
+    3: [
+      "arrivalAge",
+      "programParticipation",
+      "programName",
+      "schoolYears",
+      "armyDeferralProgram",
+      "programNameHebrewArmyDeferral",
+    ],
+    4: [
+      "currentStatus",
+      "soldierAloneStatus",
+      "serviceType",
+      "mahalPath",
+      "studyPath",
+      "tsavRishonStatus",
+      "recruitmentCenter",
+      "tsavRishonDate",
+      "tsavRishonGradesReceived",
+      "daparNote",
+      "medicalProfile",
+      "hebrewScore",
+      "yomHameaStatus",
+      "yomHameaDate",
+      "yomSayerotStatus",
+      "yomSayerotDate",
+      "armyEntryDateStatus",
+      "giyusDate",
+      "michveAlonTraining",
+      "summary",
+      "acceptTerms",
+    ],
+  };
+
+  const currentStepFields = stepFields[currentStep] || [];
+  const watchedValues = watch(currentStepFields);
+
+  useEffect(() => {
+    const revalidateStep = async () => {
+      const isValid = await validateCurrentStep();
+      console.log("Revalidating step due to form change:", isValid);
+      setIsCurrentStepValid(isValid);
+    };
+    revalidateStep();
+  }, [watchedValues, currentStep]);
 
   // Redirection basée sur le statut de soumission
   useEffect(() => {
@@ -229,98 +336,32 @@ export const LeadForm: React.FC = () => {
     }
   }, [submitSuccess, submitError, navigate]);
 
+  // Scroll to top when step changes
+  useEffect(() => {
+    // Use requestAnimationFrame to ensure DOM is updated
+    requestAnimationFrame(() => {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+  }, [currentStep]);
+
+  // Check current step validity when step changes
+  useEffect(() => {
+    const checkStepValidity = async () => {
+      console.log("Checking step validity for step:", currentStep);
+      const isValid = await validateCurrentStep();
+      console.log("Step validity result:", isValid);
+      setIsCurrentStepValid(isValid);
+    };
+    checkStepValidity();
+  }, [currentStep]);
+
   // Reset du state au montage du composant
   useEffect(() => {
     dispatch(resetFormState());
   }, [dispatch]);
 
   const nextStep = async () => {
-    // Define fields to validate for each step
-    const stepFields: Record<number, (keyof LeadFormData)[]> = {
-      0: [
-        "firstName",
-        "lastName",
-        "birthDate",
-        "gender",
-        "email",
-        "confirmEmail",
-        "phoneNumber",
-        "confirmPhoneNumber",
-        "city",
-        "isOnlyChild",
-        "contactUrgenceFirstName",
-        "contactUrgenceLastName",
-        "contactUrgencePhoneNumber",
-        "confirmContactUrgencePhoneNumber",
-        "contactUrgenceEmail",
-        "confirmContactUrgenceEmail",
-        "contactUrgenceRelation",
-      ],
-      1: [
-        "StatutLoiRetour",
-        "conversionDate",
-        "conversionAgency",
-        "statutResidentIsrael",
-        "anneeAlyah",
-        "hasIsraeliID",
-        "israeliIDNumber",
-        "numberOfNationalities",
-        "nationality1",
-        "nationality2",
-        "nationality3",
-      ], // Judaism & Nationality
-      2: [
-        "bacObtention",
-        "bacCountry",
-        "bacType",
-        "israeliBacSchool",
-        "frenchBacSchoolIsrael",
-        "otherSchoolName",
-        "jewishSchool",
-        "frenchBacSchoolFrance",
-        "academicDiploma",
-        "higherEducationCountry",
-        "universityNameHebrew",
-        "diplomaNameHebrew",
-        "universityNameFrench",
-        "diplomaNameFrench",
-      ], // Education
-      3: [
-        "arrivalAge",
-        "programParticipation",
-        "programName",
-        "schoolYears",
-        "armyDeferralProgram",
-        "programNameHebrewArmyDeferral",
-      ], // Integration Israel
-      4: [
-        // Tsahal
-        "currentStatus",
-        "soldierAloneStatus",
-        "serviceType",
-        "mahalPath",
-        "studyPath",
-        "tsavRishonStatus",
-        "recruitmentCenter",
-        "tsavRishonDate",
-        "tsavRishonGradesReceived",
-        "daparNote",
-        "medicalProfile",
-        "hebrewScore",
-        "yomHameaStatus",
-        "yomHameaDate",
-        "yomSayerotStatus",
-        "yomSayerotDate",
-        "armyEntryDateStatus",
-        "giyusDate",
-        "michveAlonTraining",
-        "summary",
-        "acceptTerms",
-      ],
-    };
-
-    const fieldsToValidate = stepFields[currentStep];
-    const isStepValid = await trigger(fieldsToValidate);
+    const isStepValid = await validateCurrentStep();
 
     if (isStepValid && currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
@@ -441,7 +482,11 @@ export const LeadForm: React.FC = () => {
                 </Button>
 
                 {currentStep < steps.length - 1 ? (
-                  <Button type="button" onClick={nextStep} disabled={!isValid}>
+                  <Button
+                    type="button"
+                    onClick={nextStep}
+                    disabled={!isCurrentStepValid}
+                  >
                     Suivant
                   </Button>
                 ) : (
