@@ -4,6 +4,7 @@ import {
   InternalServerErrorException,
   NotFoundException,
   StreamableFile,
+  Logger,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, MoreThan, Brackets, Not, IsNull, In } from 'typeorm';
@@ -24,6 +25,8 @@ import { MailService } from '../mail/mail.service';
 import { GoogleContactsService } from '../google-contacts/google-contacts.service';
 @Injectable()
 export class LeadService {
+  private readonly logger = new Logger(LeadService.name);
+
   constructor(
     @InjectRepository(Lead)
     private readonly leadRepository: Repository<Lead>,
@@ -993,7 +996,6 @@ export class LeadService {
   }
 
   async updateLead(leadId: string, updateData: UpdateLeadDto): Promise<Lead> {
-    console.log(updateData);
     if (!leadId) {
       throw new BadRequestException('ID is required');
     }
@@ -1006,13 +1008,29 @@ export class LeadService {
       if (!existingLead) {
         throw new NotFoundException('Lead not found');
       }
+      const phoneNumberChanged =
+        updateData.phoneNumber &&
+        updateData.phoneNumber !== existingLead.phoneNumber;
+      const whatsappNumberChanged =
+        updateData.whatsappNumber &&
+        updateData.whatsappNumber !== existingLead.whatsappNumber;
 
       // Appliquer les mises à jour
       Object.assign(existingLead, updateData);
 
       // Sauvegarder les modifications
       const updatedLead = await this.leadRepository.save(existingLead);
-      console.log(updatedLead);
+
+      if (phoneNumberChanged || whatsappNumberChanged) {
+        try {
+          await this.syncLeadWithGoogleContacts(updatedLead);
+        } catch (error) {
+          this.logger.error(
+            `Failed to sync lead ${updatedLead.ID} with Google Contacts:`,
+            error,
+          );
+        }
+      }
 
       return updatedLead;
     } catch (error) {
@@ -1025,6 +1043,52 @@ export class LeadService {
       throw new InternalServerErrorException(
         `Failed to update lead: ${error.message}`,
       );
+    }
+  }
+
+  private async syncLeadWithGoogleContacts(lead: Lead): Promise<void> {
+    try {
+      // Récupérer le contact Google correspondant au lead
+      const googleContact = await this.googleContactsService.getContactByLeadId(
+        lead.ID,
+      );
+
+      if (!googleContact || !googleContact.resourceName) {
+        this.logger.log(`No Google contact found for lead ID: ${lead.ID}`);
+        return;
+      }
+
+      // Préparer les données de mise à jour pour Google Contacts
+      const updateData: any = {};
+
+      // Mettre à jour le numéro mobile si phoneNumber a été modifié
+      if (lead.phoneNumber) {
+        updateData.phoneNumber = lead.phoneNumber;
+      }
+
+      // Mettre à jour le numéro WhatsApp si whatsappNumber a été modifié
+      if (lead.whatsappNumber) {
+        updateData.whatsappNumber = lead.whatsappNumber;
+      }
+
+      // Ajouter le leadId pour maintenir la cohérence
+      updateData.leadId = lead.ID;
+
+      // Mettre à jour le contact Google
+      await this.googleContactsService.updateContact(
+        googleContact.resourceName,
+        updateData,
+      );
+
+      this.logger.log(
+        `Successfully synced lead ${lead.ID} with Google Contacts`,
+      );
+    } catch (error) {
+      this.logger.error(
+        `Error syncing lead ${lead.ID} with Google Contacts:`,
+        error,
+      );
+      throw error;
     }
   }
 

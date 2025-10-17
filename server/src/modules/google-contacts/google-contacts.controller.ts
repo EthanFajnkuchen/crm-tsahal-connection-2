@@ -10,11 +10,13 @@ import {
   HttpCode,
   HttpStatus,
   UseGuards,
+  BadRequestException,
 } from '@nestjs/common';
 import { GoogleContactsService } from './google-contacts.service';
 import {
   CreateGoogleContactDto,
   GoogleContactResponseDto,
+  GoogleContactsWithLeadResponseDto,
 } from './google-contacts.dto';
 import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
 
@@ -34,6 +36,20 @@ export class GoogleContactsController {
   @Get('search')
   async searchContacts(@Query('q') query: string) {
     return this.googleContactsService.searchContacts(query);
+  }
+
+  @Get('leads')
+  async getContactsWithLeadId(): Promise<GoogleContactsWithLeadResponseDto> {
+    return this.googleContactsService.getContactsWithLeadId();
+  }
+
+  @Get('leads/:leadId')
+  async getContactByLeadId(@Param('leadId') leadId: string) {
+    const leadIdNumber = parseInt(leadId, 10);
+    if (isNaN(leadIdNumber)) {
+      throw new BadRequestException('Invalid Lead ID format');
+    }
+    return this.googleContactsService.getContactByLeadId(leadIdNumber);
   }
 
   @Get(':contactId')

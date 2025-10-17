@@ -8,6 +8,8 @@ import axios from 'axios';
 import {
   CreateGoogleContactDto,
   GoogleContactResponseDto,
+  GoogleContactWithLeadDto,
+  GoogleContactsWithLeadResponseDto,
 } from './google-contacts.dto';
 
 @Injectable()
@@ -219,7 +221,16 @@ export class GoogleContactsService {
         );
       }
 
+      // D'abord récupérer le contact existant pour obtenir l'etag
+      const existingContact = await this.getContact(contactId);
+      if (!existingContact || !existingContact.etag) {
+        throw new InternalServerErrorException(
+          'Contact not found or missing etag',
+        );
+      }
+
       const contact: any = {
+        etag: existingContact.etag,
         names:
           updateData.firstName || updateData.lastName
             ? [
@@ -228,35 +239,59 @@ export class GoogleContactsService {
                   familyName: updateData.lastName,
                 },
               ]
-            : undefined,
-        phoneNumbers: updateData.phoneNumber
-          ? [
-              {
-                value: updateData.phoneNumber,
-                type: 'mobile',
-              },
-            ]
-          : undefined,
-        userDefined: updateData.leadId
-          ? [
-              {
-                key: 'Lead ID',
-                value: updateData.leadId.toString(),
-              },
-            ]
-          : undefined,
+            : existingContact.names,
+        phoneNumbers: [],
+        userDefined: existingContact.userDefined || [],
       };
 
-      // Ajouter le numéro WhatsApp s'il est fourni et différent du numéro de téléphone
-      if (
-        updateData.whatsappNumber &&
-        updateData.whatsappNumber !== updateData.phoneNumber
-      ) {
-        if (!contact.phoneNumbers) contact.phoneNumbers = [];
-        contact.phoneNumbers.push({
-          value: updateData.whatsappNumber,
-          type: 'other',
-        });
+      // Conserver les numéros existants et les mettre à jour
+      if (existingContact.phoneNumbers) {
+        contact.phoneNumbers = [...existingContact.phoneNumbers];
+      }
+
+      // Mettre à jour le numéro mobile
+      if (updateData.phoneNumber) {
+        const mobileIndex = contact.phoneNumbers.findIndex(
+          (phone: any) => phone.type === 'mobile',
+        );
+        if (mobileIndex >= 0) {
+          contact.phoneNumbers[mobileIndex].value = updateData.phoneNumber;
+        } else {
+          contact.phoneNumbers.push({
+            value: updateData.phoneNumber,
+            type: 'mobile',
+          });
+        }
+      }
+
+      // Mettre à jour le numéro WhatsApp
+      if (updateData.whatsappNumber) {
+        const whatsappIndex = contact.phoneNumbers.findIndex(
+          (phone: any) => phone.type === 'other',
+        );
+        if (whatsappIndex >= 0) {
+          contact.phoneNumbers[whatsappIndex].value = updateData.whatsappNumber;
+        } else {
+          contact.phoneNumbers.push({
+            value: updateData.whatsappNumber,
+            type: 'other',
+          });
+        }
+      }
+
+      // Mettre à jour le Lead ID dans userDefined
+      if (updateData.leadId) {
+        const leadIdIndex = contact.userDefined.findIndex(
+          (field: any) => field.key === 'Lead ID',
+        );
+        if (leadIdIndex >= 0) {
+          contact.userDefined[leadIdIndex].value = updateData.leadId.toString();
+        } else {
+          contact.userDefined.push({
+            key: 'Lead ID',
+            value: updateData.leadId.toString(),
+          });
+        }
       }
 
       // Ajouter l'email s'il est fourni
@@ -387,6 +422,229 @@ export class GoogleContactsService {
       // Pour les autres erreurs, retourner un tableau vide plutôt que de faire échouer
       this.logger.warn('Search failed, returning empty results');
       return [];
+    }
+  }
+
+  async getContactsWithLeadId(): Promise<GoogleContactsWithLeadResponseDto> {
+    try {
+      if (!this.accessToken) {
+        this.logger.warn(
+          'Google Contacts API not available - skipping contacts retrieval',
+        );
+        return {
+          success: false,
+          message: 'Google Contacts API not configured',
+          contacts: [],
+          totalCount: 0,
+        };
+      }
+
+      let allContacts: any[] = [];
+      let nextPageToken: string | undefined = undefined;
+      let pageCount = 0;
+
+      // Récupérer tous les contacts avec pagination
+      do {
+        const params: any = {
+          personFields: 'names,phoneNumbers,emailAddresses,userDefined',
+          pageSize: 1000, // Maximum autorisé par Google
+        };
+
+        if (nextPageToken) {
+          params.pageToken = nextPageToken;
+        }
+
+        const response = await axios.get(
+          'https://people.googleapis.com/v1/people/me/connections',
+          {
+            headers: {
+              Authorization: `Bearer ${this.accessToken}`,
+            },
+            params,
+          },
+        );
+
+        const contacts = response.data.connections || [];
+        allContacts = allContacts.concat(contacts);
+        nextPageToken = response.data.nextPageToken;
+        pageCount++;
+      } while (nextPageToken);
+
+      // Filtrer les contacts qui ont la clé "Lead ID" dans userDefined
+      const contactsWithLeadId: GoogleContactWithLeadDto[] = allContacts
+        .filter((contact: any) => {
+          const hasLeadId = contact.userDefined?.some(
+            (field: any) => field.key === 'Lead ID',
+          );
+          return hasLeadId;
+        })
+        .map((contact: any) => {
+          // Extraire le leadId des userDefined
+          const leadIdField = contact.userDefined?.find(
+            (field: any) => field.key === 'Lead ID',
+          );
+          const leadId = leadIdField
+            ? parseInt(leadIdField.value, 10)
+            : undefined;
+
+          // Extraire le numéro mobile et other
+          const mobilePhone = contact.phoneNumbers?.find(
+            (phone: any) => phone.type === 'mobile',
+          )?.value;
+          const otherPhone = contact.phoneNumbers?.find(
+            (phone: any) => phone.type === 'other',
+          )?.value;
+
+          return {
+            leadId: leadId,
+            mobilePhone: this.cleanPhoneNumber(mobilePhone),
+            otherPhone: this.cleanPhoneNumber(otherPhone),
+          };
+        });
+
+      return {
+        success: true,
+        message: `${contactsWithLeadId.length} contacts avec Lead ID trouvés`,
+        contacts: contactsWithLeadId,
+        totalCount: contactsWithLeadId.length,
+      };
+    } catch (error) {
+      this.logger.error('Failed to get contacts with Lead ID:', error);
+
+      // Si l'access token a expiré, essayer de le rafraîchir
+      if (error.response?.status === 401) {
+        try {
+          await this.refreshAccessToken();
+          // Retry avec le nouveau token
+          return this.getContactsWithLeadId();
+        } catch (refreshError) {
+          this.logger.error('Failed to refresh token:', refreshError);
+        }
+      }
+
+      if (error.response?.data?.error) {
+        throw new InternalServerErrorException(
+          `Erreur Google Contacts API: ${error.response.data.error.message}`,
+        );
+      }
+
+      throw new InternalServerErrorException(
+        'Erreur lors de la récupération des contacts avec Lead ID',
+      );
+    }
+  }
+
+  private cleanPhoneNumber(
+    phoneNumber: string | undefined,
+  ): string | undefined {
+    if (!phoneNumber) {
+      return undefined;
+    }
+
+    // Supprimer les espaces, tirets, points et parenthèses
+    return phoneNumber.replace(/[\s\-\.\(\)]/g, '').trim();
+  }
+
+  async getContactByLeadId(
+    leadId: number,
+  ): Promise<GoogleContactWithLeadDto | null> {
+    try {
+      if (!this.accessToken) {
+        this.logger.warn(
+          'Google Contacts API not available - skipping contact search',
+        );
+        return null;
+      }
+
+      let allContacts: any[] = [];
+      let nextPageToken: string | undefined = undefined;
+
+      // Récupérer tous les contacts avec pagination
+      do {
+        const params: any = {
+          personFields: 'names,phoneNumbers,emailAddresses,userDefined',
+          pageSize: 1000, // Maximum autorisé par Google
+        };
+
+        if (nextPageToken) {
+          params.pageToken = nextPageToken;
+        }
+
+        const response = await axios.get(
+          'https://people.googleapis.com/v1/people/me/connections',
+          {
+            headers: {
+              Authorization: `Bearer ${this.accessToken}`,
+            },
+            params,
+          },
+        );
+
+        const contacts = response.data.connections || [];
+        allContacts = allContacts.concat(contacts);
+        nextPageToken = response.data.nextPageToken;
+      } while (nextPageToken);
+
+      // Chercher le contact avec le Lead ID spécifique
+      const contactWithLeadId = allContacts.find((contact: any) => {
+        return contact.userDefined?.some(
+          (field: any) =>
+            field.key === 'Lead ID' && parseInt(field.value, 10) === leadId,
+        );
+      });
+
+      if (!contactWithLeadId) {
+        this.logger.log(`No Google contact found with Lead ID: ${leadId}`);
+        return null;
+      }
+
+      // Extraire le leadId des userDefined
+      const leadIdField = contactWithLeadId.userDefined?.find(
+        (field: any) => field.key === 'Lead ID',
+      );
+      const extractedLeadId = leadIdField
+        ? parseInt(leadIdField.value, 10)
+        : undefined;
+
+      // Extraire le numéro mobile et other
+      const mobilePhone = contactWithLeadId.phoneNumbers?.find(
+        (phone: any) => phone.type === 'mobile',
+      )?.value;
+      const otherPhone = contactWithLeadId.phoneNumbers?.find(
+        (phone: any) => phone.type === 'other',
+      )?.value;
+
+      this.logger.log(`Found Google contact for Lead ID: ${leadId}`);
+
+      return {
+        leadId: extractedLeadId,
+        mobilePhone: this.cleanPhoneNumber(mobilePhone),
+        otherPhone: this.cleanPhoneNumber(otherPhone),
+        resourceName: contactWithLeadId.resourceName,
+      };
+    } catch (error) {
+      this.logger.error('Failed to get contact by Lead ID:', error);
+
+      // Si l'access token a expiré, essayer de le rafraîchir
+      if (error.response?.status === 401) {
+        try {
+          await this.refreshAccessToken();
+          // Retry avec le nouveau token
+          return this.getContactByLeadId(leadId);
+        } catch (refreshError) {
+          this.logger.error('Failed to refresh token:', refreshError);
+        }
+      }
+
+      if (error.response?.data?.error) {
+        throw new InternalServerErrorException(
+          `Erreur Google Contacts API: ${error.response.data.error.message}`,
+        );
+      }
+
+      throw new InternalServerErrorException(
+        'Erreur lors de la récupération du contact par Lead ID',
+      );
     }
   }
 }

@@ -19,6 +19,7 @@ import { ActiviteConfModule } from './modules/activite-conf/activite-conf.module
 import { ActiviteMassaModule } from './modules/activite-massa/activite-massa.module';
 import { ActiviteMassaParticipationModule } from './modules/activite-massa-participation/activite-massa-participation.module';
 import { GoogleContactsModule } from './modules/google-contacts/google-contacts.module';
+import { SyncModule } from './modules/sync/sync.module';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { JwtModule } from '@nestjs/jwt';
@@ -39,6 +40,7 @@ import { LoggerMiddleware } from './middlewares/logging.middleware';
     ActiviteMassaModule,
     ActiviteMassaParticipationModule,
     GoogleContactsModule,
+    SyncModule,
     JwtModule.register({
       secret: process.env.JWT_SECRET || 'default_secret_key',
       signOptions: { expiresIn: '1h' },

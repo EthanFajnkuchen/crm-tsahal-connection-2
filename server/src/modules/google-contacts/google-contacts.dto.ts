@@ -29,3 +29,16 @@ export class GoogleContactResponseDto {
   resourceName?: string;
 }
 
+export class GoogleContactWithLeadDto {
+  leadId?: number;
+  mobilePhone?: string;
+  otherPhone?: string;
+  resourceName?: string;
+}
+
+export class GoogleContactsWithLeadResponseDto {
+  success: boolean;
+  message: string;
+  contacts: GoogleContactWithLeadDto[];
+  totalCount: number;
+}
