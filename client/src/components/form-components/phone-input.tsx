@@ -9,6 +9,7 @@ interface PhoneInputProps {
   placeholder?: string;
   disabled?: boolean;
   error?: string;
+  required?: boolean;
 }
 
 const countryCodes = [
@@ -31,6 +32,7 @@ export function PhoneInput({
   placeholder = "Numéro de téléphone",
   disabled = false,
   error,
+  required = false,
 }: PhoneInputProps) {
   const [countryCode, setCountryCode] = React.useState("+33");
   const [phoneNumber, setPhoneNumber] = React.useState("");
@@ -100,7 +102,10 @@ export function PhoneInput({
 
   return (
     <div className="space-y-2">
-      <Label htmlFor="phone-input">{label}</Label>
+      <Label htmlFor="phone-input" className="flex items-center gap-2">
+        <span>{label}</span>
+        {required && <span className="text-red-500">*</span>}
+      </Label>
       <div className="flex gap-2">
         <select
           value={countryCode}

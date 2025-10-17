@@ -9,6 +9,7 @@ async function bootstrap() {
       'https://crm-tc.netlify.app',
       'http://localhost:3001',
       'https://tsahalco.com/',
+      'https://tsahalco.com',
     ],
     credentials: true,
   });

@@ -435,4 +435,265 @@ export class MailService {
       return dateString;
     }
   }
+
+  async sendLeadConfirmationEmail(
+    candidateEmail: string,
+    candidateName: string,
+    leadId: number,
+  ): Promise<void> {
+    try {
+      // Vérifier les credentials avant d'essayer d'envoyer
+      if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
+        throw new Error(
+          'Gmail credentials not configured. Please set GMAIL_USER and GMAIL_APP_PASSWORD environment variables.',
+        );
+      }
+
+      const subject = 'Formulaire reçu ! - Tsahal Connection';
+      const htmlContent = this.generateLeadConfirmationEmailContent(
+        candidateName,
+        leadId,
+      );
+
+      const mailOptions = {
+        from: process.env.GMAIL_USER,
+        to: candidateEmail,
+        subject: subject,
+        html: htmlContent,
+      };
+
+      this.logger.log(
+        `Sending lead confirmation email to ${candidateEmail} for lead ID: ${leadId}`,
+      );
+
+      const result = await this.transporter.sendMail(mailOptions);
+      this.logger.log(
+        `Lead confirmation email sent successfully: ${result.messageId}`,
+      );
+    } catch (error) {
+      this.logger.error(
+        `Failed to send lead confirmation email to ${candidateEmail}`,
+        error.stack,
+      );
+      throw error;
+    }
+  }
+
+  async sendNewLeadNotificationEmail(
+    candidateName: string,
+    candidateEmail: string,
+    leadId: number,
+  ): Promise<void> {
+    try {
+      // Vérifier les credentials avant d'essayer d'envoyer
+      if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
+        throw new Error(
+          'Gmail credentials not configured. Please set GMAIL_USER and GMAIL_APP_PASSWORD environment variables.',
+        );
+      }
+
+      const subject = `Nouvelle candidature reçue - ${candidateName}`;
+      const htmlContent = this.generateNewLeadNotificationEmailContent(
+        candidateName,
+        candidateEmail,
+        leadId,
+      );
+
+      const mailOptions = {
+        from: process.env.GMAIL_USER,
+        to: 'info@tsahalco.com',
+        subject: subject,
+        html: htmlContent,
+      };
+
+      this.logger.log(
+        `Sending new lead notification email for lead ID: ${leadId}`,
+      );
+
+      const result = await this.transporter.sendMail(mailOptions);
+      this.logger.log(
+        `New lead notification email sent successfully: ${result.messageId}`,
+      );
+    } catch (error) {
+      this.logger.error(
+        `Failed to send new lead notification email for lead ID: ${leadId}`,
+        error.stack,
+      );
+      throw error;
+    }
+  }
+
+  private generateLeadConfirmationEmailContent(
+    candidateName: string,
+    leadId: number,
+  ): string {
+    return `
+    <!DOCTYPE html>
+    <html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Confirmation de candidature</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                line-height: 1.6;
+                color: #333;
+                max-width: 600px;
+                margin: 0 auto;
+                padding: 20px;
+            }
+            .header {
+                background-color: #1e3a8a;
+                color: white;
+                padding: 20px;
+                text-align: center;
+                border-radius: 8px 8px 0 0;
+            }
+            .content {
+                background-color: #f8f9fa;
+                padding: 30px;
+                border-radius: 0 0 8px 8px;
+            }
+            .highlight {
+                background-color: #e3f2fd;
+                padding: 15px;
+                border-left: 4px solid #2196f3;
+                margin: 20px 0;
+            }
+            .footer {
+                text-align: center;
+                margin-top: 30px;
+                color: #666;
+                font-size: 14px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="header">
+            <h1>🇮🇱 Tsahal Connection</h1>
+            <h2>Formulaire reçu !</h2>
+        </div>
+        
+        <div class="content">
+            <p>Shalom ${candidateName} 👋</p>
+            
+            <p>Nous avons bien reçu votre inscription via notre formulaire de contact.<br>
+            Un membre de notre équipe prendra contact avec vous dans les prochains jours afin de répondre à votre demande.</p>
+            
+            <div class="highlight">
+                <strong>📩 Et si vous ne recevez pas de réponse sous 14 jours ouvrés, n'hésitez pas à nous relancer directement :</strong><br><br>
+                <strong>📧 Par email :</strong> info@tsahalco.com<br><br>
+                <strong>💬 Ou par WhatsApp :</strong> +972-54-905-6016
+            </div>
+            
+            <p>Nous vous remercions pour votre intérêt et votre confiance.<br>
+            À très bientôt,</p>
+            
+            <p><strong>L'équipe Tsahal Connection</strong><br>
+            <em>"Vous accompagner, notre fierté !"</em></p>
+        </div>
+        
+        <div class="footer">
+            <p>Tsahal Connection - Votre partenaire pour l'intégration en Israël</p>
+        </div>
+    </body>
+    </html>
+    `;
+  }
+
+  private generateNewLeadNotificationEmailContent(
+    candidateName: string,
+    candidateEmail: string,
+    leadId: number,
+  ): string {
+    return `
+    <!DOCTYPE html>
+    <html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Nouvelle candidature reçue</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                line-height: 1.6;
+                color: #333;
+                max-width: 600px;
+                margin: 0 auto;
+                padding: 20px;
+            }
+            .header {
+                background-color: #861A8F;
+                color: white;
+                padding: 20px;
+                text-align: center;
+                border-radius: 8px 8px 0 0;
+            }
+            .content {
+                background-color: #fef2f2;
+                padding: 30px;
+                border-radius: 0 0 8px 8px;
+            }
+            .alert {
+                background-color: #fef3c7;
+                padding: 15px;
+                border-left: 4px solid #f59e0b;
+                margin: 20px 0;
+            }
+            .info-box {
+                background-color: #e0f2fe;
+                padding: 15px;
+                border-radius: 5px;
+                margin: 15px 0;
+            }
+            .footer {
+                text-align: center;
+                margin-top: 30px;
+                color: #666;
+                font-size: 14px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="header">
+            <h1>🚨 Nouveau formulaire reçu</h1>
+            <h2>Action requise</h2>
+        </div>
+        
+        <div class="content">
+            <div class="alert">
+                <strong>⚠️ Une nouvelle candidature vient d'être soumise et nécessite votre attention.</strong>
+            </div>
+            
+            <div class="info-box">
+                <h3>📋 Informations du candidat :</h3>
+                <ul>
+                    <li><strong>Nom :</strong> ${candidateName}</li>
+                    <li><strong>Email :</strong> ${candidateEmail}</li>
+                    <li><strong>ID Candidature :</strong> #${leadId}</li>
+                    <li><strong>Date de soumission :</strong> ${new Date().toLocaleDateString('fr-FR')}</li>
+                </ul>
+            </div>
+            
+            <p>Le candidat a reçu un email de confirmation automatique. Il est maintenant temps de traiter sa candidature dans le système CRM.</p>
+            
+            <p><strong>Prochaines étapes :</strong></p>
+            <ol>
+                <li>Connectez-vous au système CRM</li>
+                <li>Consultez le dossier du candidat (ID: ${leadId})</li>
+                <li>Examinez les informations fournies</li>
+                <li>Mettez à jour le statut selon votre processus</li>
+            </ol>
+            
+            <p>Merci de traiter cette candidature dans les plus brefs délais.</p>
+        </div>
+        
+        <div class="footer">
+            <p>Tsahal Co - Système de notification automatique</p>
+        </div>
+    </body>
+    </html>
+    `;
+  }
 }

@@ -23,6 +23,7 @@ import activityReducer from "./slices/activity/activity.slice";
 import activiteConfReducer from "./slices/activite-conf/activite-conf.slice";
 import activiteMassaReducer from "./slices/activite-massa/activite-massa.slice";
 import activiteMassaParticipationReducer from "./slices/activite-massa-participation/activite-massa-participation.slice";
+import leadFormReducer from "./slices/lead-form-slice";
 
 export const store = configureStore({
   reducer: {
@@ -50,6 +51,7 @@ export const store = configureStore({
     activiteConf: activiteConfReducer,
     activiteMassa: activiteMassaReducer,
     activiteMassaParticipation: activiteMassaParticipationReducer,
+    leadForm: leadFormReducer,
   },
 });
 

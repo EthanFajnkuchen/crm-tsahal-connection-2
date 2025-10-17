@@ -89,7 +89,7 @@ const FormCheckbox = <T extends FieldValues>({
                     )}
                 </Label>
               )}
-              <div className="pt-4">
+              <div className="pt-1">
                 <Checkbox
                   id={name}
                   checked={field.value}

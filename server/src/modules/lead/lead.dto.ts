@@ -6,6 +6,8 @@ import {
   IsEmail,
   IsDateString,
   IsInt,
+  IsBoolean,
+  ValidateNested,
 } from 'class-validator';
 
 export class LeadFilterDto {
@@ -18,6 +20,280 @@ export class LeadFilterDto {
 
   @IsArray()
   fieldsToSend?: string[];
+}
+
+export class CreateLeadDto {
+  // General section
+  @IsString()
+  firstName: string;
+
+  @IsString()
+  lastName: string;
+
+  @IsString()
+  birthDate: string;
+
+  @IsString()
+  gender: string;
+
+  @IsEmail()
+  email: string;
+
+  @IsEmail()
+  confirmEmail: string;
+
+  @IsString()
+  phoneNumber: string;
+
+  @IsString()
+  confirmPhoneNumber: string;
+
+  @IsOptional()
+  @IsString()
+  whatsappSameAsPhone?: string;
+
+  @IsOptional()
+  @IsString()
+  whatsappNumber?: string;
+
+  @IsOptional()
+  @IsString()
+  confirmWhatsappNumber?: string;
+
+  @IsString()
+  city: string;
+
+  @IsString()
+  isOnlyChild: string;
+
+  // Emergency contact
+  @IsString()
+  contactUrgenceFirstName: string;
+
+  @IsString()
+  contactUrgenceLastName: string;
+
+  @IsString()
+  contactUrgencePhoneNumber: string;
+
+  @IsString()
+  confirmContactUrgencePhoneNumber: string;
+
+  @IsEmail()
+  contactUrgenceEmail: string;
+
+  @IsEmail()
+  confirmContactUrgenceEmail: string;
+
+  @IsString()
+  contactUrgenceRelation: string;
+
+  // Judaism & Nationality section
+  @IsString()
+  StatutLoiRetour: string;
+
+  @IsOptional()
+  @IsString()
+  conversionDate?: string;
+
+  @IsOptional()
+  @IsString()
+  conversionAgency?: string;
+
+  @IsString()
+  statutResidentIsrael: string;
+
+  @IsOptional()
+  @IsString()
+  anneeAlyah?: string;
+
+  @IsOptional()
+  @IsString()
+  hasIsraeliID?: string;
+
+  @IsOptional()
+  @IsString()
+  israeliIDNumber?: string;
+
+  @IsString()
+  numberOfNationalities: string;
+
+  @IsString()
+  nationality1: string;
+
+  @IsOptional()
+  @IsString()
+  passportNumber1?: string;
+
+  @IsOptional()
+  @IsString()
+  nationality2?: string;
+
+  @IsOptional()
+  @IsString()
+  passportNumber2?: string;
+
+  @IsOptional()
+  @IsString()
+  nationality3?: string;
+
+  @IsOptional()
+  @IsString()
+  passportNumber3?: string;
+
+  // Education section
+  @IsString()
+  bacObtention: string;
+
+  @IsOptional()
+  @IsString()
+  bacCountry?: string;
+
+  @IsOptional()
+  @IsString()
+  bacType?: string;
+
+  @IsOptional()
+  @IsString()
+  israeliBacSchool?: string;
+
+  @IsOptional()
+  @IsString()
+  frenchBacSchoolIsrael?: string;
+
+  @IsOptional()
+  @IsString()
+  otherSchoolName?: string;
+
+  @IsOptional()
+  @IsString()
+  jewishSchool?: string;
+
+  @IsOptional()
+  @IsString()
+  frenchBacSchoolFrance?: string;
+
+  @IsString()
+  academicDiploma: string;
+
+  @IsOptional()
+  @IsString()
+  higherEducationCountry?: string;
+
+  @IsOptional()
+  @IsString()
+  universityNameHebrew?: string;
+
+  @IsOptional()
+  @IsString()
+  diplomaNameHebrew?: string;
+
+  @IsOptional()
+  @IsString()
+  universityNameFrench?: string;
+
+  @IsOptional()
+  @IsString()
+  diplomaNameFrench?: string;
+
+  // Integration Israel section
+  @IsString()
+  arrivalAge: string;
+
+  @IsOptional()
+  @IsString()
+  programParticipation?: string;
+
+  @IsOptional()
+  @IsString()
+  programName?: string;
+
+  @IsOptional()
+  @IsString()
+  schoolYears?: string;
+
+  @IsString()
+  armyDeferralProgram: string;
+
+  @IsOptional()
+  @IsString()
+  programNameHebrewArmyDeferral?: string;
+
+  // Tsahal section
+  @IsString()
+  currentStatus: string;
+
+  @IsString()
+  soldierAloneStatus: string;
+
+  @IsString()
+  serviceType: string;
+
+  @IsOptional()
+  @IsString()
+  mahalPath?: string;
+
+  @IsOptional()
+  @IsString()
+  studyPath?: string;
+
+  @IsString()
+  tsavRishonStatus: string;
+
+  @IsOptional()
+  @IsString()
+  recruitmentCenter?: string;
+
+  @IsOptional()
+  @IsString()
+  tsavRishonDate?: string;
+
+  @IsOptional()
+  @IsString()
+  tsavRishonGradesReceived?: string;
+
+  @IsOptional()
+  @IsString()
+  daparNote?: string;
+
+  @IsOptional()
+  @IsString()
+  medicalProfile?: string;
+
+  @IsOptional()
+  @IsString()
+  hebrewScore?: string;
+
+  @IsString()
+  yomHameaStatus: string;
+
+  @IsOptional()
+  @IsString()
+  yomHameaDate?: string;
+
+  @IsString()
+  yomSayerotStatus: string;
+
+  @IsOptional()
+  @IsString()
+  yomSayerotDate?: string;
+
+  @IsString()
+  armyEntryDateStatus: string;
+
+  @IsOptional()
+  @IsString()
+  giyusDate?: string;
+
+  @IsOptional()
+  @IsString()
+  michveAlonTraining?: string;
+
+  @IsString()
+  summary: string;
+
+  @IsBoolean()
+  acceptTerms: boolean;
 }
 
 export class UpdateLeadDto {
