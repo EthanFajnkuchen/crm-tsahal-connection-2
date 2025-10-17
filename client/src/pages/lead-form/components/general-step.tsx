@@ -15,10 +15,9 @@ interface GeneralStepProps {
 }
 
 export const GeneralStep: React.FC<GeneralStepProps> = ({ form }) => {
-  const { control, watch, setValue } = form;
+  const { control, watch } = form;
 
   const whatsappSameAsPhone = watch("whatsappSameAsPhone");
-  const phoneNumber = watch("phoneNumber");
 
   // Email validation hook
   const {
@@ -29,13 +28,6 @@ export const GeneralStep: React.FC<GeneralStepProps> = ({ form }) => {
     error: emailValidationError,
     hasBeenValidated,
   } = useEmailValidation();
-
-  // Update WhatsApp number when checkbox is checked
-  React.useEffect(() => {
-    if (whatsappSameAsPhone && phoneNumber) {
-      setValue("whatsappNumber", phoneNumber);
-    }
-  }, [whatsappSameAsPhone, phoneNumber, setValue]);
 
   // Handle email validation on blur
   const handleEmailBlur = React.useCallback(
