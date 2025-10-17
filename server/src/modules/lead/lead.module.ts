@@ -5,9 +5,10 @@ import { LeadService } from './lead.service';
 import { LeadController } from './lead.controller';
 import { DiscussionModule } from '../discussion/discussion.module';
 import { MailModule } from '../mail/mail.module';
+import { GoogleContactsModule } from '../google-contacts/google-contacts.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Lead]), DiscussionModule, MailModule],
+  imports: [TypeOrmModule.forFeature([Lead]), DiscussionModule, MailModule, GoogleContactsModule],
   controllers: [LeadController],
   providers: [LeadService],
   exports: [LeadService],
