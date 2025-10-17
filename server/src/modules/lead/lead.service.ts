@@ -230,19 +230,27 @@ export class LeadService {
 
       // Créer un contact dans Google Contacts
       try {
-        await this.googleContactsService.createContact({
+        const contactResult = await this.googleContactsService.createContact({
           firstName: createLeadDto.firstName,
           lastName: createLeadDto.lastName,
           phoneNumber: createLeadDto.phoneNumber,
-          whatsappNumber: createLeadDto.whatsappNumber || createLeadDto.phoneNumber,
+          whatsappNumber:
+            createLeadDto.whatsappNumber || createLeadDto.phoneNumber,
           leadId: leadId,
           email: createLeadDto.email,
         });
-        console.log(`Contact Google créé avec succès pour le lead ID: ${leadId}`);
+
+        if (contactResult.success) {
+          console.log(
+            `Contact Google créé avec succès pour le lead ID: ${leadId}`,
+          );
+        } else {
+          console.log(`Contact Google non créé: ${contactResult.message}`);
+        }
       } catch (googleContactError) {
         // Log l'erreur mais ne pas faire échouer la création du lead
         console.error(
-          "Erreur lors de la création du contact Google:",
+          'Erreur lors de la création du contact Google:',
           googleContactError,
         );
       }

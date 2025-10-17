@@ -1,11 +1,22 @@
-import { Injectable, Logger, InternalServerErrorException } from '@nestjs/common';
-import { google } from 'googleapis';
-import { CreateGoogleContactDto, GoogleContactResponseDto } from './google-contacts.dto';
+import {
+  Injectable,
+  Logger,
+  InternalServerErrorException,
+} from '@nestjs/common';
+import * as path from 'path';
+import axios from 'axios';
+import {
+  CreateGoogleContactDto,
+  GoogleContactResponseDto,
+} from './google-contacts.dto';
 
 @Injectable()
 export class GoogleContactsService {
   private readonly logger = new Logger(GoogleContactsService.name);
-  private people: any;
+  private accessToken: string | null = null;
+  private refreshToken: string | null = null;
+  private clientId: string | null = null;
+  private clientSecret: string | null = null;
 
   constructor() {
     this.initializeGoogleAPI();
@@ -13,23 +24,74 @@ export class GoogleContactsService {
 
   private async initializeGoogleAPI() {
     try {
-      // Configuration de l'authentification Google
-      const auth = new google.auth.GoogleAuth({
-        keyFile: process.env.GOOGLE_CREDENTIALS_FILE || './google-credentials.json',
-        scopes: ['https://www.googleapis.com/auth/contacts'],
-      });
+      // Configuration OAuth2 avec refresh token
+      this.clientId = process.env.GOOGLE_CLIENT_ID;
+      this.clientSecret = process.env.GOOGLE_CLIENT_SECRET;
+      this.refreshToken = process.env.GOOGLE_REFRESH_TOKEN;
 
-      this.people = google.people({ version: 'v1', auth });
+      if (!this.clientId || !this.clientSecret || !this.refreshToken) {
+        this.logger.warn(
+          'Google Contacts API credentials not configured - contacts will not be created automatically',
+        );
+        this.logger.warn(
+          'Required environment variables: GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REFRESH_TOKEN',
+        );
+        return;
+      }
+
+      // Obtenir un access token via le refresh token
+      await this.refreshAccessToken();
       this.logger.log('Google Contacts API initialized successfully');
     } catch (error) {
       this.logger.error('Failed to initialize Google Contacts API:', error);
-      throw new InternalServerErrorException('Failed to initialize Google Contacts API');
+      this.logger.warn(
+        'Google Contacts API not available - contacts will not be created automatically',
+      );
     }
   }
 
-  async createContact(createContactDto: CreateGoogleContactDto): Promise<GoogleContactResponseDto> {
+  private async refreshAccessToken(): Promise<void> {
     try {
-      const { firstName, lastName, phoneNumber, whatsappNumber, leadId, email } = createContactDto;
+      const response = await axios.post('https://oauth2.googleapis.com/token', {
+        client_id: this.clientId,
+        client_secret: this.clientSecret,
+        refresh_token: this.refreshToken,
+        grant_type: 'refresh_token',
+      });
+
+      this.accessToken = response.data.access_token;
+      this.logger.log('Access token refreshed successfully');
+    } catch (error) {
+      this.logger.error('Failed to refresh access token:', error);
+      throw new InternalServerErrorException(
+        'Failed to authenticate with Google',
+      );
+    }
+  }
+
+  async createContact(
+    createContactDto: CreateGoogleContactDto,
+  ): Promise<GoogleContactResponseDto> {
+    try {
+      // Vérifier si l'API Google est disponible
+      if (!this.accessToken) {
+        this.logger.warn(
+          'Google Contacts API not available - skipping contact creation',
+        );
+        return {
+          success: false,
+          message: 'Google Contacts API not configured - contact not created',
+        };
+      }
+
+      const {
+        firstName,
+        lastName,
+        phoneNumber,
+        whatsappNumber,
+        leadId,
+        email,
+      } = createContactDto;
 
       // Construction du contact Google
       const contact: any = {
@@ -71,10 +133,17 @@ export class GoogleContactsService {
         ];
       }
 
-      // Créer le contact dans Google Contacts
-      const response = await this.people.people.createContact({
-        requestBody: contact,
-      });
+      // Créer le contact via l'API REST Google Contacts
+      const response = await axios.post(
+        'https://people.googleapis.com/v1/people:createContact',
+        contact,
+        {
+          headers: {
+            Authorization: `Bearer ${this.accessToken}`,
+            'Content-Type': 'application/json',
+          },
+        },
+      );
 
       this.logger.log(`Contact created successfully for lead ID: ${leadId}`);
 
@@ -86,58 +155,103 @@ export class GoogleContactsService {
       };
     } catch (error) {
       this.logger.error('Failed to create Google contact:', error);
-      
+
+      // Si l'access token a expiré, essayer de le rafraîchir
+      if (error.response?.status === 401) {
+        try {
+          await this.refreshAccessToken();
+          // Retry avec le nouveau token
+          return this.createContact(createContactDto);
+        } catch (refreshError) {
+          this.logger.error('Failed to refresh token:', refreshError);
+        }
+      }
+
       if (error.response?.data?.error) {
         throw new InternalServerErrorException(
-          `Erreur Google Contacts API: ${error.response.data.error.message}`
+          `Erreur Google Contacts API: ${error.response.data.error.message}`,
         );
       }
-      
+
       throw new InternalServerErrorException(
-        'Erreur lors de la création du contact dans Google Contacts'
+        'Erreur lors de la création du contact dans Google Contacts',
       );
     }
   }
 
   async getContact(contactId: string): Promise<any> {
     try {
-      const response = await this.people.people.get({
-        resourceName: contactId,
-        personFields: 'names,phoneNumbers,emailAddresses,userDefined',
-      });
+      if (!this.accessToken) {
+        throw new InternalServerErrorException(
+          'Google Contacts API not configured',
+        );
+      }
+
+      const response = await axios.get(
+        `https://people.googleapis.com/v1/${contactId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${this.accessToken}`,
+          },
+          params: {
+            personFields: 'names,phoneNumbers,emailAddresses,userDefined',
+          },
+        },
+      );
 
       return response.data;
     } catch (error) {
       this.logger.error('Failed to get Google contact:', error);
-      throw new InternalServerErrorException('Erreur lors de la récupération du contact');
+      throw new InternalServerErrorException(
+        'Erreur lors de la récupération du contact',
+      );
     }
   }
 
-  async updateContact(contactId: string, updateData: Partial<CreateGoogleContactDto>): Promise<GoogleContactResponseDto> {
+  async updateContact(
+    contactId: string,
+    updateData: Partial<CreateGoogleContactDto>,
+  ): Promise<GoogleContactResponseDto> {
     try {
+      if (!this.accessToken) {
+        throw new InternalServerErrorException(
+          'Google Contacts API not configured',
+        );
+      }
+
       const contact: any = {
-        names: updateData.firstName || updateData.lastName ? [
-          {
-            givenName: updateData.firstName,
-            familyName: updateData.lastName,
-          },
-        ] : undefined,
-        phoneNumbers: updateData.phoneNumber ? [
-          {
-            value: updateData.phoneNumber,
-            type: 'mobile',
-          },
-        ] : undefined,
-        userDefined: updateData.leadId ? [
-          {
-            key: 'Lead ID',
-            value: updateData.leadId.toString(),
-          },
-        ] : undefined,
+        names:
+          updateData.firstName || updateData.lastName
+            ? [
+                {
+                  givenName: updateData.firstName,
+                  familyName: updateData.lastName,
+                },
+              ]
+            : undefined,
+        phoneNumbers: updateData.phoneNumber
+          ? [
+              {
+                value: updateData.phoneNumber,
+                type: 'mobile',
+              },
+            ]
+          : undefined,
+        userDefined: updateData.leadId
+          ? [
+              {
+                key: 'Lead ID',
+                value: updateData.leadId.toString(),
+              },
+            ]
+          : undefined,
       };
 
       // Ajouter le numéro WhatsApp s'il est fourni et différent du numéro de téléphone
-      if (updateData.whatsappNumber && updateData.whatsappNumber !== updateData.phoneNumber) {
+      if (
+        updateData.whatsappNumber &&
+        updateData.whatsappNumber !== updateData.phoneNumber
+      ) {
         if (!contact.phoneNumbers) contact.phoneNumbers = [];
         contact.phoneNumbers.push({
           value: updateData.whatsappNumber,
@@ -155,11 +269,19 @@ export class GoogleContactsService {
         ];
       }
 
-      const response = await this.people.people.updateContact({
-        resourceName: contactId,
-        updatePersonFields: 'names,phoneNumbers,emailAddresses,userDefined',
-        requestBody: contact,
-      });
+      const response = await axios.patch(
+        `https://people.googleapis.com/v1/${contactId}:updateContact`,
+        contact,
+        {
+          headers: {
+            Authorization: `Bearer ${this.accessToken}`,
+            'Content-Type': 'application/json',
+          },
+          params: {
+            updatePersonFields: 'names,phoneNumbers,emailAddresses,userDefined',
+          },
+        },
+      );
 
       this.logger.log(`Contact updated successfully: ${contactId}`);
 
@@ -171,15 +293,28 @@ export class GoogleContactsService {
       };
     } catch (error) {
       this.logger.error('Failed to update Google contact:', error);
-      throw new InternalServerErrorException('Erreur lors de la mise à jour du contact');
+      throw new InternalServerErrorException(
+        'Erreur lors de la mise à jour du contact',
+      );
     }
   }
 
   async deleteContact(contactId: string): Promise<GoogleContactResponseDto> {
     try {
-      await this.people.people.deleteContact({
-        resourceName: contactId,
-      });
+      if (!this.accessToken) {
+        throw new InternalServerErrorException(
+          'Google Contacts API not configured',
+        );
+      }
+
+      await axios.delete(
+        `https://people.googleapis.com/v1/${contactId}:deleteContact`,
+        {
+          headers: {
+            Authorization: `Bearer ${this.accessToken}`,
+          },
+        },
+      );
 
       this.logger.log(`Contact deleted successfully: ${contactId}`);
 
@@ -190,21 +325,68 @@ export class GoogleContactsService {
       };
     } catch (error) {
       this.logger.error('Failed to delete Google contact:', error);
-      throw new InternalServerErrorException('Erreur lors de la suppression du contact');
+      throw new InternalServerErrorException(
+        'Erreur lors de la suppression du contact',
+      );
     }
   }
 
   async searchContacts(query: string): Promise<any[]> {
     try {
-      const response = await this.people.people.searchContacts({
-        query: query,
-        readMask: 'names,phoneNumbers,emailAddresses,userDefined',
-      });
+      if (!this.accessToken) {
+        this.logger.warn('Google Contacts API not available - skipping search');
+        return [];
+      }
+
+      // Étape 1: Warmup cache (requête vide)
+      await axios.get(
+        'https://people.googleapis.com/v1/people:searchContacts',
+        {
+          headers: {
+            Authorization: `Bearer ${this.accessToken}`,
+          },
+          params: {
+            query: '', // Requête vide pour le warmup
+            readMask: 'names,phoneNumbers,emailAddresses,userDefined',
+          },
+        },
+      );
+
+      // Étape 2: Attendre quelques secondes (comme recommandé par Google)
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+
+      // Étape 3: Faire la vraie recherche
+      const response = await axios.get(
+        'https://people.googleapis.com/v1/people:searchContacts',
+        {
+          headers: {
+            Authorization: `Bearer ${this.accessToken}`,
+          },
+          params: {
+            query: query,
+            readMask: 'names,phoneNumbers,emailAddresses,userDefined',
+          },
+        },
+      );
 
       return response.data.results || [];
     } catch (error) {
       this.logger.error('Failed to search Google contacts:', error);
-      throw new InternalServerErrorException('Erreur lors de la recherche des contacts');
+
+      // Si l'access token a expiré, essayer de le rafraîchir
+      if (error.response?.status === 401) {
+        try {
+          await this.refreshAccessToken();
+          // Retry avec le nouveau token
+          return this.searchContacts(query);
+        } catch (refreshError) {
+          this.logger.error('Failed to refresh token:', refreshError);
+        }
+      }
+
+      // Pour les autres erreurs, retourner un tableau vide plutôt que de faire échouer
+      this.logger.warn('Search failed, returning empty results');
+      return [];
     }
   }
 }

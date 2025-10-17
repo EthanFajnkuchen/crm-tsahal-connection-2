@@ -12,7 +12,10 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { GoogleContactsService } from './google-contacts.service';
-import { CreateGoogleContactDto, GoogleContactResponseDto } from './google-contacts.dto';
+import {
+  CreateGoogleContactDto,
+  GoogleContactResponseDto,
+} from './google-contacts.dto';
 import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
 
 @Controller('google-contacts')
@@ -26,6 +29,11 @@ export class GoogleContactsController {
     @Body() createContactDto: CreateGoogleContactDto,
   ): Promise<GoogleContactResponseDto> {
     return this.googleContactsService.createContact(createContactDto);
+  }
+
+  @Get('search')
+  async searchContacts(@Query('q') query: string) {
+    return this.googleContactsService.searchContacts(query);
   }
 
   @Get(':contactId')
@@ -42,13 +50,9 @@ export class GoogleContactsController {
   }
 
   @Delete(':contactId')
-  async deleteContact(@Param('contactId') contactId: string): Promise<GoogleContactResponseDto> {
+  async deleteContact(
+    @Param('contactId') contactId: string,
+  ): Promise<GoogleContactResponseDto> {
     return this.googleContactsService.deleteContact(contactId);
   }
-
-  @Get('search')
-  async searchContacts(@Query('q') query: string) {
-    return this.googleContactsService.searchContacts(query);
-  }
 }
-
