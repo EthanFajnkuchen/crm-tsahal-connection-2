@@ -84,8 +84,12 @@ export function PhoneInput({
   React.useEffect(() => {
     if (isInitialized) {
       const fullNumber = countryCode + phoneNumber;
-      if (fullNumber !== value && fullNumber.length > 0) {
+      // Only send to parent if there's actually a phone number (not just country code)
+      if (fullNumber !== value && phoneNumber.length > 0) {
         onChange(fullNumber);
+      } else if (phoneNumber.length === 0 && value !== "") {
+        // If phone number is empty, send empty string to parent
+        onChange("");
       }
     }
   }, [countryCode, phoneNumber, onChange, value, isInitialized]);

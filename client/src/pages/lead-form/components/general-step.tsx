@@ -15,10 +15,9 @@ interface GeneralStepProps {
 }
 
 export const GeneralStep: React.FC<GeneralStepProps> = ({ form }) => {
-  const { control, watch } = form;
+  const { control, watch, setValue } = form;
 
   const whatsappSameAsPhone = watch("whatsappSameAsPhone");
-
   // Email validation hook
   const {
     validateEmail,
@@ -28,6 +27,14 @@ export const GeneralStep: React.FC<GeneralStepProps> = ({ form }) => {
     error: emailValidationError,
     hasBeenValidated,
   } = useEmailValidation();
+
+  // Update WhatsApp number when checkbox is checked
+  React.useEffect(() => {
+    if (whatsappSameAsPhone) {
+      setValue("whatsappNumber", "");
+      setValue("confirmWhatsappNumber", "");
+    }
+  }, [whatsappSameAsPhone, setValue]);
 
   // Handle email validation on blur
   const handleEmailBlur = React.useCallback(
@@ -238,19 +245,24 @@ export const GeneralStep: React.FC<GeneralStepProps> = ({ form }) => {
                 control={control}
                 name="whatsappNumber"
                 rules={{
-                  required: "Le numéro WhatsApp est requis",
-                  minLength: {
-                    value: 10,
-                    message: "Le numéro doit contenir au moins 10 chiffres",
-                  },
+                  required: !whatsappSameAsPhone
+                    ? "Le numéro WhatsApp est requis"
+                    : false,
+                  minLength: !whatsappSameAsPhone
+                    ? {
+                        value: 10,
+                        message: "Le numéro doit contenir au moins 10 chiffres",
+                      }
+                    : undefined,
                 }}
                 render={({ field, fieldState }) => (
                   <PhoneInput
+                    key={`whatsapp-${whatsappSameAsPhone}`}
                     value={field.value || ""}
                     onChange={field.onChange}
                     label="Numéro WhatsApp"
                     placeholder="Numéro WhatsApp"
-                    required
+                    required={!whatsappSameAsPhone}
                     error={fieldState.error?.message}
                   />
                 )}
@@ -260,18 +272,23 @@ export const GeneralStep: React.FC<GeneralStepProps> = ({ form }) => {
                 control={control}
                 name="confirmWhatsappNumber"
                 rules={{
-                  required: "La confirmation du numéro WhatsApp est requise",
-                  validate: (value) =>
-                    value === watch("whatsappNumber") ||
-                    "Les numéros WhatsApp ne correspondent pas",
+                  required: !whatsappSameAsPhone
+                    ? "La confirmation du numéro WhatsApp est requise"
+                    : false,
+                  validate: !whatsappSameAsPhone
+                    ? (value) =>
+                        value === watch("whatsappNumber") ||
+                        "Les numéros WhatsApp ne correspondent pas"
+                    : undefined,
                 }}
                 render={({ field, fieldState }) => (
                   <PhoneInput
+                    key={`confirm-whatsapp-${whatsappSameAsPhone}`}
                     value={field.value || ""}
                     onChange={field.onChange}
                     label="Confirmez votre numéro WhatsApp"
                     placeholder="Confirmez votre numéro WhatsApp"
-                    required
+                    required={!whatsappSameAsPhone}
                     error={fieldState.error?.message}
                   />
                 )}

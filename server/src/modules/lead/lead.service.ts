@@ -85,8 +85,7 @@ export class LeadService {
         gender: createLeadDto.gender,
         email: createLeadDto.email,
         phoneNumber: createLeadDto.phoneNumber,
-        whatsappNumber:
-          createLeadDto.whatsappNumber || createLeadDto.phoneNumber,
+        whatsappNumber: createLeadDto.whatsappNumber,
         city: createLeadDto.city,
         isOnlyChild: createLeadDto.isOnlyChild,
 
@@ -200,18 +199,49 @@ export class LeadService {
         }
       }
 
-      // Envoyer l'email de confirmation au candidat
+      // Exécuter les tâches en arrière-plan (emails et Google Contacts)
+      this.executeBackgroundTasks(createLeadDto, leadId);
+
+      return {
+        success: true,
+        message: 'Candidature créée avec succès',
+        leadId: leadId,
+      };
+    } catch (error) {
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        'Erreur lors de la création de la candidature',
+      );
+    }
+  }
+
+  /**
+   * Exécute les tâches en arrière-plan (emails et Google Contacts)
+   * Cette méthode est appelée de manière asynchrone pour ne pas bloquer la réponse
+   */
+  private executeBackgroundTasks(
+    createLeadDto: CreateLeadDto,
+    leadId: number,
+  ): void {
+    // Utiliser setImmediate pour exécuter les tâches en arrière-plan
+    setImmediate(async () => {
       const candidateName = `${createLeadDto.firstName} ${createLeadDto.lastName}`;
+
+      // Envoyer l'email de confirmation au candidat
       try {
         await this.mailService.sendLeadConfirmationEmail(
           createLeadDto.email,
           candidateName,
           leadId,
         );
+        this.logger.log(
+          `Email de confirmation envoyé pour le lead ID: ${leadId}`,
+        );
       } catch (emailError) {
-        // Log l'erreur mais ne pas faire échouer la création du lead
-        console.error(
-          "Erreur lors de l'envoi de l'email de confirmation:",
+        this.logger.error(
+          `Erreur lors de l'envoi de l'email de confirmation pour le lead ID ${leadId}:`,
           emailError,
         );
       }
@@ -223,10 +253,12 @@ export class LeadService {
           createLeadDto.email,
           leadId,
         );
+        this.logger.log(
+          `Email de notification admin envoyé pour le lead ID: ${leadId}`,
+        );
       } catch (emailError) {
-        // Log l'erreur mais ne pas faire échouer la création du lead
-        console.error(
-          "Erreur lors de l'envoi de l'email de notification admin:",
+        this.logger.error(
+          `Erreur lors de l'envoi de l'email de notification admin pour le lead ID ${leadId}:`,
           emailError,
         );
       }
@@ -244,33 +276,21 @@ export class LeadService {
         });
 
         if (contactResult.success) {
-          console.log(
+          this.logger.log(
             `Contact Google créé avec succès pour le lead ID: ${leadId}`,
           );
         } else {
-          console.log(`Contact Google non créé: ${contactResult.message}`);
+          this.logger.warn(
+            `Contact Google non créé pour le lead ID ${leadId}: ${contactResult.message}`,
+          );
         }
       } catch (googleContactError) {
-        // Log l'erreur mais ne pas faire échouer la création du lead
-        console.error(
-          'Erreur lors de la création du contact Google:',
+        this.logger.error(
+          `Erreur lors de la création du contact Google pour le lead ID ${leadId}:`,
           googleContactError,
         );
       }
-
-      return {
-        success: true,
-        message: 'Candidature créée avec succès',
-        leadId: leadId,
-      };
-    } catch (error) {
-      if (error instanceof BadRequestException) {
-        throw error;
-      }
-      throw new InternalServerErrorException(
-        'Erreur lors de la création de la candidature',
-      );
-    }
+    });
   }
 
   async getLeads(limit?: number): Promise<Partial<Lead>[]> {
