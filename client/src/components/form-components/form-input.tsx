@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ChangeRequestIndicator } from "@/components/app-components/change-request-indicator/change-request-indicator";
 import { ChangeRequest } from "@/types/change-request";
+import { Loader2, X, Check } from "lucide-react";
 
 type Mode = "EDIT" | "VIEW";
 
@@ -21,6 +22,11 @@ interface FormInputProps<T extends FieldValues>
   isLoading?: boolean;
   readOnly?: boolean;
   required?: boolean;
+  // Email validation props
+  isValidatingEmail?: boolean;
+  isEmailValid?: boolean;
+  emailValidationError?: string;
+  hasBeenValidated?: boolean;
   // Admin change request functionality
   changeRequests?: ChangeRequest[];
   onApproveChangeRequest?: (changeRequestId: number) => void;
@@ -45,6 +51,11 @@ const FormInput = <T extends FieldValues>({
   isLoading = false,
   readOnly = false,
   required = false,
+  // Email validation props
+  isValidatingEmail = false,
+  isEmailValid = true,
+  emailValidationError,
+  hasBeenValidated = false,
   // Admin change request props
   changeRequests = [],
   onApproveChangeRequest,
@@ -98,15 +109,37 @@ const FormInput = <T extends FieldValues>({
           control={control}
           name={name}
           render={({ field }) => (
-            <Input
-              {...field}
-              {...props}
-              className={cn(
-                error && "border-red-500 focus-visible:ring-red-500",
-                className
+            <div className="relative">
+              <Input
+                {...field}
+                {...props}
+                className={cn(
+                  error && "border-red-500 focus-visible:ring-red-500",
+                  !isEmailValid &&
+                    emailValidationError &&
+                    "border-red-500 focus-visible:ring-red-500",
+                  className
+                )}
+                disabled={
+                  readOnly || (fieldChangeRequests.length > 0 && isAdmin)
+                }
+              />
+              {/* Email validation icons */}
+              {isValidatingEmail && (
+                <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                  <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
+                </div>
               )}
-              disabled={readOnly || (fieldChangeRequests.length > 0 && isAdmin)}
-            />
+              {!isValidatingEmail && field.value && hasBeenValidated && (
+                <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                  {isEmailValid ? (
+                    <Check className="h-4 w-4 text-green-500" />
+                  ) : (
+                    <X className="h-4 w-4 text-red-500" />
+                  )}
+                </div>
+              )}
+            </div>
           )}
         />
       ) : (
@@ -121,6 +154,9 @@ const FormInput = <T extends FieldValues>({
         />
       )}
       {error && <p className="text-sm text-red-500">{error}</p>}
+      {emailValidationError && (
+        <p className="text-sm text-red-500">{emailValidationError}</p>
+      )}
       {pendingChange && (
         <p className="text-xs text-orange-600 flex items-center gap-1">
           ⏳ Modification en attente
