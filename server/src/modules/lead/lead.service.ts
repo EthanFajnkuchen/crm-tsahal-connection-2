@@ -27,6 +27,67 @@ import { GoogleContactsService } from '../google-contacts/google-contacts.servic
 export class LeadService {
   private readonly logger = new Logger(LeadService.name);
 
+  /**
+   * Calcule le mahzor de giyus basé sur la date de giyus
+   * Logique identique au hook useMahzorGiyus côté frontend
+   */
+  private calculateMahzorGiyus(giyusDate: string | undefined): string {
+    if (!giyusDate) {
+      return '';
+    }
+
+    const [year, month] = giyusDate.split('-').map(Number);
+
+    if (month >= 2 && month <= 5) {
+      return `Mars ${year}`;
+    } else if (month >= 6 && month <= 9) {
+      return `Aout ${year}`;
+    } else if (month === 1) {
+      return `Novembre ${year - 1}`;
+    } else {
+      return `Novembre ${year}`;
+    }
+  }
+
+  /**
+   * Calcule le type de giyus basé sur la date de giyus et autres paramètres
+   * Logique identique au hook useTypeGiyus côté frontend
+   */
+  private calculateTypeGiyus(
+    giyusDate: string | undefined,
+    mahalPath: string | undefined,
+    currentStatus: string | undefined,
+    serviceType: string | undefined,
+  ): string {
+    if (!giyusDate || giyusDate === '') {
+      return '';
+    }
+
+    // Mahal Nahal / Mahal Haredi
+    if (
+      (mahalPath === 'Nahal' || mahalPath === 'Haredi') &&
+      currentStatus !== 'Abandon avant le service'
+    ) {
+      return 'Mahal Nahal / Mahal Haredi';
+    }
+
+    // Olim/Hesder
+    if (
+      serviceType === 'Service complet' ||
+      serviceType === 'Études' ||
+      serviceType === 'Garin Tzabar' ||
+      serviceType === 'Haredi' ||
+      serviceType === 'Volontaires' ||
+      mahalPath === 'Hesder'
+    ) {
+      if (currentStatus !== 'Abandon avant le service') {
+        return 'Olim/Hesder';
+      }
+    }
+
+    return '';
+  }
+
   constructor(
     @InjectRepository(Lead)
     private readonly leadRepository: Repository<Lead>,
@@ -164,8 +225,13 @@ export class LeadService {
         // Set default values for required fields
         dateInscription: new Date().toISOString().split('T')[0],
         statutCandidat: 'À traiter',
-        mahzorGiyus: '',
-        typeGiyus: '',
+        mahzorGiyus: this.calculateMahzorGiyus(createLeadDto.giyusDate),
+        typeGiyus: this.calculateTypeGiyus(
+          createLeadDto.giyusDate,
+          createLeadDto.mahalPath,
+          createLeadDto.currentStatus,
+          createLeadDto.serviceType,
+        ),
         pikoud: '',
         dateFinService: '',
         typePoste: '',
