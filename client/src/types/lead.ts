@@ -75,6 +75,7 @@ export interface Lead {
   daparNote: string;
   medicalProfile: string;
   hebrewScore: string;
+  keshevGrade: string;
   yomHameaStatus: string;
   yomHameaDate: string;
   yomSayerotStatus: string;

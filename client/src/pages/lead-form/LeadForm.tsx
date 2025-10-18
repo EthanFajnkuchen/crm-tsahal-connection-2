@@ -91,6 +91,7 @@ export interface LeadFormData {
   tsavRishonDate: string;
   tsavRishonGradesReceived: string;
   daparNote: string;
+  keshevGrade: string;
   medicalProfile: string;
   hebrewScore: string;
   yomHameaStatus: string;
@@ -202,6 +203,7 @@ export const LeadForm: React.FC = () => {
       daparNote: "",
       medicalProfile: "",
       hebrewScore: "",
+      keshevGrade: "",
       yomHameaStatus: "",
       yomHameaDate: "",
       yomSayerotStatus: "",
@@ -306,6 +308,7 @@ export const LeadForm: React.FC = () => {
       "daparNote",
       "medicalProfile",
       "hebrewScore",
+      "keshevGrade",
       "yomHameaStatus",
       "yomHameaDate",
       "yomSayerotStatus",

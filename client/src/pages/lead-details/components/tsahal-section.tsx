@@ -43,6 +43,7 @@ export const TsahalSection = ({
     "daparNote",
     "medicalProfile",
     "hebrewScore",
+    "keshevGrade",
     "yomHameaStatus",
     "yomHameaDate",
     "yomSayerotStatus",
@@ -75,6 +76,7 @@ export const TsahalSection = ({
       daparNote: lead.daparNote || "",
       medicalProfile: lead.medicalProfile || "",
       hebrewScore: lead.hebrewScore || "",
+      keshevGrade: lead.keshevGrade || "",
       yomHameaStatus: lead.yomHameaStatus || "",
       yomHameaDate: lead.yomHameaDate || "",
       yomSayerotStatus: lead.yomSayerotStatus || "",
@@ -100,6 +102,7 @@ export const TsahalSection = ({
       daparNote: lead.daparNote || "",
       medicalProfile: lead.medicalProfile || "",
       hebrewScore: lead.hebrewScore || "",
+      keshevGrade: lead.keshevGrade || "",
       yomHameaStatus: lead.yomHameaStatus || "",
       yomHameaDate: lead.yomHameaDate || "",
       yomSayerotStatus: lead.yomSayerotStatus || "",
@@ -404,6 +407,23 @@ export const TsahalSection = ({
             onRejectChangeRequest={onRejectChangeRequest}
             isAdmin={isAdmin}
             {...getFieldProps("hebrewScore")}
+          />
+          <FormDropdown
+            control={control}
+            name="keshevGrade"
+            label="Keshev"
+            mode={mode}
+            options={MILITARY.keshev_grade.map((option) => ({
+              value: option.value.toString(),
+              label: option.displayName,
+            }))}
+            hidden={tsavRishonGradesReceived !== "Oui"}
+            isLoading={localIsLoading}
+            changeRequests={changeRequestsByLead}
+            onApproveChangeRequest={onApproveChangeRequest}
+            onRejectChangeRequest={onRejectChangeRequest}
+            isAdmin={isAdmin}
+            {...getFieldProps("keshevGrade")}
           />
 
           <FormDropdown

@@ -230,6 +230,9 @@ export class Lead {
   @Column({ length: 20 })
   hebrewScore: string;
 
+  @Column({ length: 20 })
+  keshevGrade: string;
+
   @Column({ length: 100 })
   yomHameaStatus: string;
 
