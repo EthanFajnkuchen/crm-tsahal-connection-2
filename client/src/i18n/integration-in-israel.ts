@@ -43,6 +43,10 @@ export const INTEGRATION_IN_ISRAEL = {
   ],
   integration_program_names: [
     {
+      value: "Asnières",
+      displayName: "Asnières",
+    },
+    {
       value: "Daat Menahem",
       displayName: "Daat Menahem",
     },

@@ -264,6 +264,10 @@ export class CreateLeadDto {
   @IsString()
   hebrewScore?: string;
 
+  @IsOptional()
+  @IsString()
+  keshevGrade?: string;
+
   @IsString()
   yomHameaStatus: string;
 
@@ -616,6 +620,10 @@ export class UpdateLeadDto {
   @IsOptional()
   @IsString()
   hebrewScore?: string;
+
+  @IsOptional()
+  @IsString()
+  keshevGrade?: string;
 
   @IsOptional()
   @IsString()

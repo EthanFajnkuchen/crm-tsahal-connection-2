@@ -50,6 +50,7 @@ export const TsahalStep: React.FC<TsahalStepProps> = ({ form }) => {
       form.setValue("daparNote", "");
       form.setValue("medicalProfile", "");
       form.setValue("hebrewScore", "");
+      form.setValue("keshevGrade", "");
     }
 
     // Clear grades if not received
@@ -57,6 +58,7 @@ export const TsahalStep: React.FC<TsahalStepProps> = ({ form }) => {
       form.setValue("daparNote", "");
       form.setValue("medicalProfile", "");
       form.setValue("hebrewScore", "");
+      form.setValue("keshevGrade", "");
     }
 
     // Clear yom hamea date if status is "Non"
@@ -333,6 +335,23 @@ export const TsahalStep: React.FC<TsahalStepProps> = ({ form }) => {
                       name="hebrewScore"
                       label="Quel est votre simoul ivrit (note d'hébreu affiché sur le site) ?"
                       options={MILITARY.hebrew_grade.map((option) => ({
+                        value: option.value.toString(),
+                        label: option.displayName,
+                      }))}
+                      passDisplayName
+                      error={fieldState.error?.message}
+                    />
+                  )}
+                />
+                <Controller
+                  control={control}
+                  name="keshevGrade"
+                  render={({ field: _, fieldState }) => (
+                    <FormDropdown
+                      control={control}
+                      name="keshevGrade"
+                      label="Quel est votre note de Keshev ?"
+                      options={MILITARY.keshev_grade.map((option) => ({
                         value: option.value.toString(),
                         label: option.displayName,
                       }))}
