@@ -10,8 +10,8 @@ import { Toaster } from "@/components/ui/sonner";
 
 createRoot(document.getElementById("root")!).render(
   <Auth0Provider
-    domain="dev-j678f0np5nacflly.us.auth0.com"
-    clientId="nlrAya6gNRWwFq1ugK79JlV8zG9BogZL"
+    domain="tsahalco.us.auth0.com"
+    clientId="DJ339bZfup4BLe3k31iBx3NtDTnnOt5b"
     cacheLocation="localstorage"
     authorizationParams={{
       redirect_uri: window.location.origin,

@@ -48,7 +48,9 @@ const UserProfile: React.FC = () => {
       </PopoverTrigger>
       <PopoverContent className="w-48 p-2">
         <h2 className="text-sm ml-3 font-semibold">{user?.name}</h2>
-        <h3 className="text-sm ml-3 mt-1 text-gray-500">{user?.roleType[0]}</h3>
+        <h3 className="text-sm ml-3 mt-1 text-gray-500">
+          {user?.roleType ? user?.roleType[0] : "Utilisateur"}
+        </h3>
         <hr className="mt-1 mb-1" />
         <AlertDialog>
           <AlertDialogTrigger asChild>
