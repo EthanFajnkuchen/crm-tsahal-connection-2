@@ -1,7 +1,12 @@
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import * as dotenv from 'dotenv';
+import * as path from 'path';
 
-dotenv.config();
+// Charger le fichier .env approprié selon l'environnement
+const envFile =
+  process.env.NODE_ENV === 'production' ? '.env.production' : '.env.local';
+
+dotenv.config({ path: path.resolve(__dirname, '../../', envFile) });
 
 export const typeOrmConfig: TypeOrmModuleOptions = {
   type: 'mysql',
@@ -11,7 +16,7 @@ export const typeOrmConfig: TypeOrmModuleOptions = {
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
   entities: [__dirname + '/../**/*.entity{.ts,.js}'],
-  synchronize: false,
+  synchronize: process.env.NODE_ENV !== 'production', // Auto-sync en dev, pas en production
   extra: {
     connectionLimit: 10,
     waitForConnections: true,

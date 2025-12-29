@@ -59,24 +59,16 @@ export function DataTable<TData, TValue>({
     getPaginationRowModel: getPaginationRowModel(),
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
-    initialState: {
-      pagination: {
-        pageSize: 15,
-        pageIndex: initialPage,
-      },
-    },
     state: {
       sorting,
+      pagination: {
+        pageIndex: initialPage,
+        pageSize: 15,
+      },
     },
+    // Mode contrôlé manuel pour la pagination
+    manualPagination: false,
   });
-
-  // Notifier les changements de page
-  React.useEffect(() => {
-    const currentPage = table.getState().pagination.pageIndex;
-    if (onPageChange && currentPage !== initialPage) {
-      onPageChange(currentPage);
-    }
-  }, [table.getState().pagination.pageIndex, onPageChange, initialPage]);
 
   const totalPages = table.getPageCount();
   const currentPage = table.getState().pagination.pageIndex + 1;
@@ -183,7 +175,9 @@ export function DataTable<TData, TValue>({
                 href="#"
                 onClick={(e) => {
                   e.preventDefault();
-                  table.previousPage();
+                  if (table.getCanPreviousPage() && onPageChange) {
+                    onPageChange(table.getState().pagination.pageIndex - 1);
+                  }
                 }}
                 aria-disabled={!table.getCanPreviousPage()}
                 className={
@@ -202,7 +196,7 @@ export function DataTable<TData, TValue>({
                     href="#"
                     onClick={(e) => {
                       e.preventDefault();
-                      table.setPageIndex(0);
+                      if (onPageChange) onPageChange(0);
                     }}
                   >
                     1
@@ -221,7 +215,7 @@ export function DataTable<TData, TValue>({
                   href="#"
                   onClick={(e) => {
                     e.preventDefault();
-                    table.setPageIndex(pageNumber - 1);
+                    if (onPageChange) onPageChange(pageNumber - 1);
                   }}
                   isActive={currentPage === pageNumber}
                 >
@@ -240,7 +234,7 @@ export function DataTable<TData, TValue>({
                     href="#"
                     onClick={(e) => {
                       e.preventDefault();
-                      table.setPageIndex(totalPages - 1);
+                      if (onPageChange) onPageChange(totalPages - 1);
                     }}
                   >
                     {totalPages}
@@ -254,7 +248,9 @@ export function DataTable<TData, TValue>({
                 href="#"
                 onClick={(e) => {
                   e.preventDefault();
-                  table.nextPage();
+                  if (table.getCanNextPage() && onPageChange) {
+                    onPageChange(table.getState().pagination.pageIndex + 1);
+                  }
                 }}
                 aria-disabled={!table.getCanNextPage()}
                 className={

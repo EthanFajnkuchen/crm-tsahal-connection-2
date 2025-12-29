@@ -368,6 +368,10 @@ export class LeadService {
         'lead.dateInscription',
         'lead.firstName',
         'lead.lastName',
+        'lead.email',
+        'lead.phoneNumber',
+        'lead.city',
+        'lead.gender',
         'lead.statutCandidat',
       ])
       .orderBy('lead.dateInscription', 'DESC');
@@ -377,6 +381,26 @@ export class LeadService {
     }
 
     return queryBuilder.getMany();
+  }
+
+  /**
+   * Récupère tous les leads pour la migration Google Contacts
+   * Inclut les champs nécessaires pour le matching (nom, email, téléphones)
+   */
+  async getAllLeads(): Promise<Partial<Lead>[]> {
+    return this.leadRepository
+      .createQueryBuilder('lead')
+      .select([
+        'lead.ID',
+        'lead.firstName',
+        'lead.lastName',
+        'lead.email',
+        'lead.phoneNumber',
+        'lead.whatsappNumber',
+        'lead.dateInscription',
+      ])
+      .orderBy('lead.ID', 'ASC')
+      .getMany();
   }
 
   async getStatistics(): Promise<LeadStatistics> {
@@ -594,6 +618,10 @@ export class LeadService {
         ID: lead.ID,
         firstName: lead.firstName,
         lastName: lead.lastName,
+        email: lead.email,
+        phoneNumber: lead.phoneNumber,
+        ville: lead.city,
+        genre: lead.gender,
         dateInscription: lead.dateInscription,
         statutCandidat: lead.statutCandidat,
       }));
@@ -639,8 +667,8 @@ export class LeadService {
   async getProductStats(current: boolean): Promise<Record<string, number>> {
     const products = [
       'Suivi Massa',
-      'Suivi Classique',
-      'Suivi Expert',
+      'Forfait Classique',
+      'Forfait Expert',
       'Entretien individuel',
       'Simulation Tsav Rishon/Yom Hamea',
       'Evaluation physique & mentale',
@@ -1368,6 +1396,46 @@ export class LeadService {
       return categories;
     } catch (error) {
       throw new Error(`Failed to retrieve tafkidim: ${error.message}`);
+    }
+  }
+
+  async deleteLead(leadId: string): Promise<{
+    success: boolean;
+    message: string;
+  }> {
+    if (!leadId) {
+      throw new BadRequestException('ID is required');
+    }
+
+    try {
+      const lead = await this.leadRepository.findOne({
+        where: { ID: parseInt(leadId) },
+      });
+
+      if (!lead) {
+        throw new NotFoundException('Lead not found');
+      }
+
+      // Supprimer le lead (les relations en cascade seront gérées par TypeORM si configurées)
+      await this.leadRepository.delete({ ID: parseInt(leadId) });
+
+      this.logger.log(`Lead ${leadId} deleted successfully`);
+
+      return {
+        success: true,
+        message: 'Lead supprimé avec succès',
+      };
+    } catch (error) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof BadRequestException
+      ) {
+        throw error;
+      }
+      this.logger.error(`Failed to delete lead ${leadId}:`, error);
+      throw new InternalServerErrorException(
+        `Failed to delete lead: ${error.message}`,
+      );
     }
   }
 }

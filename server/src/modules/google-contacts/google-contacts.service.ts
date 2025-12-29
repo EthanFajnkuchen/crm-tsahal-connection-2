@@ -4,6 +4,7 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import * as path from 'path';
+import * as fs from 'fs';
 import axios from 'axios';
 import {
   CreateGoogleContactDto,
@@ -203,7 +204,7 @@ export class GoogleContactsService {
 
       return response.data;
     } catch (error) {
-      this.logger.error('Failed to get Google contact:', error);
+      this.logger.error('Failed to get Google contact:', error.message);
       throw new InternalServerErrorException(
         'Erreur lors de la récupération du contact',
       );
@@ -534,17 +535,6 @@ export class GoogleContactsService {
     }
   }
 
-  private cleanPhoneNumber(
-    phoneNumber: string | undefined,
-  ): string | undefined {
-    if (!phoneNumber) {
-      return undefined;
-    }
-
-    // Supprimer les espaces, tirets, points et parenthèses
-    return phoneNumber.replace(/[\s\-\.\(\)]/g, '').trim();
-  }
-
   async getContactByLeadId(
     leadId: number,
   ): Promise<GoogleContactWithLeadDto | null> {
@@ -646,5 +636,360 @@ export class GoogleContactsService {
         'Erreur lors de la récupération du contact par Lead ID',
       );
     }
+  }
+
+  /**
+   * Migration : Associe les contacts Google existants (sans Lead ID) avec les leads du CRM
+   * Utilise le nom et numéro de téléphone pour faire le matching
+   */
+  async migrateExistingContacts(leads: any[]): Promise<{
+    success: boolean;
+    matched: number;
+    updated: number;
+    errors: string[];
+  }> {
+    try {
+      if (!this.accessToken) {
+        this.logger.warn(
+          'Google Contacts API not available - skipping migration',
+        );
+        return {
+          success: false,
+          matched: 0,
+          updated: 0,
+          errors: ['Google Contacts API not configured'],
+        };
+      }
+
+      this.logger.log('Starting migration of existing Google contacts...');
+
+      // Récupérer tous les contacts Google
+      const allContacts = await this.getAllContacts();
+
+      // Filtrer les contacts qui n'ont pas de Lead ID
+      const contactsWithoutLeadId = allContacts.filter((contact) => {
+        const hasLeadId = contact.userDefined?.some(
+          (field: any) => field.key === 'Lead ID',
+        );
+        return !hasLeadId;
+      });
+
+      this.logger.log(
+        `Found ${allContacts.length} contacts and ${contactsWithoutLeadId.length} without Lead ID`,
+      );
+      this.logger.log(
+        `Attempting to match with ${leads.length} leads from CRM`,
+      );
+
+      let matched = 0;
+      let updated = 0;
+      const errors: string[] = [];
+
+      // Délai entre chaque requête pour respecter les limites de l'API Google
+      const delayBetweenRequests = 500; // 500ms = 0.5 seconde
+
+      for (const contact of contactsWithoutLeadId) {
+        try {
+          // Extraire les informations du contact Google
+          const contactInfo = this.extractContactInfo(contact);
+
+          if (!contactInfo.phoneNumbers?.length) {
+            this.logger.warn(
+              `Contact ${contact.resourceName} has no phone number - skipping`,
+            );
+            continue;
+          }
+
+          // Chercher le lead correspondant
+          const matchingLead = this.findMatchingLead(leads, contactInfo);
+
+          if (matchingLead) {
+            matched++;
+            this.logger.log(
+              `Matched contact with phone numbers ${contactInfo.phoneNumbers.join(', ')} to lead ${matchingLead.firstName} ${matchingLead.lastName} (ID: ${matchingLead.ID})`,
+            );
+
+            try {
+              // Mettre à jour le contact Google avec toutes les infos du lead
+              await this.updateGoogleContactWithLeadInfo(
+                contact.resourceName,
+                matchingLead,
+              );
+              updated++;
+              this.logger.log(
+                `Updated contact with lead info: ${matchingLead.firstName} ${matchingLead.lastName} (ID: ${matchingLead.ID})`,
+              );
+
+              // Attendre avant la prochaine requête pour respecter les limites de l'API
+              await new Promise((resolve) =>
+                setTimeout(resolve, delayBetweenRequests),
+              );
+            } catch (updateError) {
+              // Si erreur 429 (rate limit), attendre plus longtemps et réessayer
+              if (updateError.message.includes('429')) {
+                this.logger.warn(
+                  `Rate limit hit - waiting 5 seconds before retry...`,
+                );
+                await new Promise((resolve) => setTimeout(resolve, 5000));
+
+                try {
+                  await this.updateGoogleContactWithLeadInfo(
+                    contact.resourceName,
+                    matchingLead,
+                  );
+                  updated++;
+                  this.logger.log(
+                    `Updated contact after retry: ${matchingLead.firstName} ${matchingLead.lastName} (ID: ${matchingLead.ID})`,
+                  );
+
+                  // Attendre après un retry réussi
+                  await new Promise((resolve) =>
+                    setTimeout(resolve, delayBetweenRequests),
+                  );
+                } catch (retryError) {
+                  const errorMsg = `Failed to update contact ${contact.resourceName} with Lead ID ${matchingLead.ID} even after retry: ${retryError.message}`;
+                  this.logger.error(errorMsg);
+                  errors.push(errorMsg);
+                }
+              } else {
+                const errorMsg = `Failed to update contact ${contact.resourceName} with Lead ID ${matchingLead.ID}: ${updateError.message}`;
+                this.logger.error(errorMsg);
+                errors.push(errorMsg);
+              }
+            }
+          } else {
+            this.logger.warn(
+              `No matching lead found for contact "${JSON.stringify(contactInfo)}"`,
+            );
+          }
+        } catch (contactError) {
+          const errorMsg = `Error processing contact ${contact.resourceName}: ${contactError.message}`;
+          this.logger.error(errorMsg);
+          errors.push(errorMsg);
+        }
+      }
+
+      const result = {
+        success: true,
+        matched,
+        updated,
+        errors,
+      };
+
+      this.logger.log(
+        `Migration completed: ${matched} matched, ${updated} updated, ${errors.length} errors`,
+      );
+      return result;
+    } catch (error) {
+      this.logger.error('Migration failed:', error);
+      return {
+        success: false,
+        matched: 0,
+        updated: 0,
+        errors: [error.message],
+      };
+    }
+  }
+
+  /**
+   * Récupère tous les contacts Google (avec pagination)
+   */
+  private async getAllContacts(): Promise<any[]> {
+    const allContacts: any[] = [];
+    let nextPageToken: string | undefined;
+
+    do {
+      const response = await axios.get(
+        'https://people.googleapis.com/v1/people/me/connections',
+        {
+          headers: {
+            Authorization: `Bearer ${this.accessToken}`,
+          },
+          params: {
+            personFields: 'names,phoneNumbers,emailAddresses,userDefined',
+            pageSize: 1000,
+            pageToken: nextPageToken,
+          },
+        },
+      );
+
+      if (response.data.connections) {
+        allContacts.push(...response.data.connections);
+      }
+
+      nextPageToken = response.data.nextPageToken;
+    } while (nextPageToken);
+
+    return allContacts;
+  }
+
+  /**
+   * Extrait les informations utiles d'un contact Google pour le matching
+   */
+  private extractContactInfo(contact: any): {
+    firstName?: string;
+    lastName?: string;
+    phoneNumbers: string[];
+    email?: string;
+  } {
+    const info: any = {
+      phoneNumbers: [],
+    };
+
+    // Nom et prénom
+    if (contact.names && contact.names.length > 0) {
+      info.firstName = contact.names[0].givenName?.toLowerCase()?.trim();
+      info.lastName = contact.names[0].familyName?.toLowerCase()?.trim();
+    }
+
+    // Numéros de téléphone - récupérer TOUS les numéros
+    if (contact.phoneNumbers) {
+      for (const phone of contact.phoneNumbers) {
+        const cleanPhone = this.cleanPhoneNumber(phone.value);
+        if (cleanPhone) {
+          info.phoneNumbers.push(cleanPhone);
+        }
+      }
+    }
+
+    // Email
+    if (contact.emailAddresses && contact.emailAddresses.length > 0) {
+      info.email = contact.emailAddresses[0].value?.toLowerCase()?.trim();
+    }
+
+    return info;
+  }
+
+  /**
+   * Trouve le lead correspondant dans la liste basé uniquement sur le numéro de téléphone
+   */
+  private findMatchingLead(leads: any[], contactInfo: any): any {
+    // Si aucun numéro de téléphone dans le contact, pas de match possible
+    if (!contactInfo.phoneNumbers || contactInfo.phoneNumbers.length === 0) {
+      return null;
+    }
+
+    return leads.find((lead) => {
+      // Récupérer tous les numéros du lead
+      const leadPhones: string[] = [];
+
+      if (lead.phoneNumber) {
+        const cleaned = this.cleanPhoneNumber(lead.phoneNumber);
+        if (cleaned) leadPhones.push(cleaned);
+      }
+
+      if (lead.whatsappNumber) {
+        const cleaned = this.cleanPhoneNumber(lead.whatsappNumber);
+        if (cleaned) leadPhones.push(cleaned);
+      }
+
+      // Vérifier si au moins un numéro du contact correspond à un numéro du lead
+      for (const contactPhone of contactInfo.phoneNumbers) {
+        if (leadPhones.includes(contactPhone)) {
+          return true; // Match trouvé !
+        }
+      }
+
+      return false;
+    });
+  }
+
+  /**
+   * Met à jour un contact Google avec les informations du lead
+   * (Lead ID, prénom, nom, email)
+   */
+  private async updateGoogleContactWithLeadInfo(
+    resourceName: string,
+    lead: any,
+  ): Promise<void> {
+    // Récupérer le contact existant pour obtenir l'etag
+    const existingContact = await this.getContact(resourceName);
+
+    // Conserver les userDefined existants et ajouter/mettre à jour le Lead ID
+    const userDefined = existingContact.userDefined || [];
+    const leadIdIndex = userDefined.findIndex(
+      (field: any) => field.key === 'Lead ID',
+    );
+
+    if (leadIdIndex >= 0) {
+      // ne rien faire, le Lead ID est déjà là
+    } else {
+      userDefined.push({
+        key: 'Lead ID',
+        value: lead.ID.toString(),
+      });
+    }
+
+    // Préparer les données de mise à jour
+    const updateData: any = {
+      etag: existingContact.etag,
+      userDefined: userDefined,
+      names: [
+        {
+          givenName: lead.firstName,
+          familyName: lead.lastName,
+        },
+      ],
+    };
+
+    // Ajouter l'email si disponible
+    if (lead.email) {
+      updateData.emailAddresses = [
+        {
+          value: lead.email,
+          type: 'other',
+        },
+      ];
+    }
+
+    await axios.patch(
+      `https://people.googleapis.com/v1/${resourceName}:updateContact`,
+      updateData,
+      {
+        headers: {
+          Authorization: `Bearer ${this.accessToken}`,
+          'Content-Type': 'application/json',
+        },
+        params: {
+          updatePersonFields: 'names,emailAddresses,userDefined',
+        },
+      },
+    );
+  }
+
+  /**
+   * Nettoie un numéro de téléphone pour la comparaison
+   */
+  private cleanPhoneNumber(
+    phoneNumber: string | undefined,
+  ): string | undefined {
+    if (!phoneNumber) return undefined;
+
+    // Supprimer espaces, tirets, points, parenthèses
+    let cleaned = phoneNumber.replace(/[\s\-\.\(\)]/g, '').trim();
+
+    // Gérer les préfixes internationaux courants
+    // +33 (France) -> 0
+    if (cleaned.startsWith('+33')) {
+      cleaned = '0' + cleaned.substring(3);
+    }
+    // +972 (Israël) -> 0
+    else if (cleaned.startsWith('+972')) {
+      cleaned = '0' + cleaned.substring(4);
+    }
+    // 0033 (France avec 00) -> 0
+    else if (cleaned.startsWith('0033')) {
+      cleaned = '0' + cleaned.substring(4);
+    }
+    // 00972 (Israël avec 00) -> 0
+    else if (cleaned.startsWith('00972')) {
+      cleaned = '0' + cleaned.substring(5);
+    }
+    // 00 suivi d'autres chiffres (autre pays) -> retirer le premier 0
+    else if (cleaned.startsWith('00') && cleaned.length > 2) {
+      cleaned = '0' + cleaned.substring(2);
+    }
+
+    return cleaned;
   }
 }

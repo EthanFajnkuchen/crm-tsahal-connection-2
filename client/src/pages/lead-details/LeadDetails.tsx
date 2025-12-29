@@ -1,6 +1,8 @@
 import React, { useEffect, useRef } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
+import { ArrowLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { fetchLeadDetailsThunk } from "../../store/thunks/lead-details/lead-details.thunk";
 import {
   getChangeRequestsByLeadIdThunk,
@@ -24,6 +26,8 @@ import { tabs } from "./constants/tabs";
 
 const LeadDetailsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
   const { roleType } = useUserPermissions();
   const {
@@ -36,6 +40,7 @@ const LeadDetailsPage: React.FC = () => {
   );
 
   const isAdmin = roleType[0] === RoleType.ADMINISTRATEUR;
+  const returnUrl = searchParams.get("returnUrl");
 
   // Functions to handle change request approval/rejection for admins
   const handleApproveChangeRequest = async (changeRequestId: number) => {
@@ -92,6 +97,27 @@ const LeadDetailsPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Bouton retour */}
+      <div className="bg-white border-b border-gray-200 px-4 py-3">
+        <div className="max-w-7xl mx-auto">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              if (returnUrl) {
+                navigate(returnUrl);
+              } else {
+                navigate("/data");
+              }
+            }}
+            className="gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Retour à la liste
+          </Button>
+        </div>
+      </div>
+
       <div className="sticky top-[6.5rem] lg:top-16 z-10 bg-white border-b border-gray-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex space-x-1 overflow-x-auto scrollbar-hide py-2">

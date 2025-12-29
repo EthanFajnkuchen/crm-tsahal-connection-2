@@ -21,8 +21,8 @@ interface ExpertConnectionSectionProps {
 
 const expertConnectionOptions = [
   { value: "Suivi Massa", label: "Suivi Massa" },
-  { value: "Suivi Classique", label: "Suivi Classique" },
-  { value: "Suivi Expert", label: "Suivi Expert" },
+  { value: "Forfait Classique", label: "Forfait Classique" },
+  { value: "Forfait Expert", label: "Forfait Expert" },
   { value: "Entretien individuel", label: "Entretien individuel" },
   {
     value: "Simulation Tsav Rishon/Yom Hamea",

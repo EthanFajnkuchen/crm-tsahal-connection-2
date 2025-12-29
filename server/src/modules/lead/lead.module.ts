@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Lead } from './lead.entity';
 import { LeadService } from './lead.service';
@@ -8,7 +8,12 @@ import { MailModule } from '../mail/mail.module';
 import { GoogleContactsModule } from '../google-contacts/google-contacts.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Lead]), DiscussionModule, MailModule, GoogleContactsModule],
+  imports: [
+    TypeOrmModule.forFeature([Lead]),
+    DiscussionModule,
+    MailModule,
+    forwardRef(() => GoogleContactsModule),
+  ],
   controllers: [LeadController],
   providers: [LeadService],
   exports: [LeadService],

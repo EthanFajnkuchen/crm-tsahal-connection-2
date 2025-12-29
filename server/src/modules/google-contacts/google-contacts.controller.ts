@@ -13,6 +13,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { GoogleContactsService } from './google-contacts.service';
+import { GoogleContactsMigrationService } from './migration.service';
 import {
   CreateGoogleContactDto,
   GoogleContactResponseDto,
@@ -23,7 +24,10 @@ import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
 @Controller('google-contacts')
 @UseGuards(JwtAuthGuard)
 export class GoogleContactsController {
-  constructor(private readonly googleContactsService: GoogleContactsService) {}
+  constructor(
+    private readonly googleContactsService: GoogleContactsService,
+    private readonly migrationService: GoogleContactsMigrationService,
+  ) {}
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
@@ -70,5 +74,11 @@ export class GoogleContactsController {
     @Param('contactId') contactId: string,
   ): Promise<GoogleContactResponseDto> {
     return this.googleContactsService.deleteContact(contactId);
+  }
+
+  @Post('migrate')
+  @HttpCode(HttpStatus.OK)
+  async migrateExistingContacts() {
+    return this.migrationService.runMigration();
   }
 }

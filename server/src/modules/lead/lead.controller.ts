@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   Param,
@@ -161,5 +162,14 @@ export class LeadController {
     errors: string[];
   }> {
     return this.leadService.bulkUpdateGiyus(bulkData);
+  }
+
+  @Delete(':id')
+  @Permissions('delete:data')
+  async deleteLead(@Param('id') id: string): Promise<{
+    success: boolean;
+    message: string;
+  }> {
+    return this.leadService.deleteLead(id);
   }
 }

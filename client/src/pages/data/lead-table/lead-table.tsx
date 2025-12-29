@@ -1,81 +1,129 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { ArrowUpDown, Download, Loader2 } from "lucide-react";
+import { Download, Loader2 } from "lucide-react";
 
 import { DataTable } from "@/components/app-components/table/table";
-import StatusBadge from "@/components/app-components/badge-status/badge-status";
 import Section from "@/components/app-components/section/section";
-import { Button } from "@/components/ui/button";
-import type { ColumnDef } from "@tanstack/react-table";
 import { Lead } from "@/types/lead";
+import { LeadTableFilters } from "./lead-table-filters";
+import { ColumnSettings } from "./column-settings";
+import {
+  createColumnDefinitions,
+  ColumnKey,
+  AVAILABLE_COLUMNS,
+} from "./lead-columns.config.tsx";
+import { filterLeads, LeadFilters } from "./lead-filters.utils";
 
 import { RootState, AppDispatch } from "@/store/store";
 import { fetchAllLeadsThunk } from "@/store/thunks/data/all-leads.thunk";
 import { searchLeadsThunk } from "@/store/thunks/data/search-leads.thunk";
 import { downloadLeadsThunk } from "@/store/thunks/data/excel.thunk";
 
-const columns: ColumnDef<Lead>[] = [
-  {
-    accessorKey: "dateInscription",
-    header: ({ column }) => (
-      <Button
-        variant="link"
-        className="p-0 m-0 border-none shadow-none text-inherit hover:no-underline"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-      >
-        Date d'inscription
-        <ArrowUpDown className="ml-2 h-4 w-4" />
-      </Button>
-    ),
-    cell: ({ row }) => {
-      const date = row.getValue("dateInscription") as string;
-      return new Date(date).toLocaleDateString("fr-FR");
-    },
-  },
-  {
-    accessorKey: "firstName",
-    header: "Prénom",
-  },
-  {
-    accessorKey: "lastName",
-    header: "Nom",
-  },
-  {
-    accessorKey: "statutCandidat",
-    header: "Statut du candidat",
-    cell: ({ row }) => {
-      const status = row.getValue("statutCandidat") as string;
-      return (
-        <div className="min-w-[200px] md:min-w-[180px]">
-          <StatusBadge status={status} />
-        </div>
-      );
-    },
-  },
-];
+const COLUMN_STORAGE_KEY = "lead-table-visible-columns";
+const DEFAULT_VISIBLE_COLUMNS: ColumnKey[] = AVAILABLE_COLUMNS.filter(
+  (col) => col.defaultVisible
+).map((col) => col.key);
 
 export function LeadTable() {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const searchQuery = searchParams.get("search");
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const [isDownloading, setIsDownloading] = useState(false);
 
-  const { data, isLoading, error } = useSelector((state: RootState) =>
-    searchQuery ? state.searchLeads : state.allLeads
+  // Récupérer les colonnes visibles depuis localStorage
+  const [visibleColumns, setVisibleColumns] = useState<ColumnKey[]>(() => {
+    const saved = localStorage.getItem(COLUMN_STORAGE_KEY);
+    return saved ? JSON.parse(saved) : DEFAULT_VISIBLE_COLUMNS;
+  });
+
+  // Récupérer les filtres et la page depuis URL params
+  const filters: LeadFilters = useMemo(
+    () => ({
+      search: searchParams.get("search") || undefined,
+      dateFrom: searchParams.get("dateFrom") || undefined,
+      dateTo: searchParams.get("dateTo") || undefined,
+      statutCandidat: searchParams.get("statutCandidat") || undefined,
+    }),
+    [searchParams]
   );
 
+  const currentPage = useMemo(() => {
+    const page = searchParams.get("page");
+    // Convertir de base 1 (URL) à base 0 (pageIndex)
+    return page ? parseInt(page, 10) - 1 : 0;
+  }, [searchParams]);
+
+  const { data, isLoading, error } = useSelector((state: RootState) =>
+    filters.search ? state.searchLeads : state.allLeads
+  );
+
+  // Charger les données au montage ou quand la recherche change
   useEffect(() => {
-    if (searchQuery) {
-      dispatch(searchLeadsThunk(searchQuery));
+    if (filters.search) {
+      dispatch(searchLeadsThunk(filters.search));
     } else {
       dispatch(fetchAllLeadsThunk());
     }
-  }, [dispatch, searchQuery]);
+  }, [dispatch, filters.search]);
 
-  const handleDownloadExcel = async () => {
+  // Filtrer les données avec useMemo pour éviter les recalculs inutiles
+  const filteredData = useMemo(() => {
+    if (!data) return [];
+    return filterLeads(data as Lead[], filters);
+  }, [data, filters]);
+
+  // Handler pour rafraîchir les données (optimisé avec useCallback)
+  const handleRefresh = useCallback(() => {
+    if (filters.search) {
+      dispatch(searchLeadsThunk(filters.search));
+    } else {
+      dispatch(fetchAllLeadsThunk());
+    }
+  }, [dispatch, filters.search]);
+
+  // Gérer les changements de filtres
+  const handleFiltersChange = useCallback(
+    (newFilters: LeadFilters) => {
+      const params = new URLSearchParams(searchParams);
+
+      // Mettre à jour les params
+      Object.entries(newFilters).forEach(([key, value]) => {
+        if (value && value !== "all") {
+          params.set(key, value);
+        } else {
+          params.delete(key);
+        }
+      });
+
+      // Réinitialiser la page lors d'un changement de filtre
+      params.delete("page");
+
+      setSearchParams(params);
+    },
+    [searchParams, setSearchParams]
+  );
+
+  // Effacer tous les filtres
+  const handleClearFilters = useCallback(() => {
+    const params = new URLSearchParams(searchParams);
+    params.delete("search");
+    params.delete("dateFrom");
+    params.delete("dateTo");
+    params.delete("statutCandidat");
+    params.delete("page");
+    setSearchParams(params);
+  }, [searchParams, setSearchParams]);
+
+  // Gérer les changements de colonnes visibles
+  const handleColumnsChange = useCallback((newColumns: ColumnKey[]) => {
+    setVisibleColumns(newColumns);
+    localStorage.setItem(COLUMN_STORAGE_KEY, JSON.stringify(newColumns));
+  }, []);
+
+  // Télécharger Excel
+  const handleDownloadExcel = useCallback(async () => {
     try {
       setIsDownloading(true);
       const result = await dispatch(downloadLeadsThunk()).unwrap();
@@ -91,7 +139,41 @@ export function LeadTable() {
     } finally {
       setIsDownloading(false);
     }
-  };
+  }, [dispatch]);
+
+  // Gérer les changements de page
+  const handlePageChange = useCallback(
+    (pageIndex: number) => {
+      const params = new URLSearchParams(searchParams);
+      // Convertir de base 0 (pageIndex) à base 1 (numéro de page pour URL)
+      const pageNumber = pageIndex + 1;
+      if (pageIndex > 0) {
+        params.set("page", pageNumber.toString());
+      } else {
+        params.delete("page");
+      }
+      setSearchParams(params);
+    },
+    [searchParams, setSearchParams]
+  );
+
+  // Naviguer vers les détails d'un lead en gardant les params
+  const handleRowClick = useCallback(
+    (row: Lead) => {
+      navigate(
+        `/lead-details/${row.ID}?returnUrl=${encodeURIComponent(
+          window.location.pathname + window.location.search
+        )}`
+      );
+    },
+    [navigate]
+  );
+
+  // Créer les colonnes avec useMemo
+  const columns = useMemo(
+    () => createColumnDefinitions(visibleColumns, handleRefresh),
+    [visibleColumns, handleRefresh]
+  );
 
   return (
     <Section
@@ -110,13 +192,31 @@ export function LeadTable() {
         )
       }
     >
-      <DataTable
-        columns={columns}
-        data={(data as Lead[]) || []}
-        isLoading={isLoading}
-        error={error}
-        onRowClick={(row) => navigate(`/lead-details/${(row as any).ID}`)}
-      />
+      <div className="space-y-4">
+        <div className="flex justify-between items-start gap-4">
+          <div className="flex-1">
+            <LeadTableFilters
+              filters={filters}
+              onFiltersChange={handleFiltersChange}
+              onClearFilters={handleClearFilters}
+            />
+          </div>
+          <ColumnSettings
+            visibleColumns={visibleColumns}
+            onColumnsChange={handleColumnsChange}
+          />
+        </div>
+
+        <DataTable
+          columns={columns}
+          data={filteredData}
+          isLoading={isLoading}
+          error={error}
+          onRowClick={handleRowClick}
+          initialPage={currentPage}
+          onPageChange={handlePageChange}
+        />
+      </div>
     </Section>
   );
 }
