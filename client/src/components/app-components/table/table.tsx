@@ -97,73 +97,82 @@ export function DataTable<TData, TValue>({
       <div className="w-full border rounded-md">
         <div className="overflow-x-auto scrollbar-custom">
           <table className="w-full caption-bottom text-sm min-w-[800px]">
-              <thead className="[&_tr]:border-b">
-            {table.getHeaderGroups().map((headerGroup) => (
-              <tr key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <th 
-                      key={header.id}
-                      className="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0"
-                    >
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                    </th>
-                  );
-                })}
-              </tr>
-            ))}
+            <thead className="[&_tr]:border-b">
+              {table.getHeaderGroups().map((headerGroup) => (
+                <tr key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => {
+                    return (
+                      <th
+                        key={header.id}
+                        className="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0"
+                      >
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
+                      </th>
+                    );
+                  })}
+                </tr>
+              ))}
             </thead>
             <tbody className="[&_tr:last-child]:border-0">
-            {isLoading || error ? (
-              [...Array(10)].map((_, index) => (
-                <tr key={index} className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
-                  {columns.map((_column, columnIndex) => (
-                    <td key={columnIndex} className="p-4 align-middle [&:has([role=checkbox])]:pr-0">
-                      <Skeleton className="h-4 w-full" />
-                    </td>
-                  ))}
-                </tr>
-              ))
-            ) : (
-              <>
-                {table.getRowModel().rows?.length ? (
-                  table.getRowModel().rows.map((row) => (
-                    <tr
-                      key={row.id}
-                      data-state={row.getIsSelected() && "selected"}
-                      className="border-b transition-colors cursor-pointer hover:bg-muted/50 data-[state=selected]:bg-muted"
-                      onClick={() => onRowClick?.(row.original)}
-                      onDoubleClick={() => onRowDoubleClick?.(row.original)}
-                    >
-                      {row.getVisibleCells().map((cell) => (
-                        <td key={cell.id} className="p-4 align-middle [&:has([role=checkbox])]:pr-0">
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext()
-                          )}
-                        </td>
-                      ))}
-                    </tr>
-                  ))
-                ) : (
-                  <tr className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
-                    <td
-                      colSpan={columns.length}
-                      className="h-24 p-4 align-middle text-center"
-                    >
-                      No results.
-                    </td>
+              {isLoading || error ? (
+                [...Array(10)].map((_, index) => (
+                  <tr
+                    key={index}
+                    className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+                  >
+                    {columns.map((_column, columnIndex) => (
+                      <td
+                        key={columnIndex}
+                        className="p-4 align-middle [&:has([role=checkbox])]:pr-0"
+                      >
+                        <Skeleton className="h-4 w-full" />
+                      </td>
+                    ))}
                   </tr>
-                )}
-              </>
-            )}
+                ))
+              ) : (
+                <>
+                  {table.getRowModel().rows?.length ? (
+                    table.getRowModel().rows.map((row) => (
+                      <tr
+                        key={row.id}
+                        data-state={row.getIsSelected() && "selected"}
+                        className="border-b transition-colors cursor-pointer hover:bg-muted/50 data-[state=selected]:bg-muted"
+                        onClick={() => onRowClick?.(row.original)}
+                        onDoubleClick={() => onRowDoubleClick?.(row.original)}
+                      >
+                        {row.getVisibleCells().map((cell) => (
+                          <td
+                            key={cell.id}
+                            className="p-4 align-middle [&:has([role=checkbox])]:pr-0"
+                          >
+                            {flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext()
+                            )}
+                          </td>
+                        ))}
+                      </tr>
+                    ))
+                  ) : (
+                    <tr className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
+                      <td
+                        colSpan={columns.length}
+                        className="h-24 p-4 align-middle text-center"
+                      >
+                        No results.
+                      </td>
+                    </tr>
+                  )}
+                </>
+              )}
             </tbody>
-            </table>
+          </table>
         </div>
       </div>
       <div className="overflow-x-auto">

@@ -80,10 +80,21 @@ export function LeadTableFilters({
           <div className="text-sm text-muted-foreground hidden lg:block">
             {[
               filters.search && `"${filters.search}"`,
-              filters.dateFrom && `Du ${format(new Date(filters.dateFrom), "dd/MM/yyyy", { locale: fr })}`,
-              filters.dateTo && `Au ${format(new Date(filters.dateTo), "dd/MM/yyyy", { locale: fr })}`,
-              filters.statutCandidat && filters.statutCandidat !== "all" && STATUS_CANDIDAT.find(s => s.value === filters.statutCandidat)?.displayName,
-            ].filter(Boolean).join(" • ")}
+              filters.dateFrom &&
+                `Du ${format(new Date(filters.dateFrom), "dd/MM/yyyy", {
+                  locale: fr,
+                })}`,
+              filters.dateTo &&
+                `Au ${format(new Date(filters.dateTo), "dd/MM/yyyy", {
+                  locale: fr,
+                })}`,
+              filters.statutCandidat &&
+                filters.statutCandidat !== "all" &&
+                STATUS_CANDIDAT.find((s) => s.value === filters.statutCandidat)
+                  ?.displayName,
+            ]
+              .filter(Boolean)
+              .join(" • ")}
           </div>
         )}
       </div>
@@ -91,7 +102,10 @@ export function LeadTableFilters({
       {isExpanded && (
         <div className="flex flex-wrap gap-4 p-6 border rounded-lg bg-gradient-to-br from-muted/50 to-muted/30 shadow-sm">
           <div className="space-y-2 flex-1 min-w-[250px]">
-            <Label htmlFor="search" className="text-sm font-semibold text-foreground">
+            <Label
+              htmlFor="search"
+              className="text-sm font-semibold text-foreground"
+            >
               Rechercher
             </Label>
             <Input
@@ -106,7 +120,10 @@ export function LeadTableFilters({
           </div>
 
           <div className="space-y-2 flex-1 min-w-[200px]">
-            <Label htmlFor="dateFrom" className="text-sm font-semibold text-foreground">
+            <Label
+              htmlFor="dateFrom"
+              className="text-sm font-semibold text-foreground"
+            >
               Date inscription (De)
             </Label>
             <Popover>
@@ -151,7 +168,10 @@ export function LeadTableFilters({
           </div>
 
           <div className="space-y-2 flex-1 min-w-[200px]">
-            <Label htmlFor="dateTo" className="text-sm font-semibold text-foreground">
+            <Label
+              htmlFor="dateTo"
+              className="text-sm font-semibold text-foreground"
+            >
               Date inscription (À)
             </Label>
             <Popover>
@@ -196,7 +216,10 @@ export function LeadTableFilters({
           </div>
 
           <div className="space-y-2 flex-1 min-w-[250px]">
-            <Label htmlFor="statut" className="text-sm font-semibold text-foreground">
+            <Label
+              htmlFor="statut"
+              className="text-sm font-semibold text-foreground"
+            >
               Statut du candidat
             </Label>
             <Select

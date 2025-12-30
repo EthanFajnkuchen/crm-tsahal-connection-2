@@ -202,56 +202,56 @@ export function LeadTable() {
 
   return (
     <div className="p-6 h-full">
-    <Section
-      title="Liste des leads"
-      onAction={handleDownloadExcel}
-      actionLoading={isDownloading}
-      actionButtonClassName="bg-[#3daa58] hover:bg-green-700 rounded-md"
-      actionButtonContent={
-        isDownloading ? (
-          <Loader2 className="w-4 h-4 animate-spin" />
-        ) : (
-          <div className="flex items-center gap-2">
-            <Download className="w-4 h-4" />
-            Télécharger Excel
-          </div>
-        )
-      }
-    >
-      <div className="space-y-4">
-        <div className="flex justify-between items-start gap-4">
-          <div className="flex-1">
-            <LeadTableFilters
-              filters={filters}
-              onFiltersChange={handleFiltersChange}
-              onClearFilters={handleClearFilters}
+      <Section
+        title="Liste des leads"
+        onAction={handleDownloadExcel}
+        actionLoading={isDownloading}
+        actionButtonClassName="bg-[#3daa58] hover:bg-green-700 rounded-md"
+        actionButtonContent={
+          isDownloading ? (
+            <Loader2 className="w-4 h-4 animate-spin" />
+          ) : (
+            <div className="flex items-center gap-2">
+              <Download className="w-4 h-4" />
+              Télécharger Excel
+            </div>
+          )
+        }
+      >
+        <div className="space-y-4">
+          <div className="flex justify-between items-start gap-4">
+            <div className="flex-1">
+              <LeadTableFilters
+                filters={filters}
+                onFiltersChange={handleFiltersChange}
+                onClearFilters={handleClearFilters}
+              />
+            </div>
+            <ColumnSettings
+              visibleColumns={visibleColumns}
+              onColumnsChange={handleColumnsChange}
             />
           </div>
-          <ColumnSettings
-            visibleColumns={visibleColumns}
-            onColumnsChange={handleColumnsChange}
+
+          <DataTable
+            columns={columns}
+            data={filteredData}
+            isLoading={isLoading}
+            error={error}
+            onRowClick={handleRowClick}
+            initialPage={currentPage}
+            onPageChange={handlePageChange}
+            pageCount={
+              filters.search ||
+              filters.dateFrom ||
+              filters.dateTo ||
+              filters.statutCandidat
+                ? undefined // Pas de pagination pour les recherches filtrées
+                : Math.ceil(total / 15)
+            }
           />
         </div>
-
-        <DataTable
-          columns={columns}
-          data={filteredData}
-          isLoading={isLoading}
-          error={error}
-          onRowClick={handleRowClick}
-          initialPage={currentPage}
-          onPageChange={handlePageChange}
-          pageCount={
-            filters.search ||
-            filters.dateFrom ||
-            filters.dateTo ||
-            filters.statutCandidat
-              ? undefined // Pas de pagination pour les recherches filtrées
-              : Math.ceil(total / 15)
-          }
-        />
-      </div>
-    </Section>
+      </Section>
     </div>
   );
 }
