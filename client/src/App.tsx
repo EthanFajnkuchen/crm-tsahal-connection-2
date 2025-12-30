@@ -10,6 +10,7 @@ import Data from "./pages/data/Data";
 import AppLayout from "./AppLayout";
 import ExpertConnection from "./pages/expert-connection/ExpertConnection";
 import MahzorGiyus from "./pages/mahzor-giyus/MahzorGiyus";
+import MahzorGiyusDetails from "./pages/mahzor-giyus/MahzorGiyusDetails";
 import { withAuthenticationRequired } from "@auth0/auth0-react";
 import AuthTokenRouteGuard from "./AuthTokenRouteGuard";
 import Logo from "@/assets/pictures/Logo Tsahal Conection.png";
@@ -51,6 +52,10 @@ function App() {
           <Route path="data" element={<Data />} />
           <Route path="expert-connection" element={<ExpertConnection />} />
           <Route path="mahzor-giyus" element={<MahzorGiyus />} />
+          <Route
+            path="mahzor-giyus/:mahzorKey"
+            element={<MahzorGiyusDetails />}
+          />
           <Route path="forms" element={<FormsRapports />} />
           <Route path="lead-details/:id" element={<LeadDetails />} />
           <Route path="tafkidim" element={<TafkidimPage />} />

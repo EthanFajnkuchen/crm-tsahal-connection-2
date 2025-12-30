@@ -90,29 +90,25 @@ export function ColumnSettings({
   onColumnsChange,
 }: ColumnSettingsProps) {
   const [open, setOpen] = useState(false);
-  const [orderedColumns, setOrderedColumns] = useState<ColumnConfig[]>(
-    () => {
-      // Order columns based on visibleColumns order
-      const columnsMap = new Map(
-        AVAILABLE_COLUMNS.map((col) => [col.key, col])
-      );
-      const ordered: ColumnConfig[] = [];
+  const [orderedColumns, setOrderedColumns] = useState<ColumnConfig[]>(() => {
+    // Order columns based on visibleColumns order
+    const columnsMap = new Map(AVAILABLE_COLUMNS.map((col) => [col.key, col]));
+    const ordered: ColumnConfig[] = [];
 
-      // Add visible columns in order
-      visibleColumns.forEach((key) => {
-        const col = columnsMap.get(key);
-        if (col) {
-          ordered.push(col);
-          columnsMap.delete(key);
-        }
-      });
+    // Add visible columns in order
+    visibleColumns.forEach((key) => {
+      const col = columnsMap.get(key);
+      if (col) {
+        ordered.push(col);
+        columnsMap.delete(key);
+      }
+    });
 
-      // Add remaining columns
-      columnsMap.forEach((col) => ordered.push(col));
+    // Add remaining columns
+    columnsMap.forEach((col) => ordered.push(col));
 
-      return ordered;
-    }
-  );
+    return ordered;
+  });
 
   const sensors = useSensors(
     useSensor(PointerSensor),

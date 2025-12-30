@@ -1,23 +1,9 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
 import MahzorGiyusCard from "@/components/app-components/mahzor-giyus-card/mahzor-giyus-card";
 import { fetchMahzorGiyusCountsThunk } from "@/store/thunks/mahzor-giyus/mahzor-giyus.thunk";
 import AccordionSection from "@/components/app-components/accordion-section/accordion-section";
-import { MahzorGiyusColumns } from "@/table-columns/mahzor-giyus-columns";
-import {
-  openPopup,
-  closePopup,
-  setCurrentPage,
-} from "@/store/slices/mahzor-giyus/mahzor-giyus.slice";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogClose,
-} from "@/components/ui/dialog";
-import { DataTable } from "@/components/app-components/table/table";
 import MahzorGiyusSkeletonSection from "@/components/app-components/mahzor-giyus-skeleton/mahzor-giyus-skeleton";
 import { useNavigate } from "react-router-dom";
 
@@ -32,29 +18,16 @@ const MahzorGiyus: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
 
-  const { data, isLoading, error, isPopupOpen, selectedCardKey, currentPage } =
-    useSelector((state: RootState) => state.mahzorGiyus);
+  const { data, isLoading, error } = useSelector(
+    (state: RootState) => state.mahzorGiyus
+  );
 
   useEffect(() => {
     dispatch(fetchMahzorGiyusCountsThunk());
   }, [dispatch]);
 
-  const selectedLeads = useMemo(() => {
-    if (!data || !selectedCardKey) return [];
-    for (const yearData of Object.values(data)) {
-      if (yearData[selectedCardKey]) {
-        return yearData[selectedCardKey].leads || [];
-      }
-    }
-    return [];
-  }, [data, selectedCardKey]);
-
   const handleCardClick = (key: string) => {
-    dispatch(openPopup(key));
-  };
-
-  const handlePageChange = (page: number) => {
-    dispatch(setCurrentPage(page));
+    navigate(`/mahzor-giyus/${encodeURIComponent(key)}`);
   };
 
   if (isLoading || error) {
@@ -67,12 +40,6 @@ const MahzorGiyus: React.FC = () => {
     );
   }
   if (!data) return <div>No data available.</div>;
-
-  const handleRowClick = (lead: any) => {
-    if (lead.ID) {
-      navigate(`/lead-details/${lead.ID}`);
-    }
-  };
 
   return (
     <div className="space-y-8">
@@ -122,29 +89,6 @@ const MahzorGiyus: React.FC = () => {
           </AccordionSection>
         );
       })}
-
-      <Dialog
-        open={isPopupOpen}
-        onOpenChange={(open) => !open && dispatch(closePopup())}
-      >
-        <DialogContent className="max-w-7xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{selectedCardKey || "Détails"}</DialogTitle>
-            <DialogClose />
-          </DialogHeader>
-          <div className="overflow-auto max-h-[70vh]">
-            <DataTable
-              columns={MahzorGiyusColumns.columns}
-              data={selectedLeads}
-              isLoading={false}
-              error={null}
-              onRowClick={handleRowClick}
-              initialPage={currentPage}
-              onPageChange={handlePageChange}
-            />
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };

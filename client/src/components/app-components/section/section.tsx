@@ -22,8 +22,8 @@ const Section: React.FC<SectionProps> = ({
   actionButtonContent,
 }) => {
   return (
-    <div className="bg-white m-3 p-4 rounded-2xl">
-      <div className="flex items-center justify-between mb-4">
+    <div className="bg-white p-6 rounded-2xl h-full flex flex-col">
+      <div className="flex items-center justify-between mb-6 flex-shrink-0">
         <h1 className="font-[Poppins] font-semibold text-xl">{title}</h1>
         {onAction && (
           <Button
@@ -43,7 +43,9 @@ const Section: React.FC<SectionProps> = ({
           </Button>
         )}
       </div>
-      {children}
+      <div className="flex-1 overflow-y-auto">
+        {children}
+      </div>
     </div>
   );
 };

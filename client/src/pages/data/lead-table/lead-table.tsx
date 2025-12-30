@@ -55,33 +55,58 @@ export function LeadTable() {
     return page ? parseInt(page, 10) - 1 : 0;
   }, [searchParams]);
 
-  const { data, isLoading, error } = useSelector((state: RootState) =>
-    filters.search ? state.searchLeads : state.allLeads
+  const { data, total, isLoading, error } = useSelector((state: RootState) =>
+    // Si au moins un filtre est actif, utiliser searchLeads, sinon allLeads
+    filters.search ||
+    filters.dateFrom ||
+    filters.dateTo ||
+    filters.statutCandidat
+      ? state.searchLeads
+      : state.allLeads
   );
 
-  // Charger les données au montage ou quand la recherche change
+  // Charger les données au montage ou quand les filtres/page changent
   useEffect(() => {
-    if (filters.search) {
-      dispatch(searchLeadsThunk(filters.search));
+    // Si au moins un filtre est actif, utiliser searchLeads
+    if (
+      filters.search ||
+      filters.dateFrom ||
+      filters.dateTo ||
+      filters.statutCandidat
+    ) {
+      dispatch(searchLeadsThunk(filters));
     } else {
-      dispatch(fetchAllLeadsThunk());
+      dispatch(fetchAllLeadsThunk({ page: currentPage, limit: 15 }));
     }
-  }, [dispatch, filters.search]);
+  }, [
+    dispatch,
+    filters.search,
+    filters.dateFrom,
+    filters.dateTo,
+    filters.statutCandidat,
+    currentPage,
+  ]);
 
-  // Filtrer les données avec useMemo pour éviter les recalculs inutiles
+  // Les données sont déjà filtrées par le backend, pas besoin de filtrer côté client
   const filteredData = useMemo(() => {
     if (!data) return [];
-    return filterLeads(data as Lead[], filters);
-  }, [data, filters]);
+    return data as Lead[];
+  }, [data]);
 
   // Handler pour rafraîchir les données (optimisé avec useCallback)
   const handleRefresh = useCallback(() => {
-    if (filters.search) {
-      dispatch(searchLeadsThunk(filters.search));
+    // Si au moins un filtre est actif, utiliser searchLeads
+    if (
+      filters.search ||
+      filters.dateFrom ||
+      filters.dateTo ||
+      filters.statutCandidat
+    ) {
+      dispatch(searchLeadsThunk(filters));
     } else {
-      dispatch(fetchAllLeadsThunk());
+      dispatch(fetchAllLeadsThunk({ page: currentPage, limit: 15 }));
     }
-  }, [dispatch, filters.search]);
+  }, [dispatch, filters, currentPage]);
 
   // Gérer les changements de filtres
   const handleFiltersChange = useCallback(
@@ -176,6 +201,7 @@ export function LeadTable() {
   );
 
   return (
+    <div className="p-6 h-full">
     <Section
       title="Liste des leads"
       onAction={handleDownloadExcel}
@@ -215,8 +241,17 @@ export function LeadTable() {
           onRowClick={handleRowClick}
           initialPage={currentPage}
           onPageChange={handlePageChange}
+          pageCount={
+            filters.search ||
+            filters.dateFrom ||
+            filters.dateTo ||
+            filters.statutCandidat
+              ? undefined // Pas de pagination pour les recherches filtrées
+              : Math.ceil(total / 15)
+          }
         />
       </div>
     </Section>
+    </div>
   );
 }

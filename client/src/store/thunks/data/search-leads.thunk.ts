@@ -2,9 +2,16 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 import { searchLeads } from "../../adapters/data/search-leads.adapter";
 import { Lead } from "@/types/lead";
 
-export const searchLeadsThunk = createAsyncThunk<Lead[], string>(
+interface SearchFilters {
+  search?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  statutCandidat?: string;
+}
+
+export const searchLeadsThunk = createAsyncThunk<Lead[], SearchFilters>(
   "leads/searchLeads",
-  async (searchInput) => {
-    return await searchLeads(searchInput);
+  async (filters) => {
+    return await searchLeads(filters);
   }
 );

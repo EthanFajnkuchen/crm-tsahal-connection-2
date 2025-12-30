@@ -6,6 +6,7 @@ import { ApiLead } from "@/store/adapters/lead/search-lead-by-email.adapter";
 
 interface SearchLeadsState {
   data: Lead[] | ApiLead[] | null;
+  total: number;
   status: "idle" | "loading" | "succeeded" | "failed";
   isLoading: boolean;
   error: string | null;
@@ -13,6 +14,7 @@ interface SearchLeadsState {
 
 const initialState: SearchLeadsState = {
   data: null,
+  total: 0,
   status: "idle",
   isLoading: false,
   error: null,
@@ -32,6 +34,7 @@ const searchLeadsSlice = createSlice({
         state.isLoading = false;
         state.status = "succeeded";
         state.data = action.payload;
+        state.total = action.payload.length; // Pour la recherche, le total = nombre de résultats
       })
       .addCase(searchLeadsThunk.rejected, (state, action) => {
         state.isLoading = false;
@@ -46,6 +49,7 @@ const searchLeadsSlice = createSlice({
         state.isLoading = false;
         state.status = "succeeded";
         state.data = action.payload;
+        state.total = Array.isArray(action.payload) ? action.payload.length : 1;
       })
       .addCase(searchLeadByEmailThunk.rejected, (state, action) => {
         state.isLoading = false;

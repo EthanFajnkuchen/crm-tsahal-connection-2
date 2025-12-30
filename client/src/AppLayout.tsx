@@ -8,12 +8,14 @@ const AppLayout = () => {
   const isMobile = useIsMobile();
 
   return (
-    <div className="md:flex">
+    <div className="md:flex h-screen overflow-hidden">
       {!isMobile && <AppSidebar />}
       {isMobile && <HeaderMobile />}
-      <div className="flex flex-col flex-1 bg-[#f3eefb]">
+      <div className="flex flex-col flex-1 bg-[#f3eefb] h-screen overflow-hidden">
         {!isMobile && <Header />}
-        <Outlet />
+        <div className="flex-1 overflow-y-auto">
+          <Outlet />
+        </div>
       </div>
     </div>
   );

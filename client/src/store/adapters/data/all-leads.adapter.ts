@@ -3,13 +3,24 @@ import { Lead } from "@/types/lead";
 
 const M2M_TOKEN = import.meta.env.VITE_API_M2M_TOKEN;
 
-export const fetchAllLeads = async (): Promise<Lead[]> => {
+interface FetchLeadsResponse {
+  data: Lead[];
+  total: number;
+}
+
+export const fetchAllLeads = async (
+  page: number,
+  limit: number = 15
+): Promise<FetchLeadsResponse> => {
   try {
-    const response = await fetch(`${API_ROUTES.DATA_TABLE_LEADS}`, {
-      headers: {
-        Authorization: `Bearer ${M2M_TOKEN}`,
-      },
-    });
+    const response = await fetch(
+      `${API_ROUTES.DATA_TABLE_LEADS}?page=${page}&limit=${limit}`,
+      {
+        headers: {
+          Authorization: `Bearer ${M2M_TOKEN}`,
+        },
+      }
+    );
 
     if (!response.ok) {
       throw new Error("Failed to fetch all leads");

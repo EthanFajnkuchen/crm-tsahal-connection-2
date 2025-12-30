@@ -39,9 +39,21 @@ export class LeadController {
 
   @Get()
   @Permissions('read:data')
-  async getLeads(@Query('limit') limit?: string): Promise<Partial<Lead>[]> {
+  async getLeads(
+    @Query('limit') limit?: string,
+    @Query('page') page?: string,
+  ): Promise<{ data: Partial<Lead>[]; total: number } | Partial<Lead>[]> {
     const parsedLimit = parseLimitParam(limit);
-    return this.leadService.getLeads(parsedLimit);
+    const parsedPage = page ? parseInt(page, 10) : undefined;
+
+    // Si page est fourni, retourner le format paginé
+    if (parsedPage !== undefined) {
+      return this.leadService.getLeads(parsedLimit || 15, parsedPage);
+    }
+
+    // Sinon, retourner seulement les données (compatibilité dashboard)
+    const result = await this.leadService.getLeads(parsedLimit);
+    return result.data;
   }
 
   @Get('statistics')
@@ -69,12 +81,19 @@ export class LeadController {
     return this.leadService.getLeadsWithFilters(filters);
   }
 
-  @Get('search')
+  @Post('search')
+  @HttpCode(200)
   @Permissions('read:data')
   async searchLeads(
-    @Query('input') searchInput: string,
+    @Body()
+    filters: {
+      search?: string;
+      dateFrom?: string;
+      dateTo?: string;
+      statutCandidat?: string;
+    },
   ): Promise<Partial<Lead>[]> {
-    return this.leadService.searchLeads(searchInput);
+    return this.leadService.searchLeads(filters);
   }
 
   @Get('expert-co-statistics')

@@ -111,3 +111,28 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Custom scrollbar styling */
+.scrollbar-custom {
+  scrollbar-width: thin;
+  scrollbar-color: #818cf8 #f3f4f6;
+}
+
+.scrollbar-custom::-webkit-scrollbar {
+  height: 8px;
+}
+
+.scrollbar-custom::-webkit-scrollbar-track {
+  background: linear-gradient(to right, #f9fafb, #f3f4f6);
+  border-radius: 8px;
+}
+
+.scrollbar-custom::-webkit-scrollbar-thumb {
+  background: linear-gradient(to right, #818cf8, #6366f1);
+  border-radius: 8px;
+  transition: background 0.2s ease;
+}
+
+.scrollbar-custom::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(to right, #6366f1, #4f46e5);
+}

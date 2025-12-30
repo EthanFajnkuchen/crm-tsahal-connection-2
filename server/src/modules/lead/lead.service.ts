@@ -360,7 +360,10 @@ export class LeadService {
     });
   }
 
-  async getLeads(limit?: number): Promise<Partial<Lead>[]> {
+  async getLeads(
+    limit?: number,
+    page?: number,
+  ): Promise<{ data: Partial<Lead>[]; total: number }> {
     const queryBuilder = this.leadRepository
       .createQueryBuilder('lead')
       .select([
@@ -373,14 +376,50 @@ export class LeadService {
         'lead.city',
         'lead.gender',
         'lead.statutCandidat',
+        'lead.currentStatus',
+        'lead.whatsappNumber',
+        'lead.giyusDate',
+        'lead.StatutLoiRetour',
+        'lead.typePoste',
+        'lead.nomPoste',
+        'lead.pikoud',
+        'lead.dateFinService',
+        'lead.birthDate',
+        'lead.expertConnection',
+        'lead.passportNumber1',
+        'lead.bacObtention',
+        'lead.soldierAloneStatus',
+        'lead.mahalPath',
+        'lead.serviceType',
       ])
       .orderBy('lead.dateInscription', 'DESC');
 
-    if (limit) {
+    // Récupérer le total avant la pagination
+    const total = await queryBuilder.getCount();
+
+    // Appliquer la pagination si page est fourni
+    if (page !== undefined && limit) {
+      const offset = page * limit;
+      queryBuilder.skip(offset).take(limit);
+    } else if (limit) {
+      // Si seulement limit est fourni (pour compatibilité dashboard)
       queryBuilder.limit(limit);
     }
 
-    return queryBuilder.getMany();
+    const leads = await queryBuilder.getMany();
+
+    const data = leads.map((lead) => ({
+      ...lead,
+      mahzorGiyus: this.calculateMahzorGiyus(lead.giyusDate),
+      typeGiyus: this.calculateTypeGiyus(
+        lead.giyusDate,
+        lead.mahalPath,
+        lead.currentStatus,
+        lead.serviceType,
+      ),
+    }));
+
+    return { data, total };
   }
 
   /**
@@ -580,35 +619,62 @@ export class LeadService {
     return query.getRawMany();
   }
 
-  async searchLeads(searchInput: string): Promise<Partial<Lead>[]> {
+  async searchLeads(filters: {
+    search?: string;
+    dateFrom?: string;
+    dateTo?: string;
+    statutCandidat?: string;
+  }): Promise<Partial<Lead>[]> {
     try {
-      if (!searchInput) {
-        throw new Error('Search input is required');
-      }
-
-      const searchWords = searchInput.toLowerCase().split(/\s+/);
-
       let query = this.leadRepository.createQueryBuilder('lead');
 
-      searchWords.forEach((word, index) => {
-        const searchQuery = `%${word}%`;
+      // Filtre de recherche textuelle (nom, prénom, email)
+      if (filters.search && filters.search.trim()) {
+        const searchWords = filters.search.toLowerCase().split(/\s+/);
 
-        if (index === 0) {
-          query = query.where(
-            `(LOWER(lead.firstName) LIKE :searchQuery${index} 
-          OR LOWER(lead.lastName) LIKE :searchQuery${index} 
-          OR LOWER(CONCAT(lead.firstName, ' ', lead.lastName)) LIKE :searchQuery${index})`,
-            { [`searchQuery${index}`]: searchQuery },
-          );
-        } else {
-          query = query.andWhere(
-            `(LOWER(lead.firstName) LIKE :searchQuery${index} 
-          OR LOWER(lead.lastName) LIKE :searchQuery${index} 
-          OR LOWER(CONCAT(lead.firstName, ' ', lead.lastName)) LIKE :searchQuery${index})`,
-            { [`searchQuery${index}`]: searchQuery },
-          );
-        }
-      });
+        searchWords.forEach((word, index) => {
+          const searchQuery = `%${word}%`;
+
+          if (index === 0) {
+            query = query.where(
+              `(LOWER(lead.firstName) LIKE :searchQuery${index} 
+            OR LOWER(lead.lastName) LIKE :searchQuery${index} 
+            OR LOWER(CONCAT(lead.firstName, ' ', lead.lastName)) LIKE :searchQuery${index}
+            OR LOWER(lead.email) LIKE :searchQuery${index})`,
+              { [`searchQuery${index}`]: searchQuery },
+            );
+          } else {
+            query = query.andWhere(
+              `(LOWER(lead.firstName) LIKE :searchQuery${index} 
+            OR LOWER(lead.lastName) LIKE :searchQuery${index} 
+            OR LOWER(CONCAT(lead.firstName, ' ', lead.lastName)) LIKE :searchQuery${index}
+            OR LOWER(lead.email) LIKE :searchQuery${index})`,
+              { [`searchQuery${index}`]: searchQuery },
+            );
+          }
+        });
+      }
+
+      // Filtre par date de début
+      if (filters.dateFrom) {
+        query = query.andWhere('lead.dateInscription >= :dateFrom', {
+          dateFrom: filters.dateFrom,
+        });
+      }
+
+      // Filtre par date de fin
+      if (filters.dateTo) {
+        query = query.andWhere('lead.dateInscription <= :dateTo', {
+          dateTo: filters.dateTo,
+        });
+      }
+
+      // Filtre par statut du candidat
+      if (filters.statutCandidat && filters.statutCandidat !== 'all') {
+        query = query.andWhere('lead.statutCandidat = :statutCandidat', {
+          statutCandidat: filters.statutCandidat,
+        });
+      }
 
       query = query.orderBy('lead.dateInscription', 'DESC');
 
@@ -620,10 +686,32 @@ export class LeadService {
         lastName: lead.lastName,
         email: lead.email,
         phoneNumber: lead.phoneNumber,
-        ville: lead.city,
-        genre: lead.gender,
+        city: lead.city,
+        gender: lead.gender,
         dateInscription: lead.dateInscription,
         statutCandidat: lead.statutCandidat,
+        currentStatus: lead.currentStatus,
+        whatsappNumber: lead.whatsappNumber,
+        giyusDate: lead.giyusDate,
+        StatutLoiRetour: lead.StatutLoiRetour,
+        typePoste: lead.typePoste,
+        nomPoste: lead.nomPoste,
+        pikoud: lead.pikoud,
+        dateFinService: lead.dateFinService,
+        birthDate: lead.birthDate,
+        expertConnection: lead.expertConnection,
+        passportNumber1: lead.passportNumber1,
+        bacObtention: lead.bacObtention,
+        soldierAloneStatus: lead.soldierAloneStatus,
+        mahalPath: lead.mahalPath,
+        serviceType: lead.serviceType,
+        mahzorGiyus: this.calculateMahzorGiyus(lead.giyusDate),
+        typeGiyus: this.calculateTypeGiyus(
+          lead.giyusDate,
+          lead.mahalPath,
+          lead.currentStatus,
+          lead.serviceType,
+        ),
       }));
     } catch (error) {
       throw new Error(`Search failed: ${error.message}`);
