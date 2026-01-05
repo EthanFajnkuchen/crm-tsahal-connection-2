@@ -1,11 +1,40 @@
 import { Lead } from "@/types/lead";
 
 export interface LeadFilters {
+  [key: string]: string | undefined;
   search?: string;
   dateFrom?: string;
   dateTo?: string;
   statutCandidat?: string;
+  firstName?: string;
+  lastName?: string;
+  gender?: string;
+  phoneNumber?: string;
+  whatsappNumber?: string;
+  passportNumber1?: string;
+  expertConnection?: string;
+  statutLoiRetour?: string;
+  currentStatus?: string;
+  city?: string;
+  soldierAloneStatus?: string;
+  bacObtention?: string;
+  dateFinService?: string;
+  pikoud?: string;
+  nomPoste?: string;
+  typePoste?: string;
+  typeGiyus?: string;
+  giyusDate?: string;
+  mahzorGiyus?: string;
 }
+
+export const hasActiveFilters = (
+  filters: LeadFilters
+): boolean => {
+  // Vérifier les filtres principaux
+  return Object.values(filters).some(
+    (value) => value !== undefined && value !== "" && value !== "all"
+  );
+};
 
 export const filterLeads = (leads: Lead[], filters: LeadFilters): Lead[] => {
   const filtered = leads.filter((lead) => {

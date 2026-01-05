@@ -65,6 +65,9 @@ export class Lead {
   @Column({ length: 20 })
   phoneNumber: string;
 
+  @Column({ type: 'text', nullable: true })
+  profilePhoto: string;
+
   @Column({ default: false })
   isWhatsAppSame: boolean;
 

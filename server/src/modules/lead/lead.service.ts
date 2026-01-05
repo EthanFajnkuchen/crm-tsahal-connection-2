@@ -442,6 +442,302 @@ export class LeadService {
       .getMany();
   }
 
+  /**
+   * Méthode privée pour construire une requête filtrée réutilisable
+   */
+  private buildFilteredQuery(
+    filters: {
+      search?: string;
+      dateFrom?: string;
+      dateTo?: string;
+      statutCandidat?: string;
+      firstName?: string;
+      lastName?: string;
+      gender?: string;
+      phoneNumber?: string;
+      whatsappNumber?: string;
+      passportNumber1?: string;
+      expertConnection?: string;
+      statutLoiRetour?: string;
+      currentStatus?: string;
+      [key: string]: string | undefined;
+    },
+    selectAllFields: boolean = false,
+  ) {
+    let query = this.leadRepository.createQueryBuilder('lead');
+
+    // Sélection des champs selon le contexte
+    if (selectAllFields) {
+      // Pour l'export Excel - tous les champs
+      query = query.select([
+        'lead.ID',
+        'lead.dateInscription',
+        'lead.firstName',
+        'lead.lastName',
+        'lead.email',
+        'lead.phoneNumber',
+        'lead.city',
+        'lead.gender',
+        'lead.birthDate',
+        'lead.statutCandidat',
+        'lead.pikoud',
+        'lead.dateFinService',
+        'lead.typePoste',
+        'lead.nomPoste',
+        'lead.expertConnection',
+        'lead.produitEC1',
+        'lead.produitEC2',
+        'lead.produitEC3',
+        'lead.produitEC4',
+        'lead.produitEC5',
+        'lead.dateProduitEC1',
+        'lead.dateProduitEC2',
+        'lead.dateProduitEC3',
+        'lead.dateProduitEC4',
+        'lead.dateProduitEC5',
+        'lead.whatsappNumber',
+        'lead.isWhatsAppSame',
+        'lead.isOnlyChild',
+        'lead.contactUrgenceLastName',
+        'lead.contactUrgenceFirstName',
+        'lead.contactUrgencePhoneNumber',
+        'lead.contactUrgenceMail',
+        'lead.contactUrgenceRelation',
+        'lead.StatutLoiRetour',
+        'lead.conversionDate',
+        'lead.conversionAgency',
+        'lead.statutResidentIsrael',
+        'lead.anneeAlyah',
+        'lead.numberOfNationalities',
+        'lead.nationality1',
+        'lead.passportNumber1',
+        'lead.nationality2',
+        'lead.passportNumber2',
+        'lead.nationality3',
+        'lead.passportNumber3',
+        'lead.hasIsraeliID',
+        'lead.israeliIDNumber',
+        'lead.bacObtention',
+        'lead.bacCountry',
+        'lead.bacType',
+        'lead.israeliBacSchool',
+        'lead.frenchBacSchoolIsrael',
+        'lead.otherSchoolName',
+        'lead.jewishSchool',
+        'lead.frenchBacSchoolFrance',
+        'lead.academicDiploma',
+        'lead.higherEducationCountry',
+        'lead.universityNameHebrew',
+        'lead.diplomaNameHebrew',
+        'lead.universityNameFrench',
+        'lead.diplomaNameFrench',
+        'lead.arrivalAge',
+        'lead.programParticipation',
+        'lead.programName',
+        'lead.schoolYears',
+        'lead.armyDeferralProgram',
+        'lead.programNameHebrewArmyDeferral',
+        'lead.currentStatus',
+        'lead.soldierAloneStatus',
+        'lead.serviceType',
+        'lead.mahalPath',
+        'lead.studyPath',
+        'lead.tsavRishonStatus',
+        'lead.recruitmentCenter',
+        'lead.tsavRishonDate',
+        'lead.tsavRishonGradesReceived',
+        'lead.daparNote',
+        'lead.medicalProfile',
+        'lead.hebrewScore',
+        'lead.keshevGrade',
+        'lead.yomHameaStatus',
+        'lead.yomHameaDate',
+        'lead.yomSayerotStatus',
+        'lead.yomSayerotDate',
+        'lead.armyEntryDateStatus',
+        'lead.giyusDate',
+        'lead.michveAlonTraining',
+      ]);
+    } else {
+      // Pour l'affichage tableau - champs essentiels
+      query = query.select([
+        'lead.ID',
+        'lead.dateInscription',
+        'lead.firstName',
+        'lead.lastName',
+        'lead.email',
+        'lead.phoneNumber',
+        'lead.city',
+        'lead.gender',
+        'lead.statutCandidat',
+        'lead.currentStatus',
+        'lead.whatsappNumber',
+        'lead.giyusDate',
+        'lead.StatutLoiRetour',
+        'lead.typePoste',
+        'lead.nomPoste',
+        'lead.pikoud',
+        'lead.dateFinService',
+        'lead.birthDate',
+        'lead.expertConnection',
+        'lead.passportNumber1',
+        'lead.bacObtention',
+        'lead.soldierAloneStatus',
+        'lead.mahalPath',
+        'lead.serviceType',
+      ]);
+    }
+
+    // Appliquer les filtres
+    // Filtre de recherche textuelle (nom, prénom, email)
+    if (filters.search && filters.search.trim()) {
+      const searchWords = filters.search.toLowerCase().split(/\s+/);
+      query = query.andWhere(
+        new Brackets((qb) => {
+          searchWords.forEach((word, index) => {
+            const paramName = `search${index}`;
+            if (index === 0) {
+              qb.where(
+                `(LOWER(lead.firstName) LIKE :${paramName} OR LOWER(lead.lastName) LIKE :${paramName} OR LOWER(lead.email) LIKE :${paramName})`,
+                { [paramName]: `%${word}%` },
+              );
+            } else {
+              qb.andWhere(
+                `(LOWER(lead.firstName) LIKE :${paramName} OR LOWER(lead.lastName) LIKE :${paramName} OR LOWER(lead.email) LIKE :${paramName})`,
+                { [paramName]: `%${word}%` },
+              );
+            }
+          });
+        }),
+      );
+    }
+
+    // Filtre par date de début
+    if (filters.dateFrom) {
+      query = query.andWhere('lead.dateInscription >= :dateFrom', {
+        dateFrom: filters.dateFrom,
+      });
+    }
+
+    // Filtre par date de fin
+    if (filters.dateTo) {
+      query = query.andWhere('lead.dateInscription <= :dateTo', {
+        dateTo: filters.dateTo,
+      });
+    }
+
+    // Filtre par statut du candidat
+    if (filters.statutCandidat && filters.statutCandidat !== 'all') {
+      query = query.andWhere('lead.statutCandidat = :statutCandidat', {
+        statutCandidat: filters.statutCandidat,
+      });
+    }
+
+    // Filtres textuels
+    if (filters.firstName) {
+      query = query.andWhere('LOWER(lead.firstName) LIKE :firstName', {
+        firstName: `%${filters.firstName.toLowerCase()}%`,
+      });
+    }
+
+    if (filters.lastName) {
+      query = query.andWhere('LOWER(lead.lastName) LIKE :lastName', {
+        lastName: `%${filters.lastName.toLowerCase()}%`,
+      });
+    }
+
+    if (filters.email) {
+      query = query.andWhere('LOWER(lead.email) LIKE :email', {
+        email: `%${filters.email.toLowerCase()}%`,
+      });
+    }
+
+    if (filters.city) {
+      query = query.andWhere('LOWER(lead.city) LIKE :city', {
+        city: `%${filters.city.toLowerCase()}%`,
+      });
+    }
+
+    // Filtres exacts et mapping de noms de champs
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value && value !== 'all') {
+        if (['gender', 'expertConnection', 'statutLoiRetour'].includes(key)) {
+          // Filtres exacts avec nom de champ direct
+          query = query.andWhere(`lead.${key} = :${key}`, { [key]: value });
+        } else if (key === 'currentStatus') {
+          // Filtre exact pour currentStatus
+          query = query.andWhere('lead.currentStatus = :currentStatus', {
+            currentStatus: value,
+          });
+        } else if (
+          ['phoneNumber', 'whatsappNumber', 'passportNumber1'].includes(key)
+        ) {
+          // Filtres textuels (LIKE)
+          query = query.andWhere(`LOWER(lead.${key}) LIKE :${key}`, {
+            [key]: `%${value.toLowerCase()}%`,
+          });
+        }
+      }
+    });
+
+    return query;
+  }
+
+  /**
+   * Recherche les leads avec filtres et pagination
+   */
+  async searchLeads(
+    filters: {
+      search?: string;
+      dateFrom?: string;
+      dateTo?: string;
+      statutCandidat?: string;
+      firstName?: string;
+      lastName?: string;
+      gender?: string;
+      phoneNumber?: string;
+      whatsappNumber?: string;
+      passportNumber1?: string;
+      expertConnection?: string;
+      statutLoiRetour?: string;
+      currentStatus?: string;
+      [key: string]: string | undefined;
+    },
+    page: number = 0,
+    limit: number = 15,
+  ): Promise<{ data: Partial<Lead>[]; total: number }> {
+    try {
+      // Utiliser la méthode commune pour construire la requête
+      let query = this.buildFilteredQuery(filters, false);
+
+      // Récupérer le total avant la pagination
+      const total = await query.getCount();
+
+      // Appliquer la pagination
+      if (page !== undefined && limit) {
+        const offset = page * limit;
+        query = query.skip(offset).take(limit);
+      }
+
+      const leads = await query.getMany();
+
+      const data = leads.map((lead) => ({
+        ...lead,
+        mahzorGiyus: this.calculateMahzorGiyus(lead.giyusDate),
+        typeGiyus: this.calculateTypeGiyus(
+          lead.giyusDate,
+          lead.mahalPath,
+          lead.currentStatus,
+          lead.serviceType,
+        ),
+      }));
+
+      return { data, total };
+    } catch (error) {
+      throw new Error(`Failed to search leads: ${error.message}`);
+    }
+  }
+
   async getStatistics(): Promise<LeadStatistics> {
     try {
       const totalLeads = await this.leadRepository.count();
@@ -617,105 +913,6 @@ export class LeadService {
     }
 
     return query.getRawMany();
-  }
-
-  async searchLeads(filters: {
-    search?: string;
-    dateFrom?: string;
-    dateTo?: string;
-    statutCandidat?: string;
-  }): Promise<Partial<Lead>[]> {
-    try {
-      let query = this.leadRepository.createQueryBuilder('lead');
-
-      // Filtre de recherche textuelle (nom, prénom, email)
-      if (filters.search && filters.search.trim()) {
-        const searchWords = filters.search.toLowerCase().split(/\s+/);
-
-        searchWords.forEach((word, index) => {
-          const searchQuery = `%${word}%`;
-
-          if (index === 0) {
-            query = query.where(
-              `(LOWER(lead.firstName) LIKE :searchQuery${index} 
-            OR LOWER(lead.lastName) LIKE :searchQuery${index} 
-            OR LOWER(CONCAT(lead.firstName, ' ', lead.lastName)) LIKE :searchQuery${index}
-            OR LOWER(lead.email) LIKE :searchQuery${index})`,
-              { [`searchQuery${index}`]: searchQuery },
-            );
-          } else {
-            query = query.andWhere(
-              `(LOWER(lead.firstName) LIKE :searchQuery${index} 
-            OR LOWER(lead.lastName) LIKE :searchQuery${index} 
-            OR LOWER(CONCAT(lead.firstName, ' ', lead.lastName)) LIKE :searchQuery${index}
-            OR LOWER(lead.email) LIKE :searchQuery${index})`,
-              { [`searchQuery${index}`]: searchQuery },
-            );
-          }
-        });
-      }
-
-      // Filtre par date de début
-      if (filters.dateFrom) {
-        query = query.andWhere('lead.dateInscription >= :dateFrom', {
-          dateFrom: filters.dateFrom,
-        });
-      }
-
-      // Filtre par date de fin
-      if (filters.dateTo) {
-        query = query.andWhere('lead.dateInscription <= :dateTo', {
-          dateTo: filters.dateTo,
-        });
-      }
-
-      // Filtre par statut du candidat
-      if (filters.statutCandidat && filters.statutCandidat !== 'all') {
-        query = query.andWhere('lead.statutCandidat = :statutCandidat', {
-          statutCandidat: filters.statutCandidat,
-        });
-      }
-
-      query = query.orderBy('lead.dateInscription', 'DESC');
-
-      const leads = await query.getMany();
-
-      return leads.map((lead) => ({
-        ID: lead.ID,
-        firstName: lead.firstName,
-        lastName: lead.lastName,
-        email: lead.email,
-        phoneNumber: lead.phoneNumber,
-        city: lead.city,
-        gender: lead.gender,
-        dateInscription: lead.dateInscription,
-        statutCandidat: lead.statutCandidat,
-        currentStatus: lead.currentStatus,
-        whatsappNumber: lead.whatsappNumber,
-        giyusDate: lead.giyusDate,
-        StatutLoiRetour: lead.StatutLoiRetour,
-        typePoste: lead.typePoste,
-        nomPoste: lead.nomPoste,
-        pikoud: lead.pikoud,
-        dateFinService: lead.dateFinService,
-        birthDate: lead.birthDate,
-        expertConnection: lead.expertConnection,
-        passportNumber1: lead.passportNumber1,
-        bacObtention: lead.bacObtention,
-        soldierAloneStatus: lead.soldierAloneStatus,
-        mahalPath: lead.mahalPath,
-        serviceType: lead.serviceType,
-        mahzorGiyus: this.calculateMahzorGiyus(lead.giyusDate),
-        typeGiyus: this.calculateTypeGiyus(
-          lead.giyusDate,
-          lead.mahalPath,
-          lead.currentStatus,
-          lead.serviceType,
-        ),
-      }));
-    } catch (error) {
-      throw new Error(`Search failed: ${error.message}`);
-    }
   }
 
   async getExpertCoStats(): Promise<{
@@ -945,9 +1142,28 @@ export class LeadService {
     }
   }
 
-  async downloadLeads(): Promise<StreamableFile> {
+  async downloadLeads(filters?: {
+    search?: string;
+    dateFrom?: string;
+    dateTo?: string;
+    statutCandidat?: string;
+    firstName?: string;
+    lastName?: string;
+    gender?: string;
+    phoneNumber?: string;
+    whatsappNumber?: string;
+    passportNumber1?: string;
+    expertConnection?: string;
+    statutLoiRetour?: string;
+    currentStatus?: string;
+    [key: string]: string | undefined;
+  }): Promise<StreamableFile> {
     try {
-      const leads = await this.leadRepository.find();
+      // Utiliser la méthode commune avec tous les champs pour l'export
+      let query = this.buildFilteredQuery(filters || {}, true);
+
+      // Récupérer tous les leads (sans pagination pour l'export)
+      const leads = await query.getMany();
 
       const workbook = new Workbook();
       const worksheet = workbook.addWorksheet('Data Soldats');
@@ -1071,7 +1287,18 @@ export class LeadService {
       worksheet.columns = columns;
 
       for (const lead of leads) {
-        worksheet.addRow(lead);
+        // Ajouter les champs calculés comme dans searchLeads
+        const processedLead = {
+          ...lead,
+          mahzorGiyus: this.calculateMahzorGiyus(lead.giyusDate),
+          typeGiyus: this.calculateTypeGiyus(
+            lead.giyusDate,
+            lead.mahalPath,
+            lead.currentStatus,
+            lead.serviceType,
+          ),
+        };
+        worksheet.addRow(processedLead);
       }
 
       const stream = new PassThrough();
@@ -1192,6 +1419,7 @@ export class LeadService {
         dateProduitEC3: lead.dateProduitEC3,
         dateProduitEC4: lead.dateProduitEC4,
         dateProduitEC5: lead.dateProduitEC5,
+        profilePhoto: lead.profilePhoto,
       };
 
       return leadData;

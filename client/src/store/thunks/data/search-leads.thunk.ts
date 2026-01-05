@@ -7,6 +7,15 @@ interface SearchFilters {
   dateFrom?: string;
   dateTo?: string;
   statutCandidat?: string;
+  firstName?: string;
+  lastName?: string;
+  gender?: string;
+  phoneNumber?: string;
+  whatsappNumber?: string;
+  passportNumber1?: string;
+  expertConnection?: string;
+  statutLoiRetour?: string;
+  situationActuelle?: string;
 }
 
 export const searchLeadsThunk = createAsyncThunk<Lead[], SearchFilters>(

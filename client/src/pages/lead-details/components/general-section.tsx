@@ -7,6 +7,7 @@ import {
 } from "@/components/form-components/form-section";
 import { FormDropdown } from "@/components/form-components/form-dropdown";
 import { FormDatePicker } from "@/components/form-components/form-date-picker";
+import { FormImageUpload } from "@/components/form-components/form-image-upload";
 import { RELATION } from "@/i18n/emergency-contact";
 import { useEffect } from "react";
 import { ChangeRequest } from "@/types/change-request";
@@ -36,6 +37,7 @@ export const GeneralSection = ({
     "gender",
     "birthDate",
     "isOnlyChild",
+    "profilePhoto",
     "contactUrgenceFirstName",
     "contactUrgenceLastName",
     "contactUrgencePhoneNumber",
@@ -71,6 +73,7 @@ export const GeneralSection = ({
       city: lead.city,
       gender: lead.gender || "",
       isOnlyChild: lead.isOnlyChild || "",
+      profilePhoto: lead.profilePhoto || "",
       contactUrgenceFirstName: lead.contactUrgenceFirstName || "",
       contactUrgenceLastName: lead.contactUrgenceLastName || "",
       contactUrgencePhoneNumber: lead.contactUrgencePhoneNumber || "",
@@ -88,6 +91,7 @@ export const GeneralSection = ({
       city: lead.city,
       gender: lead.gender || "",
       isOnlyChild: lead.isOnlyChild || "",
+      profilePhoto: lead.profilePhoto || "",
       contactUrgenceFirstName: lead.contactUrgenceFirstName || "",
       contactUrgenceLastName: lead.contactUrgenceLastName || "",
       contactUrgencePhoneNumber: lead.contactUrgencePhoneNumber || "",
@@ -180,6 +184,19 @@ export const GeneralSection = ({
             onRejectChangeRequest={onRejectChangeRequest}
             isAdmin={isAdmin}
             {...getFieldProps("gender")}
+          />
+
+          <FormImageUpload
+            control={control}
+            name="profilePhoto"
+            label="Photo de profil"
+            mode={mode}
+            isLoading={localIsLoading}
+            changeRequests={changeRequestsByLead}
+            onApproveChangeRequest={onApproveChangeRequest}
+            onRejectChangeRequest={onRejectChangeRequest}
+            isAdmin={isAdmin}
+            {...getFieldProps("profilePhoto")}
           />
 
           <FormDatePicker

@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import * as path from 'path';
 import * as fs from 'fs';
+import * as fsPromises from 'fs/promises';
 import axios from 'axios';
 import {
   CreateGoogleContactDto,
@@ -647,6 +648,8 @@ export class GoogleContactsService {
     matched: number;
     updated: number;
     errors: string[];
+    csvFilePath?: string;
+    unmatchedContactsCount: number;
   }> {
     try {
       if (!this.accessToken) {
@@ -658,6 +661,7 @@ export class GoogleContactsService {
           matched: 0,
           updated: 0,
           errors: ['Google Contacts API not configured'],
+          unmatchedContactsCount: 0,
         };
       }
 
@@ -684,6 +688,7 @@ export class GoogleContactsService {
       let matched = 0;
       let updated = 0;
       const errors: string[] = [];
+      const unmatchedContacts: any[] = [];
 
       // Délai entre chaque requête pour respecter les limites de l'API Google
       const delayBetweenRequests = 500; // 500ms = 0.5 seconde
@@ -697,6 +702,17 @@ export class GoogleContactsService {
             this.logger.warn(
               `Contact ${contact.resourceName} has no phone number - skipping`,
             );
+
+            // Ajouter aux contacts non matchés
+            unmatchedContacts.push({
+              resourceName: contact.resourceName,
+              firstName: contactInfo.firstName || '',
+              lastName: contactInfo.lastName || '',
+              email: contactInfo.email || '',
+              phoneNumbers: 'Aucun numéro',
+              reason: 'Pas de numéro de téléphone',
+            });
+
             continue;
           }
 
@@ -761,6 +777,16 @@ export class GoogleContactsService {
             this.logger.warn(
               `No matching lead found for contact "${JSON.stringify(contactInfo)}"`,
             );
+
+            // Ajouter aux contacts non matchés
+            unmatchedContacts.push({
+              resourceName: contact.resourceName,
+              firstName: contactInfo.firstName || '',
+              lastName: contactInfo.lastName || '',
+              email: contactInfo.email || '',
+              phoneNumbers: contactInfo.phoneNumbers.join('; '),
+              reason: 'Aucun lead correspondant trouvé',
+            });
           }
         } catch (contactError) {
           const errorMsg = `Error processing contact ${contact.resourceName}: ${contactError.message}`;
@@ -769,16 +795,43 @@ export class GoogleContactsService {
         }
       }
 
+      // Créer le fichier CSV pour les contacts non matchés
+      let csvFilePath: string | undefined;
+      this.logger.log(`Found ${unmatchedContacts.length} unmatched contacts`);
+
+      if (unmatchedContacts.length > 0) {
+        this.logger.log('Creating CSV file for unmatched contacts...');
+        try {
+          csvFilePath =
+            await this.createUnmatchedContactsCsv(unmatchedContacts);
+          this.logger.log(`CSV file created successfully: ${csvFilePath}`);
+        } catch (csvError) {
+          this.logger.error('Failed to create CSV file:', csvError);
+          errors.push(`Failed to create CSV file: ${csvError.message}`);
+        }
+      } else {
+        this.logger.log('No unmatched contacts found - skipping CSV creation');
+      }
+
       const result = {
         success: true,
         matched,
         updated,
         errors,
+        csvFilePath,
+        unmatchedContactsCount: unmatchedContacts.length,
       };
 
       this.logger.log(
-        `Migration completed: ${matched} matched, ${updated} updated, ${errors.length} errors`,
+        `Migration completed: ${matched} matched, ${updated} updated, ${unmatchedContacts.length} unmatched, ${errors.length} errors`,
       );
+
+      if (csvFilePath) {
+        this.logger.log(
+          `CSV file created for unmatched contacts: ${csvFilePath}`,
+        );
+      }
+
       return result;
     } catch (error) {
       this.logger.error('Migration failed:', error);
@@ -787,6 +840,7 @@ export class GoogleContactsService {
         matched: 0,
         updated: 0,
         errors: [error.message],
+        unmatchedContactsCount: 0,
       };
     }
   }
@@ -924,23 +978,23 @@ export class GoogleContactsService {
     const updateData: any = {
       etag: existingContact.etag,
       userDefined: userDefined,
-      names: [
-        {
-          givenName: lead.firstName,
-          familyName: lead.lastName,
-        },
-      ],
+      // names: [
+      //   {
+      //     givenName: lead.firstName,
+      //     familyName: lead.lastName,
+      //   },
+      // ],
     };
 
     // Ajouter l'email si disponible
-    if (lead.email) {
-      updateData.emailAddresses = [
-        {
-          value: lead.email,
-          type: 'other',
-        },
-      ];
-    }
+    // if (lead.email) {
+    //   updateData.emailAddresses = [
+    //     {
+    //       value: lead.email,
+    //       type: 'other',
+    //     },
+    //   ];
+    // }
 
     await axios.patch(
       `https://people.googleapis.com/v1/${resourceName}:updateContact`,
@@ -955,6 +1009,100 @@ export class GoogleContactsService {
         },
       },
     );
+  }
+
+  /**
+   * Crée un fichier CSV pour les contacts non matchés
+   */
+  private async createUnmatchedContactsCsv(
+    unmatchedContacts: any[],
+  ): Promise<string> {
+    try {
+      this.logger.log(
+        `Creating CSV for ${unmatchedContacts.length} unmatched contacts`,
+      );
+
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+      const fileName = `unmatched-contacts-${timestamp}.csv`;
+      const filePath = path.join(process.cwd(), 'logs', fileName);
+
+      this.logger.log(`CSV file path: ${filePath}`);
+
+      // Créer le dossier logs s'il n'existe pas
+      const logsDir = path.join(process.cwd(), 'logs');
+      this.logger.log(`Checking/creating logs directory: ${logsDir}`);
+
+      if (!fs.existsSync(logsDir)) {
+        this.logger.log('Creating logs directory...');
+        await fsPromises.mkdir(logsDir, { recursive: true });
+        this.logger.log('Logs directory created');
+      } else {
+        this.logger.log('Logs directory already exists');
+      }
+
+      // En-têtes CSV
+      const headers = [
+        'Resource Name',
+        'Prénom',
+        'Nom',
+        'Email',
+        'Numéros de téléphone',
+        'Raison',
+      ];
+
+      // Fonction pour échapper et nettoyer les valeurs CSV
+      const escapeCsvValue = (value: string): string => {
+        if (!value) return '';
+
+        // Remplacer les guillemets doubles par deux guillemets doubles
+        const escaped = value.replace(/"/g, '""');
+
+        // Entourer de guillemets si contient virgule, guillemet, saut de ligne ou point-virgule
+        if (
+          escaped.includes(',') ||
+          escaped.includes('"') ||
+          escaped.includes('\n') ||
+          escaped.includes(';')
+        ) {
+          return `"${escaped}"`;
+        }
+
+        return escaped;
+      };
+
+      // Construire le contenu CSV
+      this.logger.log('Building CSV content...');
+      let csvContent = headers.map((h) => escapeCsvValue(h)).join(',') + '\n';
+
+      for (const contact of unmatchedContacts) {
+        const row = [
+          contact.resourceName || '',
+          contact.firstName || '',
+          contact.lastName || '',
+          contact.email || '',
+          contact.phoneNumbers || '',
+          contact.reason || '',
+        ];
+
+        csvContent +=
+          row.map((val) => escapeCsvValue(val.toString())).join(',') + '\n';
+      }
+
+      this.logger.log(
+        `CSV content built, length: ${csvContent.length} characters`,
+      );
+
+      // Écrire le fichier avec encodage UTF-8 et BOM pour Excel
+      this.logger.log('Writing CSV file...');
+      const bom = '\uFEFF'; // BOM pour UTF-8
+      await fsPromises.writeFile(filePath, bom + csvContent, 'utf8');
+
+      this.logger.log(`CSV file created successfully: ${filePath}`);
+      return filePath;
+    } catch (error) {
+      this.logger.error('Failed to create CSV file:', error);
+      throw error;
+    }
   }
 
   /**

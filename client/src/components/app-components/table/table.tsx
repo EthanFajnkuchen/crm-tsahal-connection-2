@@ -143,8 +143,28 @@ export function DataTable<TData, TValue>({
                         key={row.id}
                         data-state={row.getIsSelected() && "selected"}
                         className="border-b transition-colors cursor-pointer hover:bg-muted/50 data-[state=selected]:bg-muted"
-                        onClick={() => onRowClick?.(row.original)}
-                        onDoubleClick={() => onRowDoubleClick?.(row.original)}
+                        onClick={(e) => {
+                          // Ne pas naviguer si le clic vient d'un Dialog/Portail Radix
+                          const target = e.target as HTMLElement;
+                          if (
+                            target.closest('[role="dialog"]') ||
+                            target.closest("[data-radix-portal]")
+                          ) {
+                            return;
+                          }
+                          onRowClick?.(row.original);
+                        }}
+                        onDoubleClick={(e) => {
+                          // Ne pas naviguer si le double-clic vient d'un Dialog/Portail Radix
+                          const target = e.target as HTMLElement;
+                          if (
+                            target.closest('[role="dialog"]') ||
+                            target.closest("[data-radix-portal]")
+                          ) {
+                            return;
+                          }
+                          onRowDoubleClick?.(row.original);
+                        }}
                       >
                         {row.getVisibleCells().map((cell) => (
                           <td

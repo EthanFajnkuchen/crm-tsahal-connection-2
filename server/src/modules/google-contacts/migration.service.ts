@@ -21,6 +21,8 @@ export class GoogleContactsMigrationService {
     totalLeads: number;
     matched: number;
     updated: number;
+    unmatchedContactsCount: number;
+    csvFilePath?: string;
     errors: string[];
     duration: number;
   }> {
@@ -44,6 +46,7 @@ export class GoogleContactsMigrationService {
           totalLeads: 0,
           matched: 0,
           updated: 0,
+          unmatchedContactsCount: 0,
           errors: ['Aucun lead trouvé dans le CRM'],
           duration: Date.now() - startTime,
         };
@@ -60,6 +63,12 @@ export class GoogleContactsMigrationService {
       this.logger.log(`- Leads dans le CRM: ${allLeads.length}`);
       this.logger.log(`- Contacts matchés: ${result.matched}`);
       this.logger.log(`- Contacts mis à jour: ${result.updated}`);
+      this.logger.log(
+        `- Contacts non matchés: ${result.unmatchedContactsCount}`,
+      );
+      if (result.csvFilePath) {
+        this.logger.log(`- Fichier CSV créé: ${result.csvFilePath}`);
+      }
       this.logger.log(`- Erreurs: ${result.errors.length}`);
       this.logger.log(`- Durée: ${Math.round(duration / 1000)}s`);
       this.logger.log('='.repeat(50));
@@ -85,6 +94,7 @@ export class GoogleContactsMigrationService {
         totalLeads: 0,
         matched: 0,
         updated: 0,
+        unmatchedContactsCount: 0,
         errors: [error.message],
         duration,
       };

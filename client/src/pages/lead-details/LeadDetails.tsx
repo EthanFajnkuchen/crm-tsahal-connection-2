@@ -1,8 +1,6 @@
 import React, { useEffect, useRef } from "react";
-import { useParams, useSearchParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { ArrowLeft } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { fetchLeadDetailsThunk } from "../../store/thunks/lead-details/lead-details.thunk";
 import {
   getChangeRequestsByLeadIdThunk,
@@ -26,8 +24,6 @@ import { tabs } from "./constants/tabs";
 
 const LeadDetailsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
   const { roleType } = useUserPermissions();
   const {
@@ -40,7 +36,6 @@ const LeadDetailsPage: React.FC = () => {
   );
 
   const isAdmin = roleType[0] === RoleType.ADMINISTRATEUR;
-  const returnUrl = searchParams.get("returnUrl");
 
   // Functions to handle change request approval/rejection for admins
   const handleApproveChangeRequest = async (changeRequestId: number) => {
@@ -97,28 +92,7 @@ const LeadDetailsPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Bouton retour */}
-      <div className="bg-white border-b border-gray-200 px-4 py-3">
-        <div className="max-w-7xl mx-auto">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => {
-              if (returnUrl) {
-                navigate(returnUrl);
-              } else {
-                navigate("/data");
-              }
-            }}
-            className="gap-2"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Retour à la liste
-          </Button>
-        </div>
-      </div>
-
-      <div className="sticky top-[6.5rem] lg:top-16 z-10 bg-white border-b border-gray-200 shadow-sm">
+      <div className="sticky top-0 z-10 bg-white border-b border-gray-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex space-x-1 overflow-x-auto scrollbar-hide py-2">
             {tabs.map((tab) => (
@@ -148,7 +122,7 @@ const LeadDetailsPage: React.FC = () => {
             <div
               ref={(el) => (sectionRefs.current["lead-info"] = el)}
               id="lead-info"
-              className="scroll-mt-20"
+              className="scroll-mt-16"
             >
               <LeadInfoSection
                 lead={lead}
@@ -162,7 +136,7 @@ const LeadDetailsPage: React.FC = () => {
             <div
               ref={(el) => (sectionRefs.current["general"] = el)}
               id="general"
-              className="scroll-mt-20"
+              className="scroll-mt-16"
             >
               <GeneralSection
                 lead={lead}
@@ -176,7 +150,7 @@ const LeadDetailsPage: React.FC = () => {
             <div
               ref={(el) => (sectionRefs.current["expert-connection"] = el)}
               id="expert-connection"
-              className="scroll-mt-20"
+              className="scroll-mt-16"
             >
               <ExpertConnectionSection lead={lead} />
             </div>
@@ -184,7 +158,7 @@ const LeadDetailsPage: React.FC = () => {
             <div
               ref={(el) => (sectionRefs.current["judaism-nationality"] = el)}
               id="judaism-nationality"
-              className="scroll-mt-20"
+              className="scroll-mt-16"
             >
               <JudaismNationalitySection
                 lead={lead}
@@ -198,7 +172,7 @@ const LeadDetailsPage: React.FC = () => {
             <div
               ref={(el) => (sectionRefs.current["education"] = el)}
               id="education"
-              className="scroll-mt-20"
+              className="scroll-mt-16"
             >
               <EducationSection
                 lead={lead}
@@ -212,7 +186,7 @@ const LeadDetailsPage: React.FC = () => {
             <div
               ref={(el) => (sectionRefs.current["integration-israel"] = el)}
               id="integration-israel"
-              className="scroll-mt-20"
+              className="scroll-mt-16"
             >
               <IntegrationIsraelSection
                 lead={lead}
@@ -226,7 +200,7 @@ const LeadDetailsPage: React.FC = () => {
             <div
               ref={(el) => (sectionRefs.current["tsahal"] = el)}
               id="tsahal"
-              className="scroll-mt-20"
+              className="scroll-mt-16"
             >
               <TsahalSection
                 lead={lead}
@@ -240,7 +214,7 @@ const LeadDetailsPage: React.FC = () => {
             <div
               ref={(el) => (sectionRefs.current["discussions"] = el)}
               id="discussions"
-              className="scroll-mt-20"
+              className="scroll-mt-16"
             >
               <DiscussionsSection lead={lead} />
             </div>
@@ -248,7 +222,7 @@ const LeadDetailsPage: React.FC = () => {
             <div
               ref={(el) => (sectionRefs.current["activities"] = el)}
               id="activities"
-              className="scroll-mt-20"
+              className="scroll-mt-16"
             >
               <ActivitiesSection lead={lead} />
             </div>

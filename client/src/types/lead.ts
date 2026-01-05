@@ -20,6 +20,7 @@ export interface Lead {
   gender: string;
   email: string;
   phoneNumber: string;
+  profilePhoto?: string;
   isWhatsAppSame: boolean;
   whatsappNumber?: string;
   city: string;

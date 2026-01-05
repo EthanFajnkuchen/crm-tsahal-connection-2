@@ -25,7 +25,7 @@ export type ColumnKey =
   | "whatsappNumber"
   | "mahzorGiyus"
   | "giyusDate"
-  | "StatutLoiRetour"
+  | "statutLoiRetour"
   | "typeGiyus"
   | "typePoste"
   | "nomPoste"
@@ -42,69 +42,145 @@ export interface ColumnConfig {
   key: ColumnKey;
   label: string;
   defaultVisible: boolean;
+  filterable?: boolean;
 }
 
 export const AVAILABLE_COLUMNS: ColumnConfig[] = [
-  { key: "dateInscription", label: "Date d'inscription", defaultVisible: true },
-  { key: "firstName", label: "Prénom", defaultVisible: true },
-  { key: "lastName", label: "Nom", defaultVisible: true },
-  { key: "email", label: "Email", defaultVisible: false },
-  { key: "phoneNumber", label: "Téléphone", defaultVisible: false },
-  { key: "whatsappNumber", label: "WhatsApp", defaultVisible: false },
-  { key: "city", label: "Ville", defaultVisible: false },
-  { key: "gender", label: "Genre", defaultVisible: false },
-  { key: "birthDate", label: "Date de naissance", defaultVisible: false },
-  { key: "ID", label: "ID", defaultVisible: false },
-  { key: "statutCandidat", label: "Statut du candidat", defaultVisible: true },
-  { key: "currentStatus", label: "Situation actuelle", defaultVisible: false },
-  { key: "mahzorGiyus", label: "Mahzor Giyus", defaultVisible: false },
-  { key: "giyusDate", label: "Date de Giyus", defaultVisible: false },
-  { key: "typeGiyus", label: "Type Giyus", defaultVisible: false },
   {
-    key: "StatutLoiRetour",
+    key: "dateInscription",
+    label: "Date d'inscription",
+    defaultVisible: true,
+    filterable: true,
+  },
+  { key: "firstName", label: "Prénom", defaultVisible: true, filterable: true },
+  { key: "lastName", label: "Nom", defaultVisible: true, filterable: true },
+  { key: "email", label: "Email", defaultVisible: false, filterable: true },
+  {
+    key: "phoneNumber",
+    label: "Téléphone",
+    defaultVisible: false,
+    filterable: true,
+  },
+  {
+    key: "whatsappNumber",
+    label: "WhatsApp",
+    defaultVisible: false,
+    filterable: true,
+  },
+  { key: "city", label: "Ville", defaultVisible: false, filterable: true },
+  { key: "gender", label: "Genre", defaultVisible: false, filterable: true },
+  {
+    key: "birthDate",
+    label: "Date de naissance",
+    defaultVisible: false,
+    filterable: true,
+  },
+  { key: "ID", label: "ID", defaultVisible: false, filterable: false },
+  {
+    key: "statutCandidat",
+    label: "Statut du candidat",
+    defaultVisible: true,
+    filterable: true,
+  },
+  {
+    key: "currentStatus",
+    label: "Situation actuelle",
+    defaultVisible: false,
+    filterable: true,
+  },
+  {
+    key: "mahzorGiyus",
+    label: "Mahzor Giyus",
+    defaultVisible: false,
+    filterable: true,
+  },
+  {
+    key: "giyusDate",
+    label: "Date de Giyus",
+    defaultVisible: false,
+    filterable: true,
+  },
+  {
+    key: "typeGiyus",
+    label: "Type Giyus",
+    defaultVisible: false,
+    filterable: true,
+  },
+  {
+    key: "statutLoiRetour",
     label: "Statut Loi du Retour",
     defaultVisible: false,
+    filterable: true,
   },
-  { key: "typePoste", label: "Type de poste", defaultVisible: false },
-  { key: "nomPoste", label: "Nom du poste", defaultVisible: false },
-  { key: "pikoud", label: "Pikoud", defaultVisible: false },
+  {
+    key: "typePoste",
+    label: "Type de poste",
+    defaultVisible: false,
+    filterable: true,
+  },
+  {
+    key: "nomPoste",
+    label: "Nom du poste",
+    defaultVisible: false,
+    filterable: true,
+  },
+  { key: "pikoud", label: "Pikoud", defaultVisible: false, filterable: true },
   {
     key: "dateFinService",
     label: "Date de fin de service",
     defaultVisible: false,
+    filterable: true,
   },
   {
     key: "expertConnection",
     label: "Expert Connection",
     defaultVisible: false,
+    filterable: true,
   },
   {
     key: "passportNumber1",
     label: "Numéro de passeport",
     defaultVisible: false,
+    filterable: true,
   },
-  { key: "bacObtention", label: "Obtention du Bac", defaultVisible: false },
-  { key: "soldierAloneStatus", label: "Soldat seul", defaultVisible: false },
-  { key: "actions", label: "Actions", defaultVisible: true },
+  {
+    key: "bacObtention",
+    label: "Obtention du Bac",
+    defaultVisible: false,
+    filterable: true,
+  },
+  {
+    key: "soldierAloneStatus",
+    label: "Soldat seul",
+    defaultVisible: false,
+    filterable: true,
+  },
+  { key: "actions", label: "Actions", defaultVisible: true, filterable: false },
 ];
 
 export const createColumnDefinitions = (
   visibleColumns: ColumnKey[],
   onRefresh: () => void
 ): ColumnDef<Lead>[] => {
+
+  // Mapping des colonnes
   const allColumns: Record<ColumnKey, ColumnDef<Lead>> = {
     dateInscription: {
       accessorKey: "dateInscription",
-      header: ({ column }) => (
-        <Button
-          variant="link"
-          className="p-0 m-0 border-none shadow-none text-inherit hover:no-underline"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Date d'inscription
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      ),
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="link"
+            className="p-0 m-0 border-none shadow-none text-inherit hover:no-underline"
+            onClick={() =>
+              column.toggleSorting(column.getIsSorted() === "asc")
+            }
+          >
+            Date d'inscription
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        );
+      },
       cell: ({ row }) => {
         const date = row.getValue("dateInscription") as string;
         return new Date(date).toLocaleDateString("fr-FR");
@@ -112,15 +188,15 @@ export const createColumnDefinitions = (
     },
     firstName: {
       accessorKey: "firstName",
-      header: "Prénom",
+      header: () => "Prénom",
     },
     lastName: {
       accessorKey: "lastName",
-      header: "Nom",
+      header: () => "Nom",
     },
     email: {
       accessorKey: "email",
-      header: "Email",
+      header: () => "Email",
       cell: ({ row }) => {
         const email = row.getValue("email") as string;
         return email || "-";
@@ -128,7 +204,7 @@ export const createColumnDefinitions = (
     },
     phoneNumber: {
       accessorKey: "phoneNumber",
-      header: "Téléphone",
+      header: () => "Téléphone",
       cell: ({ row }) => {
         const phone = row.getValue("phoneNumber") as string;
         return phone || "-";
@@ -136,7 +212,7 @@ export const createColumnDefinitions = (
     },
     city: {
       accessorKey: "city",
-      header: "Ville",
+      header: () => "Ville",
       cell: ({ row }) => {
         const city = row.getValue("city") as string;
         return city || "-";
@@ -144,7 +220,7 @@ export const createColumnDefinitions = (
     },
     gender: {
       accessorKey: "gender",
-      header: "Genre",
+      header: () => "Genre",
       cell: ({ row }) => {
         const gender = row.getValue("gender") as string;
         return gender || "-";
@@ -156,7 +232,7 @@ export const createColumnDefinitions = (
     },
     statutCandidat: {
       accessorKey: "statutCandidat",
-      header: "Statut du candidat",
+      header: () => "Statut du candidat",
       cell: ({ row }) => {
         const status = row.getValue("statutCandidat") as string;
         return (
@@ -168,7 +244,7 @@ export const createColumnDefinitions = (
     },
     currentStatus: {
       accessorKey: "currentStatus",
-      header: "Situation actuelle",
+      header: () => "Situation actuelle",
       cell: ({ row }) => {
         const status = row.getValue("currentStatus") as string;
         return status || "-";
@@ -176,7 +252,7 @@ export const createColumnDefinitions = (
     },
     whatsappNumber: {
       accessorKey: "whatsappNumber",
-      header: "WhatsApp",
+      header: () => "WhatsApp",
       cell: ({ row }) => {
         const whatsapp = row.getValue("whatsappNumber") as string;
         return whatsapp || "-";
@@ -184,7 +260,7 @@ export const createColumnDefinitions = (
     },
     mahzorGiyus: {
       accessorKey: "mahzorGiyus",
-      header: "Mahzor Giyus",
+      header: () => "Mahzor Giyus",
       cell: ({ row }) => {
         const mahzor = row.getValue("mahzorGiyus") as string;
         return mahzor || "-";
@@ -192,25 +268,42 @@ export const createColumnDefinitions = (
     },
     giyusDate: {
       accessorKey: "giyusDate",
-      header: ({ column }) => (
-        <Button
-          variant="link"
-          className="p-0 m-0 border-none shadow-none text-inherit hover:no-underline"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Date de Giyus
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      ),
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="link"
+            className="p-0 m-0 border-none shadow-none text-inherit hover:no-underline"
+            onClick={() =>
+              column.toggleSorting(column.getIsSorted() === "asc")
+            }
+          >
+            Date de Giyus
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        );
+      },
       cell: ({ row }) => {
         const date = row.getValue("giyusDate") as string;
         if (!date) return "-";
         return new Date(date).toLocaleDateString("fr-FR");
       },
     },
-    StatutLoiRetour: {
+    statutLoiRetour: {
       accessorKey: "StatutLoiRetour",
-      header: "Statut Loi du Retour",
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="link"
+            className="p-0 m-0 border-none shadow-none text-inherit hover:no-underline"
+            onClick={() =>
+              column.toggleSorting(column.getIsSorted() === "asc")
+            }
+          >
+            Statut Loi du Retour
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        );
+      },
       cell: ({ row }) => {
         const value = row.getValue("StatutLoiRetour") as string;
         const option = JUDAISM.status_return_law.find(
@@ -239,7 +332,7 @@ export const createColumnDefinitions = (
     },
     nomPoste: {
       accessorKey: "nomPoste",
-      header: "Nom du poste",
+      header: () => "Nom du poste",
       cell: ({ row }) => {
         const nom = row.getValue("nomPoste") as string;
         return nom || "-";
@@ -256,16 +349,20 @@ export const createColumnDefinitions = (
     },
     dateFinService: {
       accessorKey: "dateFinService",
-      header: ({ column }) => (
-        <Button
-          variant="link"
-          className="p-0 m-0 border-none shadow-none text-inherit hover:no-underline"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Date de fin de service
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      ),
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="link"
+            className="p-0 m-0 border-none shadow-none text-inherit hover:no-underline"
+            onClick={() =>
+              column.toggleSorting(column.getIsSorted() === "asc")
+            }
+          >
+            Date de fin de service
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        );
+      },
       cell: ({ row }) => {
         const date = row.getValue("dateFinService") as string;
         if (!date) return "-";
@@ -274,16 +371,20 @@ export const createColumnDefinitions = (
     },
     birthDate: {
       accessorKey: "birthDate",
-      header: ({ column }) => (
-        <Button
-          variant="link"
-          className="p-0 m-0 border-none shadow-none text-inherit hover:no-underline"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Date de naissance
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      ),
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="link"
+            className="p-0 m-0 border-none shadow-none text-inherit hover:no-underline"
+            onClick={() =>
+              column.toggleSorting(column.getIsSorted() === "asc")
+            }
+          >
+            Date de naissance
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        );
+      },
       cell: ({ row }) => {
         const date = row.getValue("birthDate") as string;
         if (!date) return "-";
@@ -302,7 +403,7 @@ export const createColumnDefinitions = (
     },
     passportNumber1: {
       accessorKey: "passportNumber1",
-      header: "Numéro de passeport",
+      header: () => "Numéro de passeport",
       cell: ({ row }) => {
         const passport = row.getValue("passportNumber1") as string;
         return passport || "-";

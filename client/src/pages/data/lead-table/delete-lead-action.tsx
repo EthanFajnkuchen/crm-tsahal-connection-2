@@ -64,7 +64,17 @@ export function DeleteLeadAction({ lead, onSuccess }: DeleteLeadActionProps) {
           <Trash2 className="h-4 w-4" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent
+        className="sm:max-w-[425px]"
+        onPointerDownOutside={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+        }}
+        onInteractOutside={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+        }}
+      >
         <DialogHeader>
           <DialogTitle>Confirmer la suppression</DialogTitle>
           <DialogDescription>

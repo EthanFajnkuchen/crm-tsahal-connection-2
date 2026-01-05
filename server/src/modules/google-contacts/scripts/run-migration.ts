@@ -58,6 +58,12 @@ async function bootstrap() {
     console.log(`📋 Leads dans le CRM: ${result.totalLeads}`);
     console.log(`🔗 Contacts matchés: ${result.matched}`);
     console.log(`📝 Contacts mis à jour: ${result.updated}`);
+    console.log(
+      `❓ Contacts non matchés: ${result.unmatchedContactsCount || 0}`,
+    );
+    if (result.csvFilePath) {
+      console.log(`📄 Fichier CSV créé: ${result.csvFilePath}`);
+    }
     console.log(`⏱️  Durée: ${Math.round(result.duration / 1000)}s`);
     console.log(`❌ Erreurs: ${result.errors.length}`);
     console.log('='.repeat(60));

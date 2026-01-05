@@ -13,11 +13,10 @@ import {
   ColumnKey,
   AVAILABLE_COLUMNS,
 } from "./lead-columns.config.tsx";
-import { filterLeads, LeadFilters } from "./lead-filters.utils";
+import { LeadFilters, hasActiveFilters } from "./lead-filters.utils";
 
 import { RootState, AppDispatch } from "@/store/store";
 import { fetchAllLeadsThunk } from "@/store/thunks/data/all-leads.thunk";
-import { searchLeadsThunk } from "@/store/thunks/data/search-leads.thunk";
 import { downloadLeadsThunk } from "@/store/thunks/data/excel.thunk";
 
 const COLUMN_STORAGE_KEY = "lead-table-visible-columns";
@@ -45,6 +44,25 @@ export function LeadTable() {
       dateFrom: searchParams.get("dateFrom") || undefined,
       dateTo: searchParams.get("dateTo") || undefined,
       statutCandidat: searchParams.get("statutCandidat") || undefined,
+      firstName: searchParams.get("firstName") || undefined,
+      lastName: searchParams.get("lastName") || undefined,
+      gender: searchParams.get("gender") || undefined,
+      phoneNumber: searchParams.get("phoneNumber") || undefined,
+      whatsappNumber: searchParams.get("whatsappNumber") || undefined,
+      passportNumber1: searchParams.get("passportNumber1") || undefined,
+      expertConnection: searchParams.get("expertConnection") || undefined,
+      statutLoiRetour: searchParams.get("statutLoiRetour") || undefined,
+      currentStatus: searchParams.get("currentStatus") || undefined,
+      city: searchParams.get("city") || undefined,
+      soldierAloneStatus: searchParams.get("soldierAloneStatus") || undefined,
+      bacObtention: searchParams.get("bacObtention") || undefined,
+      dateFinService: searchParams.get("dateFinService") || undefined,
+      pikoud: searchParams.get("pikoud") || undefined,
+      nomPoste: searchParams.get("nomPoste") || undefined,
+      typePoste: searchParams.get("typePoste") || undefined,
+      typeGiyus: searchParams.get("typeGiyus") || undefined,
+      giyusDate: searchParams.get("giyusDate") || undefined,
+      mahzorGiyus: searchParams.get("mahzorGiyus") || undefined,
     }),
     [searchParams]
   );
@@ -55,37 +73,25 @@ export function LeadTable() {
     return page ? parseInt(page, 10) - 1 : 0;
   }, [searchParams]);
 
-  const { data, total, isLoading, error } = useSelector((state: RootState) =>
-    // Si au moins un filtre est actif, utiliser searchLeads, sinon allLeads
-    filters.search ||
-    filters.dateFrom ||
-    filters.dateTo ||
-    filters.statutCandidat
-      ? state.searchLeads
-      : state.allLeads
+  const { data, total, isLoading, error } = useSelector(
+    (state: RootState) => state.allLeads
   );
 
   // Charger les données au montage ou quand les filtres/page changent
   useEffect(() => {
-    // Si au moins un filtre est actif, utiliser searchLeads
-    if (
-      filters.search ||
-      filters.dateFrom ||
-      filters.dateTo ||
-      filters.statutCandidat
-    ) {
-      dispatch(searchLeadsThunk(filters));
-    } else {
-      dispatch(fetchAllLeadsThunk({ page: currentPage, limit: 15 }));
-    }
-  }, [
-    dispatch,
-    filters.search,
-    filters.dateFrom,
-    filters.dateTo,
-    filters.statutCandidat,
-    currentPage,
-  ]);
+    // Créer un objet filtres combiné
+    const combinedFilters = hasActiveFilters(filters)
+      ? filters
+      : undefined;
+
+    dispatch(
+      fetchAllLeadsThunk({
+        page: currentPage,
+        limit: 15,
+        filters: combinedFilters,
+      })
+    );
+  }, [dispatch, filters, currentPage]);
 
   // Les données sont déjà filtrées par le backend, pas besoin de filtrer côté client
   const filteredData = useMemo(() => {
@@ -95,18 +101,29 @@ export function LeadTable() {
 
   // Handler pour rafraîchir les données (optimisé avec useCallback)
   const handleRefresh = useCallback(() => {
-    // Si au moins un filtre est actif, utiliser searchLeads
-    if (
-      filters.search ||
-      filters.dateFrom ||
-      filters.dateTo ||
-      filters.statutCandidat
-    ) {
-      dispatch(searchLeadsThunk(filters));
-    } else {
-      dispatch(fetchAllLeadsThunk({ page: currentPage, limit: 15 }));
-    }
+    // Créer un objet filtres combiné
+    const combinedFilters = hasActiveFilters(filters)
+      ? filters
+      : undefined;
+
+    dispatch(
+      fetchAllLeadsThunk({
+        page: currentPage,
+        limit: 15,
+        filters: combinedFilters,
+      })
+    );
   }, [dispatch, filters, currentPage]);
+
+  // Créer les colonnes avec useMemo
+  const columns = useMemo(
+    () =>
+      createColumnDefinitions(
+        visibleColumns,
+        handleRefresh
+      ),
+    [visibleColumns, handleRefresh]
+  );
 
   // Gérer les changements de filtres
   const handleFiltersChange = useCallback(
@@ -130,13 +147,32 @@ export function LeadTable() {
     [searchParams, setSearchParams]
   );
 
-  // Effacer tous les filtres
+  // Effacer tous les filtres principaux
   const handleClearFilters = useCallback(() => {
     const params = new URLSearchParams(searchParams);
     params.delete("search");
     params.delete("dateFrom");
     params.delete("dateTo");
     params.delete("statutCandidat");
+    params.delete("firstName");
+    params.delete("lastName");
+    params.delete("gender");
+    params.delete("phoneNumber");
+    params.delete("whatsappNumber");
+    params.delete("passportNumber1");
+    params.delete("expertConnection");
+    params.delete("statutLoiRetour");
+    params.delete("currentStatus");
+    params.delete("city");
+    params.delete("soldierAloneStatus");
+    params.delete("bacObtention");
+    params.delete("dateFinService");
+    params.delete("pikoud");
+    params.delete("nomPoste");
+    params.delete("typePoste");
+    params.delete("typeGiyus");
+    params.delete("giyusDate");
+    params.delete("mahzorGiyus");
     params.delete("page");
     setSearchParams(params);
   }, [searchParams, setSearchParams]);
@@ -151,7 +187,15 @@ export function LeadTable() {
   const handleDownloadExcel = useCallback(async () => {
     try {
       setIsDownloading(true);
-      const result = await dispatch(downloadLeadsThunk()).unwrap();
+
+      // Créer un objet filtres pour l'export
+      const combinedFilters = hasActiveFilters(filters)
+        ? filters
+        : undefined;
+
+      const result = await dispatch(
+        downloadLeadsThunk(combinedFilters)
+      ).unwrap();
 
       const url = window.URL.createObjectURL(result);
       const a = document.createElement("a");
@@ -164,7 +208,7 @@ export function LeadTable() {
     } finally {
       setIsDownloading(false);
     }
-  }, [dispatch]);
+  }, [dispatch, filters]);
 
   // Gérer les changements de page
   const handlePageChange = useCallback(
@@ -192,12 +236,6 @@ export function LeadTable() {
       );
     },
     [navigate]
-  );
-
-  // Créer les colonnes avec useMemo
-  const columns = useMemo(
-    () => createColumnDefinitions(visibleColumns, handleRefresh),
-    [visibleColumns, handleRefresh]
   );
 
   return (
@@ -241,14 +279,7 @@ export function LeadTable() {
             onRowClick={handleRowClick}
             initialPage={currentPage}
             onPageChange={handlePageChange}
-            pageCount={
-              filters.search ||
-              filters.dateFrom ||
-              filters.dateTo ||
-              filters.statutCandidat
-                ? undefined // Pas de pagination pour les recherches filtrées
-                : Math.ceil(total / 15)
-            }
+            pageCount={Math.ceil(total / 15)}
           />
         </div>
       </Section>

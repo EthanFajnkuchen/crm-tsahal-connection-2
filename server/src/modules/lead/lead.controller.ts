@@ -42,18 +42,94 @@ export class LeadController {
   async getLeads(
     @Query('limit') limit?: string,
     @Query('page') page?: string,
+    @Query('search') search?: string,
+    @Query('dateFrom') dateFrom?: string,
+    @Query('dateTo') dateTo?: string,
+    @Query('statutCandidat') statutCandidat?: string,
+    @Query('firstName') firstName?: string,
+    @Query('lastName') lastName?: string,
+    @Query('gender') gender?: string,
+    @Query('phoneNumber') phoneNumber?: string,
+    @Query('whatsappNumber') whatsappNumber?: string,
+    @Query('passportNumber1') passportNumber1?: string,
+    @Query('expertConnection') expertConnection?: string,
+    @Query('statutLoiRetour') statutLoiRetour?: string,
+    @Query('currentStatus') currentStatus?: string,
+    @Query() allQueryParams?: any,
   ): Promise<{ data: Partial<Lead>[]; total: number } | Partial<Lead>[]> {
     const parsedLimit = parseLimitParam(limit);
     const parsedPage = page ? parseInt(page, 10) : undefined;
 
+    // Construire les filtres à partir des query params
+    const filters = {
+      search,
+      dateFrom,
+      dateTo,
+      statutCandidat,
+      firstName,
+      lastName,
+      gender,
+      phoneNumber,
+      whatsappNumber,
+      passportNumber1,
+      expertConnection,
+      statutLoiRetour,
+      currentStatus,
+      // Ajouter tous les autres query params (pour les filtres de colonnes)
+      ...Object.fromEntries(
+        Object.entries(allQueryParams).filter(
+          ([key, value]) =>
+            ![
+              'limit',
+              'page',
+              'search',
+              'dateFrom',
+              'dateTo',
+              'statutCandidat',
+              'firstName',
+              'lastName',
+              'gender',
+              'phoneNumber',
+              'whatsappNumber',
+              'passportNumber1',
+              'expertConnection',
+              'statutLoiRetour',
+              'currentStatus',
+            ].includes(key),
+        ),
+      ),
+    };
+
+    // Vérifier s'il y a des filtres actifs
+    const hasActiveFilters = Object.values(filters).some(
+      (value) => value !== undefined && value !== '',
+    );
+
     // Si page est fourni, retourner le format paginé
     if (parsedPage !== undefined) {
-      return this.leadService.getLeads(parsedLimit || 15, parsedPage);
+      if (hasActiveFilters) {
+        return this.leadService.searchLeads(
+          filters,
+          parsedPage,
+          parsedLimit || 15,
+        );
+      } else {
+        return this.leadService.getLeads(parsedLimit || 15, parsedPage);
+      }
     }
 
     // Sinon, retourner seulement les données (compatibilité dashboard)
-    const result = await this.leadService.getLeads(parsedLimit);
-    return result.data;
+    if (hasActiveFilters) {
+      const result = await this.leadService.searchLeads(
+        filters,
+        0,
+        parsedLimit,
+      );
+      return result.data;
+    } else {
+      const result = await this.leadService.getLeads(parsedLimit);
+      return result.data;
+    }
   }
 
   @Get('statistics')
@@ -86,13 +162,8 @@ export class LeadController {
   @Permissions('read:data')
   async searchLeads(
     @Body()
-    filters: {
-      search?: string;
-      dateFrom?: string;
-      dateTo?: string;
-      statutCandidat?: string;
-    },
-  ): Promise<Partial<Lead>[]> {
+    filters: any,
+  ): Promise<{ data: Partial<Lead>[]; total: number }> {
     return this.leadService.searchLeads(filters);
   }
 
@@ -130,8 +201,61 @@ export class LeadController {
 
   @Get('download')
   @Permissions('read:data')
-  async downloadLeads() {
-    return this.leadService.downloadLeads();
+  async downloadLeads(
+    @Query('search') search?: string,
+    @Query('dateFrom') dateFrom?: string,
+    @Query('dateTo') dateTo?: string,
+    @Query('statutCandidat') statutCandidat?: string,
+    @Query('firstName') firstName?: string,
+    @Query('lastName') lastName?: string,
+    @Query('gender') gender?: string,
+    @Query('phoneNumber') phoneNumber?: string,
+    @Query('whatsappNumber') whatsappNumber?: string,
+    @Query('passportNumber1') passportNumber1?: string,
+    @Query('expertConnection') expertConnection?: string,
+    @Query('statutLoiRetour') statutLoiRetour?: string,
+    @Query('currentStatus') currentStatus?: string,
+    @Query() allQueryParams?: any,
+  ) {
+    // Construire les filtres à partir des query params
+    const filters = {
+      search,
+      dateFrom,
+      dateTo,
+      statutCandidat,
+      firstName,
+      lastName,
+      gender,
+      phoneNumber,
+      whatsappNumber,
+      passportNumber1,
+      expertConnection,
+      statutLoiRetour,
+      currentStatus,
+      // Ajouter tous les autres query params (pour les filtres de colonnes)
+      ...Object.fromEntries(
+        Object.entries(allQueryParams).filter(
+          ([key, value]) =>
+            ![
+              'search',
+              'dateFrom',
+              'dateTo',
+              'statutCandidat',
+              'firstName',
+              'lastName',
+              'gender',
+              'phoneNumber',
+              'whatsappNumber',
+              'passportNumber1',
+              'expertConnection',
+              'statutLoiRetour',
+              'currentStatus',
+            ].includes(key),
+        ),
+      ),
+    };
+
+    return this.leadService.downloadLeads(filters);
   }
 
   @Get(':id')
