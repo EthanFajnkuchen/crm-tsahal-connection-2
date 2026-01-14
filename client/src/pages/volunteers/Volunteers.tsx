@@ -2,14 +2,13 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
 import {
-  getChangeRequestsThunk,
+  getGroupedChangeRequestsThunk,
   acceptChangeRequestThunk,
   rejectChangeRequestThunk,
   bulkAcceptChangeRequestsThunk,
   bulkRejectChangeRequestsThunk,
 } from "@/store/thunks/change-request/change-request.thunk";
-import { createChangeRequestColumns } from "@/table-columns/change-request-columns";
-import { DataTable } from "@/components/app-components/table/table";
+import { GroupedChangeRequestsTable } from "@/components/app-components/grouped-change-requests-table/grouped-change-requests-table";
 import Section from "@/components/app-components/section/section";
 import ProtectedComponent from "@/components/app-components/protected-component/protected-component";
 import { ChangeRequest } from "@/types/change-request";
@@ -19,7 +18,7 @@ import { Check, X, Loader2 } from "lucide-react";
 
 const Volunteers: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const { changeRequests, isLoading, error } = useSelector(
+  const { groupedChangeRequests, isLoading, error } = useSelector(
     (state: RootState) => state.changeRequest
   );
   const [processingId, setProcessingId] = useState<number | null>(null);
@@ -33,7 +32,7 @@ const Volunteers: React.FC = () => {
   });
 
   useEffect(() => {
-    dispatch(getChangeRequestsThunk());
+    dispatch(getGroupedChangeRequestsThunk());
   }, [dispatch]);
 
   const handleAccept = async (changeRequest: ChangeRequest) => {
@@ -41,6 +40,8 @@ const Volunteers: React.FC = () => {
     try {
       await dispatch(acceptChangeRequestThunk(changeRequest)).unwrap();
       toast.success(`Modification acceptée`);
+      // Rafraîchir les données après l'acceptation
+      dispatch(getGroupedChangeRequestsThunk());
     } catch (error) {
       toast.error("Erreur lors de l'acceptation de la modification");
       console.error("Error accepting change request:", error);
@@ -54,6 +55,8 @@ const Volunteers: React.FC = () => {
     try {
       await dispatch(rejectChangeRequestThunk(id)).unwrap();
       toast.success("Modification refusée");
+      // Rafraîchir les données après le refus
+      dispatch(getGroupedChangeRequestsThunk());
     } catch (error) {
       toast.error("Erreur lors du refus de la modification");
       console.error("Error rejecting change request:", error);
@@ -71,7 +74,11 @@ const Volunteers: React.FC = () => {
 
     setBulkProcessing((prev) => ({ ...prev, accept: true }));
     try {
-      const selectedChangeRequests = changeRequests.filter((cr) =>
+      // Récupérer toutes les demandes depuis les groupes
+      const allRequests = groupedChangeRequests.flatMap(
+        (group) => group.requests
+      );
+      const selectedChangeRequests = allRequests.filter((cr) =>
         selectedItems.has(cr.id)
       );
       const result = await dispatch(
@@ -91,6 +98,8 @@ const Volunteers: React.FC = () => {
       }
 
       setSelectedItems(new Set());
+      // Rafraîchir les données après l'opération
+      dispatch(getGroupedChangeRequestsThunk());
     } catch (error) {
       toast.error("Erreur lors de l'acceptation des modifications");
       console.error("Error bulk accepting change requests:", error);
@@ -125,6 +134,8 @@ const Volunteers: React.FC = () => {
       }
 
       setSelectedItems(new Set());
+      // Rafraîchir les données après l'opération
+      dispatch(getGroupedChangeRequestsThunk());
     } catch (error) {
       toast.error("Erreur lors du refus des modifications");
       console.error("Error bulk rejecting change requests:", error);
@@ -132,15 +143,6 @@ const Volunteers: React.FC = () => {
       setBulkProcessing((prev) => ({ ...prev, reject: false }));
     }
   };
-
-  const columns = createChangeRequestColumns({
-    onAccept: handleAccept,
-    onReject: handleReject,
-    processingId,
-    selectedItems,
-    onSelectionChange: setSelectedItems,
-    enableSelection: true,
-  });
 
   if (error) {
     return (
@@ -207,19 +209,15 @@ const Volunteers: React.FC = () => {
               </div>
             )}
 
-            {changeRequests.length === 0 && !isLoading ? (
-              <div className="text-center py-8">
-                <p className="text-gray-500">
-                  Aucune demande de modification en attente
-                </p>
-              </div>
-            ) : (
-              <DataTable
-                columns={columns}
-                data={changeRequests}
-                isLoading={isLoading && changeRequests.length === 0}
-              />
-            )}
+            <GroupedChangeRequestsTable
+              groupedRequests={groupedChangeRequests}
+              onAccept={handleAccept}
+              onReject={handleReject}
+              processingId={processingId}
+              selectedItems={selectedItems}
+              onSelectionChange={setSelectedItems}
+              enableSelection={true}
+            />
           </div>
         </Section>
       </ProtectedComponent>

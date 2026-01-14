@@ -49,8 +49,8 @@ export class CreateLeadDto {
   confirmPhoneNumber: string;
 
   @IsOptional()
-  @IsString()
-  whatsappSameAsPhone?: string;
+  @IsBoolean()
+  whatsappSameAsPhone?: boolean;
 
   @IsOptional()
   @IsString()
@@ -65,6 +65,10 @@ export class CreateLeadDto {
 
   @IsString()
   isOnlyChild: string;
+
+  @IsOptional()
+  @IsString()
+  profilePhoto?: string;
 
   // Emergency contact
   @IsString()

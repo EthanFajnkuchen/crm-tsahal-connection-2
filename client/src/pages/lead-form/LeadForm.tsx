@@ -30,6 +30,7 @@ export interface LeadFormData {
   confirmWhatsappNumber: string;
   city: string;
   isOnlyChild: string;
+  profilePhoto: string | null;
 
   // Emergency contact
   contactUrgenceFirstName: string;
@@ -146,6 +147,7 @@ export const LeadForm: React.FC = () => {
       confirmWhatsappNumber: "",
       city: "",
       isOnlyChild: "",
+      profilePhoto: null,
       contactUrgenceFirstName: "",
       contactUrgenceLastName: "",
       contactUrgencePhoneNumber: "",
@@ -250,6 +252,7 @@ export const LeadForm: React.FC = () => {
       "confirmWhatsappNumber",
       "city",
       "isOnlyChild",
+      "profilePhoto",
       "contactUrgenceFirstName",
       "contactUrgenceLastName",
       "contactUrgencePhoneNumber",

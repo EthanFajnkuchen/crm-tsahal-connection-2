@@ -68,14 +68,14 @@ export const useForm = (options: UseFormOptions) => {
   const hasFieldPendingChanges = (fieldName: string): boolean => {
     if (!isVolunteer) return false;
     return changeRequestsByLead.some(
-      (request) => request.fieldChanged === fieldName
+      (request) => request.fieldChanged?.trim() === fieldName?.trim()
     );
   };
 
   const getPendingChangeDetails = (fieldName: string) => {
     if (!isVolunteer) return null;
     const pendingChange = changeRequestsByLead.find(
-      (request) => request.fieldChanged === fieldName
+      (request) => request.fieldChanged?.trim() === fieldName?.trim()
     );
 
     if (pendingChange) {

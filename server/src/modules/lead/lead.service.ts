@@ -102,6 +102,7 @@ export class LeadService {
     leadId?: number;
   }> {
     try {
+      
       // Validation des confirmations
       if (createLeadDto.email !== createLeadDto.confirmEmail) {
         throw new BadRequestException('Les emails ne correspondent pas');
@@ -146,9 +147,11 @@ export class LeadService {
         gender: createLeadDto.gender,
         email: createLeadDto.email,
         phoneNumber: createLeadDto.phoneNumber,
+        isWhatsAppSame: createLeadDto.whatsappSameAsPhone || false,
         whatsappNumber: createLeadDto.whatsappNumber,
         city: createLeadDto.city,
         isOnlyChild: createLeadDto.isOnlyChild,
+        profilePhoto: createLeadDto.profilePhoto,
 
         // Emergency contact
         contactUrgenceFirstName: createLeadDto.contactUrgenceFirstName,
@@ -275,6 +278,8 @@ export class LeadService {
         leadId: leadId,
       };
     } catch (error) {
+      console.error('[ERROR] Erreur lors de la création du lead:', error);
+      console.error('[ERROR] Stack trace:', error.stack);
       if (error instanceof BadRequestException) {
         throw error;
       }
@@ -330,31 +335,37 @@ export class LeadService {
         );
       }
 
-      // Créer un contact dans Google Contacts
-      try {
-        const contactResult = await this.googleContactsService.createContact({
-          firstName: createLeadDto.firstName,
-          lastName: createLeadDto.lastName,
-          phoneNumber: createLeadDto.phoneNumber,
-          whatsappNumber:
-            createLeadDto.whatsappNumber || createLeadDto.phoneNumber,
-          leadId: leadId,
-          email: createLeadDto.email,
-        });
+      // Créer un contact dans Google Contacts (uniquement en production)
+      if (process.env.NODE_ENV === 'production') {
+        try {
+          const contactResult = await this.googleContactsService.createContact({
+            firstName: createLeadDto.firstName,
+            lastName: createLeadDto.lastName,
+            phoneNumber: createLeadDto.phoneNumber,
+            whatsappNumber:
+              createLeadDto.whatsappNumber || createLeadDto.phoneNumber,
+            leadId: leadId,
+            email: createLeadDto.email,
+          });
 
-        if (contactResult.success) {
-          this.logger.log(
-            `Contact Google créé avec succès pour le lead ID: ${leadId}`,
-          );
-        } else {
-          this.logger.warn(
-            `Contact Google non créé pour le lead ID ${leadId}: ${contactResult.message}`,
+          if (contactResult.success) {
+            this.logger.log(
+              `Contact Google créé avec succès pour le lead ID: ${leadId}`,
+            );
+          } else {
+            this.logger.warn(
+              `Contact Google non créé pour le lead ID ${leadId}: ${contactResult.message}`,
+            );
+          }
+        } catch (googleContactError) {
+          this.logger.error(
+            `Erreur lors de la création du contact Google pour le lead ID ${leadId}:`,
+            googleContactError,
           );
         }
-      } catch (googleContactError) {
-        this.logger.error(
-          `Erreur lors de la création du contact Google pour le lead ID ${leadId}:`,
-          googleContactError,
+      } else {
+        this.logger.debug(
+          `Skipping Google Contacts creation for lead ID ${leadId} (not in production)`,
         );
       }
     });
@@ -460,6 +471,14 @@ export class LeadService {
       expertConnection?: string;
       statutLoiRetour?: string;
       currentStatus?: string;
+      mahzorGiyus?: string;
+      typeGiyus?: string;
+      pikoud?: string;
+      city?: string;
+      excludeTab1?: string;
+      excludeTab2?: string;
+      excludeTab3?: string;
+      excludeTab4?: string;
       [key: string]: string | undefined;
     },
     selectAllFields: boolean = false,
@@ -626,11 +645,50 @@ export class LeadService {
       });
     }
 
-    // Filtre par statut du candidat
+    // Filtre par statut du candidat (peut être une liste séparée par virgule pour tab3)
     if (filters.statutCandidat && filters.statutCandidat !== 'all') {
-      query = query.andWhere('lead.statutCandidat = :statutCandidat', {
-        statutCandidat: filters.statutCandidat,
-      });
+      const trimmedValue = filters.statutCandidat.trim();
+      if (trimmedValue.includes(',')) {
+        // Cas spécial : plusieurs statuts (pour tab3)
+        const statuts = trimmedValue.split(',').map(s => s.trim()).filter(s => s);
+        if (statuts.length > 0) {
+          query = query.andWhere('lead.statutCandidat IN (:...statuts)', {
+            statuts,
+          });
+        }
+      } else {
+        query = query.andWhere('lead.statutCandidat = :statutCandidat', {
+          statutCandidat: trimmedValue,
+        });
+      }
+    }
+
+    // Gestion du cas tab5 (Autres) - exclure les autres cas
+    // Pour tab5, on doit exclure TOUS les cas des autres onglets simultanément
+    // Un lead est dans "Autres" s'il ne correspond à AUCUN des 4 autres onglets
+    if (filters.excludeTab1 === 'true' && filters.excludeTab2 === 'true' && 
+        filters.excludeTab3 === 'true' && filters.excludeTab4 === 'true') {
+      // Exclure tab1 : statutCandidat != "Ne répond pas / Ne sait pas"
+      // Exclure tab2 : currentStatus != "Abandon pendant le service"
+      // Exclure tab3 : statutCandidat NOT IN ("En cours de traitement", "Dossier traité")
+      // Exclure tab4 : currentStatus != "Un soldat - Michve Alon"
+      // Toutes les conditions doivent être vraies (AND), en gérant les NULL
+      query = query.andWhere(
+        new Brackets((qb) => {
+          qb.where(
+            "(lead.statutCandidat IS NULL OR lead.statutCandidat != 'Ne répond pas / Ne sait pas')"
+          )
+          .andWhere(
+            "(lead.currentStatus IS NULL OR lead.currentStatus != 'Abandon pendant le service')"
+          )
+          .andWhere(
+            "(lead.statutCandidat IS NULL OR lead.statutCandidat NOT IN ('En cours de traitement', 'Dossier traité'))"
+          )
+          .andWhere(
+            "(lead.currentStatus IS NULL OR lead.currentStatus != 'Un soldat - Michve Alon')"
+          );
+        }),
+      );
     }
 
     // Filtres textuels
@@ -655,6 +713,27 @@ export class LeadService {
     if (filters.city) {
       query = query.andWhere('LOWER(lead.city) LIKE :city', {
         city: `%${filters.city.toLowerCase()}%`,
+      });
+    }
+
+    // Filtre par mahzorGiyus
+    if (filters.mahzorGiyus) {
+      query = query.andWhere('lead.mahzorGiyus = :mahzorGiyus', {
+        mahzorGiyus: filters.mahzorGiyus,
+      });
+    }
+
+    // Filtre par typeGiyus
+    if (filters.typeGiyus && filters.typeGiyus !== 'all') {
+      query = query.andWhere('lead.typeGiyus = :typeGiyus', {
+        typeGiyus: filters.typeGiyus,
+      });
+    }
+
+    // Filtre par pikoud
+    if (filters.pikoud && filters.pikoud !== 'all') {
+      query = query.andWhere('lead.pikoud = :pikoud', {
+        pikoud: filters.pikoud,
       });
     }
 
@@ -1156,6 +1235,10 @@ export class LeadService {
     expertConnection?: string;
     statutLoiRetour?: string;
     currentStatus?: string;
+    mahzorGiyus?: string;
+    typeGiyus?: string;
+    pikoud?: string;
+    city?: string;
     [key: string]: string | undefined;
   }): Promise<StreamableFile> {
     try {
@@ -1455,12 +1538,19 @@ export class LeadService {
       const updatedLead = await this.leadRepository.save(existingLead);
 
       if (phoneNumberChanged || whatsappNumberChanged) {
-        try {
-          await this.syncLeadWithGoogleContacts(updatedLead);
-        } catch (error) {
-          this.logger.error(
-            `Failed to sync lead ${updatedLead.ID} with Google Contacts:`,
-            error,
+        // Ne synchroniser avec Google Contacts qu'en production
+        if (process.env.NODE_ENV === 'production') {
+          try {
+            await this.syncLeadWithGoogleContacts(updatedLead);
+          } catch (error) {
+            this.logger.error(
+              `Failed to sync lead ${updatedLead.ID} with Google Contacts:`,
+              error,
+            );
+          }
+        } else {
+          this.logger.debug(
+            `Skipping Google Contacts sync for lead ${updatedLead.ID} (not in production)`,
           );
         }
       }
@@ -1480,6 +1570,14 @@ export class LeadService {
   }
 
   private async syncLeadWithGoogleContacts(lead: Lead): Promise<void> {
+    // Ne synchroniser avec Google Contacts qu'en production
+    if (process.env.NODE_ENV !== 'production') {
+      this.logger.debug(
+        `Skipping Google Contacts sync for lead ${lead.ID} (not in production)`,
+      );
+      return;
+    }
+
     try {
       // Récupérer le contact Google correspondant au lead
       const googleContact = await this.googleContactsService.getContactByLeadId(

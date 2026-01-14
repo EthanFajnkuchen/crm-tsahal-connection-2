@@ -58,9 +58,23 @@ const FormDropdown = <T extends FieldValues>({
 }: FormDropdownProps<T>) => {
   if (hidden) return null;
   // Filter change requests for this specific field
+  // Use trim() to handle any whitespace issues
   const fieldChangeRequests = changeRequests.filter(
-    (request) => request.fieldChanged === name
+    (request) => request.fieldChanged?.trim() === name?.trim()
   );
+  
+  // Determine if there's a pending change
+  // For volunteers: check both pendingChange prop AND fieldChangeRequests
+  // For admins: only check pendingChange prop (they see ChangeRequestIndicator instead)
+  // Note: pendingChange comes from getFieldProps() which uses hasFieldPendingChanges()
+  // But we also check fieldChangeRequests directly as a fallback for volunteers
+  // This ensures the message displays even if pendingChange prop is not correctly passed
+  const hasPendingChange = Boolean(pendingChange) || (fieldChangeRequests.length > 0 && !isAdmin);
+  
+  // Get the new value to display - prefer pendingChangeDetails, fallback to fieldChangeRequests
+  const displayNewValue = pendingChangeDetails?.newValue || 
+    (fieldChangeRequests.length > 0 ? fieldChangeRequests[0].newValue : null);
+  
   if (isLoading) {
     return (
       <div className="space-y-2">
@@ -135,13 +149,11 @@ const FormDropdown = <T extends FieldValues>({
         />
       )}
       {error && <p className="text-sm text-red-500">{error}</p>}
-      {pendingChange && (
+      {hasPendingChange && (
         <p className="text-xs text-orange-600 flex items-center gap-1">
           ⏳ Modification en attente
-          {pendingChangeDetails && (
-            <span className="ml-1 font-mono">
-              → {pendingChangeDetails.newValue}
-            </span>
+          {displayNewValue && (
+            <span className="ml-1 font-mono">→ "{displayNewValue}"</span>
           )}
         </p>
       )}

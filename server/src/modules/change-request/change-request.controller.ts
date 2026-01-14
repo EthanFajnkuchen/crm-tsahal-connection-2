@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import { ChangeRequestService } from './change-request.service';
 import { ChangeRequest } from './change-request.entity';
+import { Lead } from '../lead/lead.entity';
 import {
   CreateChangeRequestDto,
   UpdateChangeRequestDto,
@@ -31,6 +32,20 @@ export class ChangeRequestController {
   // @Permissions('read:data')
   async findAll(): Promise<ChangeRequest[]> {
     return this.changeRequestService.findAll();
+  }
+
+  @Get('grouped/by-lead')
+  @Permissions('read:data')
+  async findAllGroupedByLead(): Promise<
+    Array<{
+      leadId: number;
+      lead: Lead;
+      requests: ChangeRequest[];
+      totalCount: number;
+      volunteers: string[];
+    }>
+  > {
+    return this.changeRequestService.findAllGroupedByLead();
   }
 
   @Get('lead/:leadId')

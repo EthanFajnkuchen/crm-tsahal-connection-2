@@ -5,6 +5,7 @@ import { FormDropdown } from "@/components/form-components/form-dropdown";
 import { FormDatePicker } from "@/components/form-components/form-date-picker";
 import { PhoneInput } from "@/components/form-components/phone-input";
 import { FormCheckbox } from "@/components/form-components/form-checkbox";
+import { FormImageUpload } from "@/components/form-components/form-image-upload";
 import { LeadFormData } from "../LeadForm";
 import { RELATION } from "@/i18n/emergency-contact";
 import { Controller } from "react-hook-form";
@@ -62,6 +63,13 @@ export const GeneralStep: React.FC<GeneralStepProps> = ({ form }) => {
         <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">
           Informations personnelles
         </h3>
+
+        <FormImageUpload
+          control={control}
+          name="profilePhoto"
+          label="Photo de profil"
+          mode="EDIT"
+        />
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Controller

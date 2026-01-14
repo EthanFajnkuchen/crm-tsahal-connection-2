@@ -186,18 +186,20 @@ export const GeneralSection = ({
             {...getFieldProps("gender")}
           />
 
-          <FormImageUpload
-            control={control}
-            name="profilePhoto"
-            label="Photo de profil"
-            mode={mode}
-            isLoading={localIsLoading}
-            changeRequests={changeRequestsByLead}
-            onApproveChangeRequest={onApproveChangeRequest}
-            onRejectChangeRequest={onRejectChangeRequest}
-            isAdmin={isAdmin}
-            {...getFieldProps("profilePhoto")}
-          />
+          {mode === "EDIT" && (
+            <FormImageUpload
+              control={control}
+              name="profilePhoto"
+              label="Photo de profil"
+              mode={mode}
+              isLoading={localIsLoading}
+              changeRequests={changeRequestsByLead}
+              onApproveChangeRequest={onApproveChangeRequest}
+              onRejectChangeRequest={onRejectChangeRequest}
+              isAdmin={isAdmin}
+              {...getFieldProps("profilePhoto")}
+            />
+          )}
 
           <FormDatePicker
             control={control}

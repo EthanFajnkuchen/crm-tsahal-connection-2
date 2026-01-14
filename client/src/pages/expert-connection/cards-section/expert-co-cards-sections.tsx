@@ -79,8 +79,10 @@ const ExpertCoCardsSection: React.FC = () => {
   };
 
   const handleRowClick = (lead: any) => {
-    if (lead.id) {
-      navigate(`/lead-details/${lead.id}`);
+    // Vérifier les deux formats possibles : ID (majuscules) ou id (minuscules)
+    const leadId = lead.ID || lead.id;
+    if (leadId) {
+      navigate(`/lead-details/${leadId}`);
     }
   };
 

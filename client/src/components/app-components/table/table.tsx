@@ -144,22 +144,30 @@ export function DataTable<TData, TValue>({
                         data-state={row.getIsSelected() && "selected"}
                         className="border-b transition-colors cursor-pointer hover:bg-muted/50 data-[state=selected]:bg-muted"
                         onClick={(e) => {
-                          // Ne pas naviguer si le clic vient d'un Dialog/Portail Radix
+                          // Ne pas naviguer si le clic vient d'un élément interactif (bouton, lien, etc.)
                           const target = e.target as HTMLElement;
                           if (
-                            target.closest('[role="dialog"]') ||
-                            target.closest("[data-radix-portal]")
+                            target.closest('button') ||
+                            target.closest('a') ||
+                            target.closest('[role="button"]') ||
+                            target.closest('input') ||
+                            target.closest('select') ||
+                            target.closest('textarea')
                           ) {
                             return;
                           }
                           onRowClick?.(row.original);
                         }}
                         onDoubleClick={(e) => {
-                          // Ne pas naviguer si le double-clic vient d'un Dialog/Portail Radix
+                          // Ne pas naviguer si le double-clic vient d'un élément interactif
                           const target = e.target as HTMLElement;
                           if (
-                            target.closest('[role="dialog"]') ||
-                            target.closest("[data-radix-portal]")
+                            target.closest('button') ||
+                            target.closest('a') ||
+                            target.closest('[role="button"]') ||
+                            target.closest('input') ||
+                            target.closest('select') ||
+                            target.closest('textarea')
                           ) {
                             return;
                           }

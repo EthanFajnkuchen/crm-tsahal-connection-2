@@ -1,9 +1,10 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { ChangeRequest } from "@/types/change-request";
+import { ChangeRequest, GroupedChangeRequest } from "@/types/change-request";
 import {
   createChangeRequestThunk,
   getChangeRequestsThunk,
   getChangeRequestsByLeadIdThunk,
+  getGroupedChangeRequestsThunk,
   deleteChangeRequestThunk,
   acceptChangeRequestThunk,
   rejectChangeRequestThunk,
@@ -14,6 +15,7 @@ import {
 interface ChangeRequestState {
   changeRequests: ChangeRequest[];
   changeRequestsByLead: ChangeRequest[];
+  groupedChangeRequests: GroupedChangeRequest[];
   isLoading: boolean;
   error: string | null;
 }
@@ -21,6 +23,7 @@ interface ChangeRequestState {
 const initialState: ChangeRequestState = {
   changeRequests: [],
   changeRequestsByLead: [],
+  groupedChangeRequests: [],
   isLoading: false,
   error: null,
 };
@@ -83,6 +86,23 @@ const changeRequestSlice = createSlice({
         state.isLoading = false;
         state.error =
           action.error.message || "Failed to get change requests by lead";
+      })
+      // Get grouped change requests
+      .addCase(getGroupedChangeRequestsThunk.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(
+        getGroupedChangeRequestsThunk.fulfilled,
+        (state, action: PayloadAction<GroupedChangeRequest[]>) => {
+          state.isLoading = false;
+          state.groupedChangeRequests = action.payload;
+        }
+      )
+      .addCase(getGroupedChangeRequestsThunk.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error =
+          action.error.message || "Failed to get grouped change requests";
       })
       // Delete change request
       .addCase(deleteChangeRequestThunk.pending, (state) => {

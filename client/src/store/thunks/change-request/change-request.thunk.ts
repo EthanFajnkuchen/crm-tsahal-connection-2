@@ -1,6 +1,6 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { changeRequestAdapter } from "@/store/adapters/change-request/change-request.adapter";
-import { CreateChangeRequestDto, ChangeRequest } from "@/types/change-request";
+import { CreateChangeRequestDto, ChangeRequest, GroupedChangeRequest } from "@/types/change-request";
 
 export const createChangeRequestThunk = createAsyncThunk<
   ChangeRequest,
@@ -13,6 +13,13 @@ export const getChangeRequestsThunk = createAsyncThunk<ChangeRequest[]>(
   "changeRequest/getAll",
   async () => {
     return await changeRequestAdapter.getChangeRequests();
+  }
+);
+
+export const getGroupedChangeRequestsThunk = createAsyncThunk<GroupedChangeRequest[]>(
+  "changeRequest/getGrouped",
+  async () => {
+    return await changeRequestAdapter.getGroupedChangeRequests();
   }
 );
 

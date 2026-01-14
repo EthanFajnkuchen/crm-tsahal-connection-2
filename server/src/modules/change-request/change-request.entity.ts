@@ -27,4 +27,13 @@ export class ChangeRequest {
 
   @Column({ type: 'datetime' })
   dateModified: Date;
+
+  @Column({ default: false })
+  emailNotified: boolean;
+
+  @Column({ type: 'datetime', nullable: true })
+  emailNotifiedAt: Date;
+
+  @Column({ type: 'datetime', nullable: true })
+  notificationScheduledAt: Date;
 }

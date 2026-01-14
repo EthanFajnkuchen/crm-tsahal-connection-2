@@ -21,3 +21,17 @@ export interface CreateChangeRequestDto {
   changedBy: string;
   dateModified: string;
 }
+
+export interface GroupedChangeRequest {
+  leadId: number;
+  lead: {
+    firstName: string;
+    lastName: string;
+    ID: number;
+    email?: string;
+    phoneNumber?: string;
+  };
+  requests: ChangeRequest[];
+  totalCount: number;
+  volunteers: string[];
+}

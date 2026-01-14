@@ -94,6 +94,36 @@ export const ChangeRequestIndicator: React.FC<ChangeRequestIndicatorProps> = ({
     return value;
   };
 
+  /**
+   * Vérifie si une valeur est une image en base64
+   */
+  const isBase64Image = (value: string): boolean => {
+    if (!value) return false;
+    return (
+      value.startsWith("data:image/") ||
+      value.startsWith("/9j/") || // JPEG base64
+      value.startsWith("iVBORw0KGgo") || // PNG base64
+      value.startsWith("R0lGODlh") // GIF base64
+    );
+  };
+
+  /**
+   * Vérifie si le champ est une image (par nom de champ)
+   */
+  const isImageField = (fieldName: string): boolean => {
+    const imageFields = ["profilePhoto", "photo", "image"];
+    return imageFields.some((field) =>
+      fieldName.toLowerCase().includes(field.toLowerCase())
+    );
+  };
+
+  /**
+   * Détermine si une valeur doit être affichée comme image
+   */
+  const shouldDisplayAsImage = (value: string, fieldName: string): boolean => {
+    return isImageField(fieldName) && isBase64Image(value);
+  };
+
   return (
     <>
       <button
@@ -114,7 +144,21 @@ export const ChangeRequestIndicator: React.FC<ChangeRequestIndicatorProps> = ({
       </button>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent
+          className={
+            selectedRequest &&
+            (shouldDisplayAsImage(
+              selectedRequest.newValue,
+              selectedRequest.fieldChanged
+            ) ||
+              shouldDisplayAsImage(
+                selectedRequest.oldValue,
+                selectedRequest.fieldChanged
+              ))
+              ? "sm:max-w-[600px]"
+              : "sm:max-w-[500px]"
+          }
+        >
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <AlertTriangle className="w-5 h-5 text-red-600" />
@@ -137,23 +181,98 @@ export const ChangeRequestIndicator: React.FC<ChangeRequestIndicatorProps> = ({
                   </p>
                 </div>
 
-                <div>
-                  <label className="text-sm font-medium text-gray-700">
-                    Valeur actuelle :
-                  </label>
-                  <p className="text-sm bg-red-50 p-2 rounded border border-red-200">
-                    {formatValue(selectedRequest.oldValue)}
-                  </p>
-                </div>
+                {shouldDisplayAsImage(
+                  selectedRequest.oldValue,
+                  selectedRequest.fieldChanged
+                ) ||
+                shouldDisplayAsImage(
+                  selectedRequest.newValue,
+                  selectedRequest.fieldChanged
+                ) ? (
+                  // Affichage côte à côte pour les images
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 mb-2 block">
+                        Valeur actuelle :
+                      </label>
+                      <div className="bg-red-50 p-3 rounded border border-red-200 flex items-center justify-center min-h-[200px]">
+                        {selectedRequest.oldValue &&
+                        selectedRequest.oldValue !== "null" &&
+                        selectedRequest.oldValue !== "undefined" ? (
+                          <img
+                            src={selectedRequest.oldValue}
+                            alt="Valeur actuelle"
+                            className="max-w-full h-auto rounded border-2 border-red-300 max-h-64 object-contain shadow-sm"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.style.display = "none";
+                              const parent = target.parentElement;
+                              if (parent) {
+                                parent.innerHTML =
+                                  '<p class="text-sm text-gray-500 italic">(Image invalide)</p>';
+                              }
+                            }}
+                          />
+                        ) : (
+                          <p className="text-sm text-gray-500 italic">
+                            (Aucune image)
+                          </p>
+                        )}
+                      </div>
+                    </div>
 
-                <div>
-                  <label className="text-sm font-medium text-gray-700">
-                    Nouvelle valeur proposée :
-                  </label>
-                  <p className="text-sm bg-green-50 p-2 rounded border border-green-200">
-                    {formatValue(selectedRequest.newValue)}
-                  </p>
-                </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 mb-2 block">
+                        Nouvelle valeur proposée :
+                      </label>
+                      <div className="bg-green-50 p-3 rounded border border-green-200 flex items-center justify-center min-h-[200px]">
+                        {selectedRequest.newValue &&
+                        selectedRequest.newValue !== "null" &&
+                        selectedRequest.newValue !== "undefined" ? (
+                          <img
+                            src={selectedRequest.newValue}
+                            alt="Nouvelle valeur proposée"
+                            className="max-w-full h-auto rounded border-2 border-green-300 max-h-64 object-contain shadow-sm"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.style.display = "none";
+                              const parent = target.parentElement;
+                              if (parent) {
+                                parent.innerHTML =
+                                  '<p class="text-sm text-gray-500 italic">(Image invalide)</p>';
+                              }
+                            }}
+                          />
+                        ) : (
+                          <p className="text-sm text-gray-500 italic">
+                            (Aucune image)
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  // Affichage normal pour les valeurs texte
+                  <>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700">
+                        Valeur actuelle :
+                      </label>
+                      <p className="text-sm bg-red-50 p-2 rounded border border-red-200">
+                        {formatValue(selectedRequest.oldValue)}
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="text-sm font-medium text-gray-700">
+                        Nouvelle valeur proposée :
+                      </label>
+                      <p className="text-sm bg-green-50 p-2 rounded border border-green-200">
+                        {formatValue(selectedRequest.newValue)}
+                      </p>
+                    </div>
+                  </>
+                )}
 
                 <div className="grid grid-cols-2 gap-4 text-xs text-gray-500">
                   <div>

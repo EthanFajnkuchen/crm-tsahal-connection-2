@@ -14,6 +14,14 @@ export class SyncService {
 
   @Cron(CronExpression.EVERY_DAY_AT_2AM)
   async handleDailySync() {
+    // Ne synchroniser avec Google Contacts qu'en production
+    if (process.env.NODE_ENV !== 'production') {
+      this.logger.debug(
+        'Skipping daily Google Contacts sync (not in production)',
+      );
+      return;
+    }
+
     this.logger.log('Starting daily Google Contacts sync...');
     try {
       await this.syncGoogleContactsWithCRM();
@@ -143,6 +151,15 @@ export class SyncService {
 
   // Méthode pour déclencher manuellement la synchronisation
   async triggerManualSync() {
+    // Ne synchroniser avec Google Contacts qu'en production
+    if (process.env.NODE_ENV !== 'production') {
+      this.logger.debug('Skipping manual Google Contacts sync (not in production)');
+      return {
+        success: false,
+        message: 'Manual sync skipped (not in production)',
+      };
+    }
+
     this.logger.log('Manual sync triggered');
     try {
       await this.syncGoogleContactsWithCRM();

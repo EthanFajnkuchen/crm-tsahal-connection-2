@@ -1,4 +1,4 @@
-import { CreateChangeRequestDto, ChangeRequest } from "@/types/change-request";
+import { CreateChangeRequestDto, ChangeRequest, GroupedChangeRequest } from "@/types/change-request";
 import { API_ROUTES } from "@/constants/api-routes";
 const M2M_TOKEN = import.meta.env.VITE_API_M2M_TOKEN;
 
@@ -31,6 +31,22 @@ export const changeRequestAdapter = {
 
     if (!response.ok) {
       throw new Error("Failed to fetch change requests");
+    }
+
+    return response.json();
+  },
+
+  getGroupedChangeRequests: async (): Promise<GroupedChangeRequest[]> => {
+    const response = await fetch(API_ROUTES.CHANGE_REQUESTS_GROUPED, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${M2M_TOKEN}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch grouped change requests");
     }
 
     return response.json();

@@ -224,9 +224,22 @@ export const LeadInfoSection = ({
     <form onSubmit={handleSubmit(onSave)}>
       <FormSection
         title={
-          <div className="flex items-center gap-2">
-            {lead.firstName + " " + lead.lastName}
-            {expertCoBadge}
+          <div className="flex items-center gap-3">
+            {lead.profilePhoto && (
+              <img
+                src={lead.profilePhoto}
+                alt={`${lead.firstName} ${lead.lastName}`}
+                className="h-12 w-12 rounded-full object-cover border-2 border-gray-300 shadow-sm"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.style.display = "none";
+                }}
+              />
+            )}
+            <div className="flex items-center gap-2">
+              {lead.firstName + " " + lead.lastName}
+              {expertCoBadge}
+            </div>
           </div>
         }
         mode={mode}

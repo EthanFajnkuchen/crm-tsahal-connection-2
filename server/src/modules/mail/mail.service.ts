@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
 import { Lead } from '../lead/lead.entity';
+import { ChangeRequest } from '../change-request/change-request.entity';
 
 @Injectable()
 export class MailService {
@@ -693,7 +694,283 @@ export class MailService {
             <p>Tsahal Co - Système de notification automatique</p>
         </div>
     </body>
-    </html>
+      </html>
     `;
+  }
+
+  /**
+   * Envoie un email de notification groupé pour les demandes de modification
+   * @param lead Le contact concerné
+   * @param requests Les demandes de modification à notifier
+   * @param volunteer Le nom du volontaire qui a fait les modifications
+   */
+  async sendChangeRequestNotificationEmail(
+    lead: Lead,
+    requests: ChangeRequest[],
+    volunteer: string,
+  ): Promise<void> {
+    try {
+      // Vérifier les credentials avant d'essayer d'envoyer
+      if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
+        throw new Error(
+          'Gmail credentials not configured. Please set GMAIL_USER and GMAIL_APP_PASSWORD environment variables.',
+        );
+      }
+
+      const leadName = `${lead.firstName} ${lead.lastName}`;
+      const subject = `Nouvelles demandes de modification - ${leadName}`;
+      const htmlContent = this.generateChangeRequestNotificationEmailContent(
+        lead,
+        requests,
+        volunteer,
+      );
+
+      // Récupérer l'email des admins depuis les variables d'environnement
+      const isProduction = process.env.NODE_ENV === 'production';
+      const adminEmails = isProduction
+        ? process.env.SHIHOURIM_RECIPIENTS
+        : 'yoan.partouche@gmail.com';
+
+      const mailOptions = {
+        from: process.env.GMAIL_USER,
+        to: Array.isArray(adminEmails) ? adminEmails.join(',') : adminEmails,
+        subject: subject,
+        html: htmlContent,
+      };
+
+      this.logger.log(
+        `Sending change request notification email (${isProduction ? 'PROD' : 'DEV'}) to ${Array.isArray(adminEmails) ? adminEmails.join(',') : adminEmails}`,
+      );
+
+      this.logger.log(
+        `Sending change request notification email for ${requests.length} request(s) from ${volunteer} for lead ${leadName} (ID: ${lead.ID})`,
+      );
+
+      const result = await this.transporter.sendMail(mailOptions);
+      this.logger.log(
+        `Change request notification email sent successfully: ${result.messageId}`,
+      );
+    } catch (error) {
+      this.logger.error(
+        `Failed to send change request notification email for lead ${lead.ID}`,
+        error.stack,
+      );
+      throw error;
+    }
+  }
+
+  private generateChangeRequestNotificationEmailContent(
+    lead: Lead,
+    requests: ChangeRequest[],
+    volunteer: string,
+  ): string {
+    const leadName = `${lead.firstName} ${lead.lastName}`;
+    const leadId = lead.ID;
+    const requestCount = requests.length;
+    const plural = requestCount > 1 ? 's' : '';
+
+    // Générer la liste des modifications
+    const requestsList = requests
+      .map((request, index) => {
+        const oldValue = this.formatDisplayValue(request.oldValue);
+        const newValue = this.formatDisplayValue(request.newValue);
+        const dateModified = new Date(request.dateModified).toLocaleDateString(
+          'fr-FR',
+          {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+          },
+        );
+
+        return `
+          <tr style="border-bottom: 1px solid #e0e0e0;">
+            <td style="padding: 12px; vertical-align: top;">
+              <strong style="color: #667eea;">${index + 1}.</strong>
+            </td>
+            <td style="padding: 12px; vertical-align: top;">
+              <div style="margin-bottom: 8px;">
+                <strong style="color: #333;">Champ modifié :</strong><br>
+                <span style="background-color: #f0f0f0; padding: 4px 8px; border-radius: 4px; font-family: monospace;">${request.fieldChanged}</span>
+              </div>
+              <div style="margin-bottom: 8px;">
+                <strong style="color: #d32f2f;">Ancienne valeur :</strong><br>
+                <span style="color: #666;">${oldValue || '(vide)'}</span>
+              </div>
+              <div>
+                <strong style="color: #2e7d32;">Nouvelle valeur :</strong><br>
+                <span style="color: #333; font-weight: 500;">${newValue || '(vide)'}</span>
+              </div>
+            </td>
+            <td style="padding: 12px; vertical-align: top; color: #666; font-size: 14px;">
+              ${dateModified}
+            </td>
+          </tr>
+        `;
+      })
+      .join('');
+
+    // URL de l'application (à configurer dans les variables d'environnement)
+    const appUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    const reviewUrl = `${appUrl}/volontaires`;
+
+    return `
+      <!DOCTYPE html>
+      <html lang="fr">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Demandes de modification</title>
+        <style>
+          body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+          }
+          .container {
+            max-width: 700px;
+            margin: 20px auto;
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+          }
+          .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+          }
+          .header h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 300;
+          }
+          .content {
+            padding: 30px;
+          }
+          .alert-box {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+          }
+          .info-box {
+            background-color: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+          }
+          table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+          }
+          .cta-button {
+            display: inline-block;
+            background-color: #667eea;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 25px;
+            text-decoration: none;
+            margin: 20px 0;
+            font-weight: 500;
+            transition: background-color 0.3s;
+          }
+          .cta-button:hover {
+            background-color: #5568d3;
+          }
+          .footer {
+            background-color: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+            border-top: 1px solid #e9ecef;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>🔔 Nouvelles demandes de modification</h1>
+          </div>
+          
+          <div class="content">
+            <div class="alert-box">
+              <strong>⚠️ Action requise</strong><br>
+              Le volontaire <strong>${volunteer}</strong> a soumis ${requestCount} demande${plural} de modification pour le contact suivant.
+            </div>
+
+            <div class="info-box">
+              <h2 style="margin-top: 0; color: #2196f3;">📋 Informations du contact</h2>
+              <p style="margin: 5px 0;">
+                <strong>Nom :</strong> ${leadName}<br>
+                <strong>ID Candidature :</strong> #${leadId}<br>
+                <strong>Email :</strong> ${lead.email || 'Non renseigné'}<br>
+                <strong>Téléphone :</strong> ${lead.phoneNumber || 'Non renseigné'}
+              </p>
+            </div>
+
+            <h2 style="color: #333; margin-top: 30px;">📝 Détails des modifications</h2>
+            
+            <table>
+              <thead>
+                <tr style="background-color: #f8f9fa;">
+                  <th style="padding: 12px; text-align: left; width: 50px;">#</th>
+                  <th style="padding: 12px; text-align: left;">Modification</th>
+                  <th style="padding: 12px; text-align: left; width: 150px;">Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${requestsList}
+              </tbody>
+            </table>
+
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${reviewUrl}" class="cta-button">
+                👉 Examiner les demandes dans le CRM
+              </a>
+            </div>
+
+            <p style="color: #666; font-size: 14px; margin-top: 30px;">
+              <strong>Note :</strong> Ces modifications sont en attente de validation. 
+              Veuillez les examiner et les approuver ou les refuser depuis l'interface d'administration.
+            </p>
+          </div>
+          
+          <div class="footer">
+            <strong>Équipe Tsahal Connection</strong><br>
+            Système de notification automatique<br>
+            <em>Vous accompagner, notre fierté !</em>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+  }
+
+  /**
+   * Formate une valeur pour l'affichage dans l'email
+   */
+  private formatDisplayValue(value: string): string {
+    if (!value || value === 'null' || value === 'undefined') {
+      return '(vide)';
+    }
+
+    // Vérifier si c'est une date au format YYYY-MM-DD
+    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    if (dateRegex.test(value)) {
+      return this.formatDateForDisplay(value);
+    }
+
+    return value;
   }
 }
