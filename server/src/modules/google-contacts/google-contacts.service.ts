@@ -846,6 +846,103 @@ export class GoogleContactsService {
   }
 
   /**
+   * Liste tous les contacts Google sans Lead ID et crée un CSV
+   * Ne fait aucune modification, juste un export
+   */
+  async listContactsWithoutLeadId(): Promise<{
+    success: boolean;
+    totalContacts: number;
+    contactsWithoutLeadId: number;
+    csvFilePath?: string;
+    errors: string[];
+  }> {
+    try {
+      if (!this.accessToken) {
+        this.logger.warn(
+          'Google Contacts API not available - skipping listing',
+        );
+        return {
+          success: false,
+          totalContacts: 0,
+          contactsWithoutLeadId: 0,
+          errors: ['Google Contacts API not configured'],
+        };
+      }
+
+      this.logger.log('Listing contacts without Lead ID...');
+
+      // Récupérer tous les contacts Google
+      const allContacts = await this.getAllContacts();
+
+      // Filtrer les contacts qui n'ont pas de Lead ID
+      const contactsWithoutLeadId = allContacts.filter((contact) => {
+        const hasLeadId = contact.userDefined?.some(
+          (field: any) => field.key === 'Lead ID',
+        );
+        return !hasLeadId;
+      });
+
+      this.logger.log(
+        `Found ${allContacts.length} total contacts and ${contactsWithoutLeadId.length} without Lead ID`,
+      );
+
+      const errors: string[] = [];
+      const contactsForCsv: any[] = [];
+
+      // Extraire les informations de chaque contact sans Lead ID
+      for (const contact of contactsWithoutLeadId) {
+        try {
+          const contactInfo = this.extractContactInfo(contact);
+
+          contactsForCsv.push({
+            resourceName: contact.resourceName,
+            firstName: contactInfo.firstName || '',
+            lastName: contactInfo.lastName || '',
+            email: contactInfo.email || '',
+            phoneNumbers: contactInfo.phoneNumbers?.join('; ') || 'Aucun numéro',
+            reason: 'Pas de Lead ID',
+          });
+        } catch (contactError) {
+          const errorMsg = `Error processing contact ${contact.resourceName}: ${contactError.message}`;
+          this.logger.error(errorMsg);
+          errors.push(errorMsg);
+        }
+      }
+
+      // Créer le fichier CSV
+      let csvFilePath: string | undefined;
+      if (contactsForCsv.length > 0) {
+        this.logger.log(`Creating CSV file for ${contactsForCsv.length} contacts without Lead ID...`);
+        try {
+          csvFilePath = await this.createUnmatchedContactsCsv(contactsForCsv);
+          this.logger.log(`CSV file created successfully: ${csvFilePath}`);
+        } catch (csvError) {
+          this.logger.error('Failed to create CSV file:', csvError);
+          errors.push(`Failed to create CSV file: ${csvError.message}`);
+        }
+      } else {
+        this.logger.log('No contacts without Lead ID found - skipping CSV creation');
+      }
+
+      return {
+        success: true,
+        totalContacts: allContacts.length,
+        contactsWithoutLeadId: contactsForCsv.length,
+        csvFilePath,
+        errors,
+      };
+    } catch (error) {
+      this.logger.error('Failed to list contacts without Lead ID:', error);
+      return {
+        success: false,
+        totalContacts: 0,
+        contactsWithoutLeadId: 0,
+        errors: [error.message],
+      };
+    }
+  }
+
+  /**
    * Récupère tous les contacts Google (avec pagination)
    */
   private async getAllContacts(): Promise<any[]> {

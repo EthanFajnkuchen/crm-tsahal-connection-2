@@ -1821,17 +1821,80 @@ export class LeadService {
       throw new BadRequestException('ID is required');
     }
 
+    const parsedLeadId = parseInt(leadId);
+
     try {
       const lead = await this.leadRepository.findOne({
-        where: { ID: parseInt(leadId) },
+        where: { ID: parsedLeadId },
       });
 
       if (!lead) {
         throw new NotFoundException('Lead not found');
       }
 
-      // Supprimer le lead (les relations en cascade seront gérées par TypeORM si configurées)
-      await this.leadRepository.delete({ ID: parseInt(leadId) });
+      // Supprimer toutes les entités liées avant de supprimer le lead
+      // Utiliser une transaction pour garantir la cohérence
+      await this.leadRepository.manager.transaction(
+        async (transactionalEntityManager) => {
+          // 1. Supprimer les discussions
+          const discussionsDeleted = await transactionalEntityManager.query(
+            'DELETE FROM discussions WHERE id_lead = ?',
+            [parsedLeadId],
+          );
+          this.logger.log(
+            `Deleted ${discussionsDeleted.affectedRows || 0} discussion(s) for lead ${leadId}`,
+          );
+
+          // 2. Supprimer les change requests
+          const changeRequestsDeleted =
+            await transactionalEntityManager.query(
+              'DELETE FROM change_requests WHERE leadId = ?',
+              [parsedLeadId],
+            );
+          this.logger.log(
+            `Deleted ${changeRequestsDeleted.affectedRows || 0} change request(s) for lead ${leadId}`,
+          );
+
+          // 3. Supprimer les participations activités massa
+          const massaParticipationsDeleted =
+            await transactionalEntityManager.query(
+              'DELETE FROM activite_massa_participation WHERE lead_id = ?',
+              [parsedLeadId],
+            );
+          this.logger.log(
+            `Deleted ${massaParticipationsDeleted.affectedRows || 0} massa participation(s) for lead ${leadId}`,
+          );
+
+          // 4. Supprimer les participations activités conf
+          const confParticipationsDeleted =
+            await transactionalEntityManager.query(
+              'DELETE FROM activite_conf WHERE lead_id = ?',
+              [parsedLeadId],
+            );
+          this.logger.log(
+            `Deleted ${confParticipationsDeleted.affectedRows || 0} conf participation(s) for lead ${leadId}`,
+          );
+
+          // 5. Supprimer les activités générales (si la table existe avec leadId)
+          try {
+            const activitiesDeleted = await transactionalEntityManager.query(
+              'DELETE FROM activities WHERE leadId = ?',
+              [parsedLeadId],
+            );
+            this.logger.log(
+              `Deleted ${activitiesDeleted.affectedRows || 0} activit(ies) for lead ${leadId}`,
+            );
+          } catch (error) {
+            // La table n'existe peut-être pas ou n'a pas de champ leadId
+            this.logger.debug(
+              `No activities table or leadId field for lead ${leadId}`,
+            );
+          }
+
+          // 6. Supprimer le lead lui-même
+          await transactionalEntityManager.delete(Lead, { ID: parsedLeadId });
+        },
+      );
 
       this.logger.log(`Lead ${leadId} deleted successfully`);
 
