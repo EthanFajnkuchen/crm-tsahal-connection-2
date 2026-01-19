@@ -7,6 +7,7 @@ async function bootstrap() {
     origin: [
       'http://localhost:5173',
       'https://crm-tc.netlify.app',
+      'https://tc-crm.com/',
       'http://localhost:3001',
       'https://tsahalco.com/',
       'https://tsahalco.com',
